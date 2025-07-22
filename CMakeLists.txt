@@ -10,18 +10,23 @@ set(UNITY_BUILD true)
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../Binary")
 
-# Add engine core static library module target
+# Add core static library module target
 add_library("LeviathanCore" STATIC 
 "Source/Engine/LeviathanCore/Core/PlatformEntryPointPrototype.h"
 "Source/Engine/LeviathanCore/Core/Application.h"
 "Source/Engine/LeviathanCore/Core/Application.cpp"
-"Source/Engine/LeviathanCore/Core/Core.h"
-"Source/Engine/LeviathanCore/Core/Core.cpp"
+"Source/Engine/LeviathanCore/Core/Engine.h"
+"Source/Engine/LeviathanCore/Core/Engine.cpp"
+)
+
+# Add target headers to precompile for core static library module
+target_precompile_headers("LeviathanCore" PUBLIC 
+"Source/Engine/LeviathanCore/Core/CorePrecompiledHeader.h"
 )
 
 # Begin game title executable setup
 # Add game title executable target
-add_executable("GameTitle" 
+add_executable("GameTitle" WIN32
 "Source/GameTitle/TitleApplication.h" 
 "Source/GameTitle/TitleApplication.cpp"
 )
