@@ -1,11 +1,12 @@
 #pragma once
 
 #include "PlatformEntryPointPrototype.h"
+#include "Core.h"
 
 #define IMPLEMENT(ApplicationType)\
 	PLATFORM_ENTRY_POINT_PROTOTYPE\
 	{\
-		auto* Application = new ApplicationType;\
+		Core::BeginApplication(new ApplicationType);\
 		return 0;\
 	}
 

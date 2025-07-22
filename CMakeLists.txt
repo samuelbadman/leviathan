@@ -15,6 +15,8 @@ add_library("LeviathanCore" STATIC
 "Source/Engine/LeviathanCore/Core/PlatformEntryPointPrototype.h"
 "Source/Engine/LeviathanCore/Core/Application.h"
 "Source/Engine/LeviathanCore/Core/Application.cpp"
+"Source/Engine/LeviathanCore/Core/Core.h"
+"Source/Engine/LeviathanCore/Core/Core.cpp"
 )
 
 # Begin game title executable setup
