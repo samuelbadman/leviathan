@@ -10,6 +10,20 @@ set(UNITY_BUILD true)
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../Binary")
 
+# Configure build platform
+set(BUILD_PLATFORM_WINDOWS ON)
+
+# Add compile definitions to all targets in project
+if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
+add_compile_definitions("PLATFORM_WINDOWS")
+endif()
+
+# Set executable target
+if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
+set(BUILD_EXECUTABLE_TARGET WIN32)
+endif()
+
+# Begin static library module target setup
 # Add core static library module target
 add_library("LeviathanCore" STATIC 
 "Source/Engine/LeviathanCore/Core/PlatformEntryPointPrototype.h"
@@ -20,16 +34,23 @@ add_library("LeviathanCore" STATIC
 )
 
 # Add target headers to precompile for core static library module
+# Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
 target_precompile_headers("LeviathanCore" PUBLIC 
 "Source/Engine/LeviathanCore/Core/CorePrecompiledHeader.h"
 )
+# End static library module target setup
 
-# Begin game title executable setup
-# Add game title executable target
-add_executable("GameTitle" WIN32
+# Begin game title executable target setup
+# Add game title executable target with source files compiled for all platform builds
+add_executable("GameTitle" "${BUILD_EXECUTABLE_TARGET}" 
 "Source/GameTitle/TitleApplication.h" 
 "Source/GameTitle/TitleApplication.cpp"
 )
+
+# Add source files to be compiled only for specific platform builds
+if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
+#target_sources("GameTitle" )
+endif()
 
 # Link engine static library modules used by game title executable
 target_link_libraries("GameTitle" 
@@ -40,7 +61,7 @@ target_link_libraries("GameTitle"
 target_include_directories("GameTitle" PRIVATE 
 "Source/Engine/LeviathanCore/"
 )
-# End game title executable setup
+# End game title executable target setup
 
 # Set Visual Studio startup project. Select game title being built here
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "GameTitle")

@@ -24,6 +24,7 @@ namespace Core
 
 		virtual void Begin() {};
 		virtual void Tick() {};
+		virtual void FixedTick(float FixedTimestep) {};
 		virtual void End() {};
 	};
 }

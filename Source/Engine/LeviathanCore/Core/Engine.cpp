@@ -1,6 +1,8 @@
 #include "Engine.h"
 #include "Application.h"
 
+#include <cstdio>
+
 void Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 {
 	if (!pApplication)
@@ -23,7 +25,11 @@ void Core::Engine::BeginApplicationMainLoop()
 	//	ApplicationInstance->Tick();
 	//}
 
+#ifdef PLATFORM_WINDOWS
 	MessageBox(NULL, "Running app", "Message", MB_OK);
+#else
+	printf("Running app");
+#endif // PLATFORM_WINDOWS
 
 	ApplicationInstance->End();
 }
