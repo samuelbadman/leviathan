@@ -14,6 +14,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../Binary")
 set(BUILD_PLATFORM_WINDOWS ON)
 
 # Add compile definitions to all targets in project
+# Configuration definitions
+add_compile_definitions("$<$<CONFIG:Debug>:CONFIG_DEBUG>")
+add_compile_definitions("$<$<CONFIG:Release>:CONFIG_RELEASE>")
+add_compile_definitions("$<$<CONFIG:RelWithDebInfo>:CONFIG_RELWITHDEBINFO;CONFIG_RELEASE>")
+add_compile_definitions("$<$<CONFIG:MinSizeRel>:CONFIG_MINSIZEREL;CONFIG_RELEASE>")
+
+# Platform definitions
 if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
 add_compile_definitions("PLATFORM_WINDOWS")
 endif()

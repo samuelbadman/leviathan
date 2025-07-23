@@ -30,7 +30,7 @@ void Core::Engine::BeginApplicationMainLoop()
 	//	ApplicationInstance->Tick();
 	//}
 
-	//MessageBox(NULL, "App running", "Message", MB_OK);
+	MessageBox(NULL, "App running", "Message", MB_OK);
 
 	ApplicationInstance->End();
 }
