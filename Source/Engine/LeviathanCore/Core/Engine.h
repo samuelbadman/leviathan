@@ -4,6 +4,10 @@ namespace Core
 {
 	class Application;
 
+	/*
+	* Only a single instance of Engine should ever be created and it is responsible for managing low-level platform implementations that cannot be instantiated.
+	* The single instance of Engine is created during the platform entry point function defined in PlatformEntryPointImplementation.h.
+	*/
 	class Engine
 	{
 	private:

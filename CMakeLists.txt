@@ -24,14 +24,23 @@ set(BUILD_EXECUTABLE_TARGET WIN32)
 endif()
 
 # Begin static library module target setup
-# Add core static library module target
+# Add core static library module target with source files to be compiled for all platforms
 add_library("LeviathanCore" STATIC 
 "Source/Engine/LeviathanCore/Core/PlatformEntryPointPrototype.h"
+"Source/Engine/LeviathanCore/Core/PlatformEntryPointImplementation.h"
 "Source/Engine/LeviathanCore/Core/Application.h"
 "Source/Engine/LeviathanCore/Core/Application.cpp"
 "Source/Engine/LeviathanCore/Core/Engine.h"
 "Source/Engine/LeviathanCore/Core/Engine.cpp"
+"Source/Engine/LeviathanCore/Core/Platform.h"
 )
+
+# Add source files to be compiled only for specific platform builds
+if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
+target_sources("LeviathanCore" PRIVATE
+"Source/Engine/LeviathanCore/Core/Platform_Windows.cpp"
+)
+endif()
 
 # Add target headers to precompile for core static library module
 # Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
@@ -47,17 +56,12 @@ add_executable("GameTitle" "${BUILD_EXECUTABLE_TARGET}"
 "Source/GameTitle/TitleApplication.cpp"
 )
 
-# Add source files to be compiled only for specific platform builds
-if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
-#target_sources("GameTitle" )
-endif()
-
 # Link engine static library modules used by game title executable
 target_link_libraries("GameTitle" 
 "LeviathanCore"
 )
 
-# Add engine module source directories as include directories for game title executable
+# Add engine static library module source directories as include directories for game title executable
 target_include_directories("GameTitle" PRIVATE 
 "Source/Engine/LeviathanCore/"
 )

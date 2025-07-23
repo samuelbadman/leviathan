@@ -1,7 +1,6 @@
 #include "Engine.h"
 #include "Application.h"
-
-#include <cstdio>
+#include "Platform.h"
 
 void Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 {
@@ -13,6 +12,11 @@ void Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 	ApplicationInstance = std::move(pApplication);
 	RunningApplicationInstance = true;
 
+	if (!Platform::Initialize())
+	{
+		return;
+	}
+
 	BeginApplicationMainLoop();
 }
 
@@ -22,14 +26,11 @@ void Core::Engine::BeginApplicationMainLoop()
 
 	//while (RunningApplicationInstance)
 	//{
+	//	Platform::Tick();
 	//	ApplicationInstance->Tick();
 	//}
 
-#ifdef PLATFORM_WINDOWS
-	MessageBox(NULL, "Running app", "Message", MB_OK);
-#else
-	printf("Running app");
-#endif // PLATFORM_WINDOWS
+	//MessageBox(NULL, "App running", "Message", MB_OK);
 
 	ApplicationInstance->End();
 }
