@@ -26,19 +26,23 @@ void Core::Engine::BeginApplicationMainLoop()
 
 	while (RunningApplicationInstance)
 	{
-		Platform::Tick();
+		Platform::PerFrameUpdate();
 
-		const float DeltaSeconds = Platform::Microseconds() * 1e-6f;
-		const float AverageFPS = 1.0f / DeltaSeconds;
-		const float AverageMilliseconds = 1.0f / AverageFPS;
-		const uint16_t AverageFPSWhole = static_cast<uint16_t>(AverageFPS);
+		const double FrameDeltaSeconds = Platform::GetFrameMicroseconds() * 1e-6;
 
-		//printf("fps: %d, ms: %f\n", AverageFPSWhole, AverageMilliseconds);
+		//const double AverageFPS = 1.0 / FrameDeltaSeconds;
+		//const double AverageMilliseconds = 1.0 / AverageFPS;
+		//const uint32_t AverageFPSWhole = static_cast<uint32_t>(AverageFPS);
 
-		ApplicationInstance->Tick(DeltaSeconds);
+		TimeAccumulationSeconds += FrameDeltaSeconds;
+		while (TimeAccumulationSeconds > TimeElapsedBetweenFixedTicksSeconds)
+		{
+			ApplicationInstance->FixedTick(FixedTimestep);
+			TimeAccumulationSeconds -= TimeElapsedBetweenFixedTicksSeconds;
+		}
+
+		ApplicationInstance->Tick(FrameDeltaSeconds);
 	}
-
-	MessageBox(NULL, "App running", "Message", MB_OK);
 
 	ApplicationInstance->End();
 }

@@ -5,7 +5,7 @@ namespace Core
 	namespace Platform
 	{
 		bool Initialize();
-		void Tick();
-		float Microseconds();
+		void PerFrameUpdate();
+		double GetFrameMicroseconds();
 	}
 }

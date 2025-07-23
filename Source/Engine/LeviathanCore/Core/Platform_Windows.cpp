@@ -6,7 +6,7 @@ namespace
 	{
 		LARGE_INTEGER TicksPerSecond = {};
 		LARGE_INTEGER LastTickCount = {};
-		uint64_t Microseconds = 0;
+		uint64_t FrameMicroseconds = 0;
 
 		void InitializePerformanceCounter()
 		{
@@ -21,7 +21,7 @@ namespace
 
 			const uint64_t ElapsedTicks = CurrentTickCount.QuadPart - WinPlatformInternals::LastTickCount.QuadPart;
 			// Convert elapsed ticks to microseconds to not lose precision by dividing a small number by a large one.
-			WinPlatformInternals::Microseconds = (ElapsedTicks * static_cast<uint64_t>(1e6)) / WinPlatformInternals::TicksPerSecond.QuadPart;
+			WinPlatformInternals::FrameMicroseconds = (ElapsedTicks * static_cast<uint64_t>(1e6)) / WinPlatformInternals::TicksPerSecond.QuadPart;
 
 			WinPlatformInternals::LastTickCount = CurrentTickCount;
 		}
@@ -107,12 +107,12 @@ bool Core::Platform::Initialize()
 	return true;
 }
 
-void Core::Platform::Tick()
+void Core::Platform::PerFrameUpdate()
 {
 	WinPlatformInternals::UpdatePerformanceCounter();
 }
 
-float Core::Platform::Microseconds()
+double Core::Platform::GetFrameMicroseconds()
 {
-	return static_cast<float>(WinPlatformInternals::Microseconds);
+	return static_cast<double>(WinPlatformInternals::FrameMicroseconds);
 }

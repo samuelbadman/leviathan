@@ -11,17 +11,17 @@ namespace Core
 	class Engine
 	{
 	private:
-		// Engine configuration properties. TODO: Get from an ini text file on disk during engine startup
+		// TODO: Move config variables into an ini file stored on disk and read in during engine startup
+		// Step taken every fixed tick
+		static constexpr float FixedTimestep = 0.02f;
 
-		// Seconds elapsed between fixed ticks. FixedTick is called every SliceSeconds seconds.
-		static constexpr float SliceSeconds = 0.1f;
-
-		// Timestep used in fixed tick call. Can be tweaked for a less or more precise simulation.
-		static constexpr float FixedTimestep = 0.1f;
+		// Duration in seconds between each fixed tick
+		static constexpr double TimeElapsedBetweenFixedTicksSeconds = 1.0;
 
 	private:
 		std::unique_ptr<Application> ApplicationInstance = nullptr;
 		bool RunningApplicationInstance = false;
+		double TimeAccumulationSeconds = 0.0;
 
 	public:
 		void BeginApplication(std::unique_ptr<Application> pApplication);
