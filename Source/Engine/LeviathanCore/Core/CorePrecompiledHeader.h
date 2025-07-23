@@ -6,3 +6,4 @@
 #endif // PLATFORM_WINDOWS
 
 #include <memory>
+#include <iostream>

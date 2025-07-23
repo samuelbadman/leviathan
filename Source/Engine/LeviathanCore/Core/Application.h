@@ -14,7 +14,7 @@ namespace Core
 		virtual ~Application() {};
 
 		virtual void Begin() {};
-		virtual void Tick() {};
+		virtual void Tick(float DeltaSeconds) {};
 		virtual void FixedTick(float FixedTimestep) {};
 		virtual void End() {};
 	};

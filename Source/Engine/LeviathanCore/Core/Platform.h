@@ -6,5 +6,6 @@ namespace Core
 	{
 		bool Initialize();
 		void Tick();
+		float Microseconds();
 	}
 }
