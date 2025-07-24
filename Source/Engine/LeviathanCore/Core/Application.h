@@ -17,5 +17,8 @@ namespace Core
 		virtual void FixedTick(float FixedTimestep) {};
 		virtual void Tick(double DeltaSeconds) {};
 		virtual void End() {};
+
+	protected:
+		inline Core::Engine& GetEngine() const { return EngineInstance; }
 	};
 }

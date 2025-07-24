@@ -7,5 +7,7 @@ namespace Core
 		bool Initialize();
 		void PerFrameUpdate();
 		double GetFrameMicroseconds();
+		bool CreateConsole();
+		bool RemoveConsole();
 	}
 }

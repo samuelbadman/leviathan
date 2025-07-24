@@ -21,12 +21,20 @@ namespace Core
 	private:
 		std::unique_ptr<Application> ApplicationInstance = nullptr;
 		bool RunningApplicationInstance = false;
-		double TimeAccumulationSeconds = 0.0;
+		double FixedTimeAccumulationSeconds = 0.0;
 
 	public:
 		void BeginApplication(std::unique_ptr<Application> pApplication);
 
+		// Returns false if the console could not be created otherwise, returns true. 
+		bool CreateConsoleWindow();
+
+		// Returns false if the console could not be freed otherwise, returns true
+		bool RemoveConsoleWindow();
+
 	private:
 		void BeginApplicationMainLoop();
+		void FixedTickApplication(double FrameDeltaSeconds);
+		void TickApplication(double FrameDeltaSeconds);
 	};
 }

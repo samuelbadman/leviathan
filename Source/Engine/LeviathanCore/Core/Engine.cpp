@@ -4,7 +4,7 @@
 
 void Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 {
-	if (!pApplication)
+	if ((RunningApplicationInstance) || (!pApplication))
 	{
 		return;
 	}
@@ -18,6 +18,16 @@ void Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 	}
 
 	BeginApplicationMainLoop();
+}
+
+bool Core::Engine::CreateConsoleWindow()
+{
+	return Platform::CreateConsole();
+}
+
+bool Core::Engine::RemoveConsoleWindow()
+{
+	return Platform::RemoveConsole();
 }
 
 void Core::Engine::BeginApplicationMainLoop()
@@ -34,15 +44,25 @@ void Core::Engine::BeginApplicationMainLoop()
 		//const double AverageMilliseconds = 1.0 / AverageFPS;
 		//const uint32_t AverageFPSWhole = static_cast<uint32_t>(AverageFPS);
 
-		TimeAccumulationSeconds += FrameDeltaSeconds;
-		while (TimeAccumulationSeconds > TimeElapsedBetweenFixedTicksSeconds)
-		{
-			ApplicationInstance->FixedTick(FixedTimestep);
-			TimeAccumulationSeconds -= TimeElapsedBetweenFixedTicksSeconds;
-		}
-
-		ApplicationInstance->Tick(FrameDeltaSeconds);
+		FixedTickApplication(FrameDeltaSeconds);
+		TickApplication(FrameDeltaSeconds);
 	}
 
 	ApplicationInstance->End();
+}
+
+void Core::Engine::FixedTickApplication(double FrameDeltaSeconds)
+{
+	FixedTimeAccumulationSeconds += FrameDeltaSeconds;
+
+	while (FixedTimeAccumulationSeconds > TimeElapsedBetweenFixedTicksSeconds)
+	{
+		ApplicationInstance->FixedTick(FixedTimestep);
+		FixedTimeAccumulationSeconds -= TimeElapsedBetweenFixedTicksSeconds;
+	}
+}
+
+void Core::Engine::TickApplication(double FrameDeltaSeconds)
+{
+	ApplicationInstance->Tick(FrameDeltaSeconds);
 }

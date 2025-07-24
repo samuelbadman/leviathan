@@ -2,7 +2,7 @@
 
 namespace
 {
-	namespace WinPlatformInternals
+	namespace WindowsPlatformInternals
 	{
 		LARGE_INTEGER TicksPerSecond = {};
 		LARGE_INTEGER LastTickCount = {};
@@ -19,13 +19,14 @@ namespace
 			LARGE_INTEGER CurrentTickCount;
 			QueryPerformanceCounter(&CurrentTickCount);
 
-			const uint64_t ElapsedTicks = CurrentTickCount.QuadPart - WinPlatformInternals::LastTickCount.QuadPart;
+			const uint64_t ElapsedTicks = CurrentTickCount.QuadPart - WindowsPlatformInternals::LastTickCount.QuadPart;
 			// Convert elapsed ticks to microseconds to not lose precision by dividing a small number by a large one.
-			WinPlatformInternals::FrameMicroseconds = (ElapsedTicks * static_cast<uint64_t>(1e6)) / WinPlatformInternals::TicksPerSecond.QuadPart;
+			WindowsPlatformInternals::FrameMicroseconds = (ElapsedTicks * static_cast<uint64_t>(1e6)) / WindowsPlatformInternals::TicksPerSecond.QuadPart;
 
-			WinPlatformInternals::LastTickCount = CurrentTickCount;
+			WindowsPlatformInternals::LastTickCount = CurrentTickCount;
 		}
 
+		// Returns false if the console could not be created otherwise, returns true
 		bool CreateConsole()
 		{
 			if (!AllocConsole())
@@ -62,6 +63,7 @@ namespace
 			return true;
 		}
 
+		// Returns false if the console could not be freed otherwise, returns true
 		bool RemoveConsole()
 		{
 			// Detach from console.
@@ -98,21 +100,38 @@ namespace
 
 bool Core::Platform::Initialize()
 {
-	WinPlatformInternals::InitializePerformanceCounter();
-
-#ifdef CONFIG_DEBUG
-	WinPlatformInternals::CreateConsole();
-#endif // CONFIG_DEBUG
+	WindowsPlatformInternals::InitializePerformanceCounter();
 
 	return true;
 }
 
 void Core::Platform::PerFrameUpdate()
 {
-	WinPlatformInternals::UpdatePerformanceCounter();
+	WindowsPlatformInternals::UpdatePerformanceCounter();
 }
 
 double Core::Platform::GetFrameMicroseconds()
 {
-	return static_cast<double>(WinPlatformInternals::FrameMicroseconds);
+	return static_cast<double>(WindowsPlatformInternals::FrameMicroseconds);
+}
+
+bool Core::Platform::CreateConsole()
+{
+	// Disable close button in console window menu bar. Can still close the console window using alt+f4 keys
+	//HWND ConsoleWindowHandle = GetConsoleWindow();
+	//if (ConsoleWindowHandle != NULL)
+	//{
+	//	HMENU ConsoleWindowMenuHandle = GetSystemMenu(ConsoleWindowHandle, FALSE);
+	//	if (ConsoleWindowMenuHandle != NULL)
+	//	{
+	//		DeleteMenu(ConsoleWindowMenuHandle, SC_CLOSE, MF_BYCOMMAND);
+	//	}
+	//}
+
+	return WindowsPlatformInternals::CreateConsole();
+}
+
+bool Core::Platform::RemoveConsole()
+{
+	return WindowsPlatformInternals::RemoveConsole();
 }
