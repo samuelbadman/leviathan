@@ -1,4 +1,5 @@
 #include "Platform.h"
+#include "ConsoleOutput.h"
 
 namespace
 {
@@ -7,6 +8,8 @@ namespace
 		LARGE_INTEGER TicksPerSecond = {};
 		LARGE_INTEGER LastTickCount = {};
 		uint64_t FrameMicroseconds = 0;
+
+		HWND InvisibleWindowHandle = NULL;
 
 		void InitializePerformanceCounter()
 		{
@@ -95,6 +98,102 @@ namespace
 			// Console destruction succeeded.
 			return true;
 		}
+
+		// Window procedure function to handle system messages received by the invisible window created during platform initialization
+		LRESULT CALLBACK InvisibleWindowWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+		{
+			switch (Msg)
+			{
+			case WM_INPUT_DEVICE_CHANGE:
+			{
+				// WM_INPUT_DEVICE_CHANGE message is only received by the window passed to RegisterRawInputDevices
+				if (wParam == GIDC_ARRIVAL)
+				{
+					// Game controller connected.
+					DEBUG_CONSOLE_PRINTF("gamepad connected\n");
+				}
+				else if (wParam == GIDC_REMOVAL)
+				{
+					// Game controller disconnected.
+					DEBUG_CONSOLE_PRINTF("gamepad disconnected\n");
+				}
+
+				return 0;
+			}
+
+			default:
+				return DefWindowProc(hWnd, Msg, wParam, lParam);
+			}
+		}
+
+		bool CreateInvisibleWindow()
+		{
+			WNDCLASSEX InvisibleWindowClass = {};
+			InvisibleWindowClass.cbSize = sizeof(WNDCLASSEX);
+			InvisibleWindowClass.style = 0;
+			InvisibleWindowClass.lpfnWndProc = &WindowsPlatformInternals::InvisibleWindowWndProc;
+			InvisibleWindowClass.cbClsExtra = 0;
+			InvisibleWindowClass.cbWndExtra = 0;
+			InvisibleWindowClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+			InvisibleWindowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+			InvisibleWindowClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+			InvisibleWindowClass.lpszMenuName = NULL;
+			InvisibleWindowClass.lpszClassName = "InvisibleWindowClass";
+
+			if (!RegisterClassEx(&InvisibleWindowClass))
+			{
+				return false;
+			}
+
+			WindowsPlatformInternals::InvisibleWindowHandle = CreateWindowEx(0, InvisibleWindowClass.lpszClassName, "", 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL);
+			if (WindowsPlatformInternals::InvisibleWindowHandle == NULL)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		// Returns true if the raw input devices were succesfully registered otherwise, returns false. 
+		// Requires the invisible window to have been created and the invisible window handle to be valid
+		bool RegisterWindowsRawInputDevices()
+		{
+			if (WindowsPlatformInternals::InvisibleWindowHandle == NULL)
+			{
+				return false;
+			}
+
+			static constexpr USHORT RawInputDeviceMouseUsagePage = 0x01;
+			static constexpr USHORT RawInputDeviceMouseUsage = 0x02;
+			static constexpr USHORT RawInputDeviceGameControllerUsagePage = 0x01;
+			static constexpr USHORT RawInputDeviceGameControllerUsage = 0x05;
+			// Generate WM_INPUT_DEVICE_CHANGED messages in the WndProc function when this device is added/removed
+			static constexpr DWORD RawInputDeviceGameControllerFlags = RIDEV_DEVNOTIFY;
+
+			std::array<RAWINPUTDEVICE, 2> Devices = {};
+
+			Devices[0].usUsagePage = RawInputDeviceMouseUsagePage;
+			Devices[0].usUsage = RawInputDeviceMouseUsage;
+			Devices[0].dwFlags = 0;
+			Devices[0].hwndTarget = NULL; // Null hwnd to have generated raw input messages be sent to the window that currently has keyboard focus
+
+			Devices[1].usUsagePage = RawInputDeviceGameControllerUsagePage;
+			Devices[1].usUsage = RawInputDeviceGameControllerUsage;
+			Devices[1].dwFlags = RawInputDeviceGameControllerFlags;
+			Devices[1].hwndTarget = WindowsPlatformInternals::InvisibleWindowHandle; // Game controller connected/disconnected messages require a specific window to send messages to
+
+			return (RegisterRawInputDevices(Devices.data(), Devices.size(), sizeof(RAWINPUTDEVICE)) == TRUE);
+		}
+
+		void DispatchSystemMessages()
+		{
+			MSG Msg;
+			while (PeekMessage(&Msg, nullptr, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&Msg);
+				DispatchMessage(&Msg);
+			}
+		}
 	}
 }
 
@@ -102,12 +201,25 @@ bool Core::Platform::Initialize()
 {
 	WindowsPlatformInternals::InitializePerformanceCounter();
 
+	// Create an invisible window that is used to listen for gamepad connected/disconnected messages
+	if (!WindowsPlatformInternals::CreateInvisibleWindow())
+	{
+		return false;
+	}
+
+	// Register raw input devices
+	if (!WindowsPlatformInternals::RegisterWindowsRawInputDevices())
+	{
+		return false;
+	}
+
 	return true;
 }
 
 void Core::Platform::PerFrameUpdate()
 {
 	WindowsPlatformInternals::UpdatePerformanceCounter();
+	WindowsPlatformInternals::DispatchSystemMessages();
 }
 
 double Core::Platform::GetFrameMicroseconds()

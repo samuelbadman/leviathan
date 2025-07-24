@@ -40,7 +40,7 @@ add_library("LeviathanCore" STATIC
 "Source/Engine/LeviathanCore/Core/Engine.h"
 "Source/Engine/LeviathanCore/Core/Engine.cpp"
 "Source/Engine/LeviathanCore/Core/Platform.h"
-"Source/Engine/LeviathanCore/Core/ConsoleLogging.h"
+"Source/Engine/LeviathanCore/Core/ConsoleOutput.h"
 )
 
 # Add source files to be compiled only for specific platform builds

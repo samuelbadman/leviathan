@@ -1,5 +1,5 @@
 #include "TitleApplication.h"
-#include "Core/ConsoleLogging.h"
+#include "Core/ConsoleOutput.h"
 
 IMPLEMENT(TitleApplication)
 
@@ -7,5 +7,5 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	: Core::Application(EngineInstanceRunningApplication)
 {
 	GetEngine().CreateConsoleWindow();
-	PRINT("hello title application\n");
+	CONSOLE_PRINTF("hello title application\n");
 }
