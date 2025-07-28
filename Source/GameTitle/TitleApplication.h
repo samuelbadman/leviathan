@@ -6,4 +6,7 @@ class TitleApplication : public Core::Application
 {
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);
+
+private:
+	void Print();
 };
