@@ -3,11 +3,14 @@
 #include "Core/Application.h"
 #include "Core/Delegate.h"
 
+DECLARE_SINGLE_DELEGATE(TestSingleDelegate);
+DECLARE_MULTI_DELEGATE(TestMultiDelegate);
+
 class TitleApplication : public Core::Application
 {
 private:
-	Core::SingleDelegate SD = {};
-	Core::MultiDelegate MD = {};
+	TestSingleDelegate SD = {};
+	TestMultiDelegate MD = {};
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);
