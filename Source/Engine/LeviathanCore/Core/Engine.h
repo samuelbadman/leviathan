@@ -3,6 +3,7 @@
 namespace Core
 {
 	class Application;
+	class NotificationManager;
 
 	/*
 	* Only a single instance of Engine should ever be created and it is responsible for managing low-level platform implementations that cannot be instantiated.
@@ -19,18 +20,24 @@ namespace Core
 		static constexpr double TimeElapsedBetweenFixedTicksSeconds = 1.0;
 
 	private:
-		std::unique_ptr<Application> ApplicationInstance = nullptr;
+		std::unique_ptr<Core::NotificationManager> NotificationManagerInstance = nullptr;
+		std::unique_ptr<Core::Application> ApplicationInstance = nullptr;
 		bool RunningApplicationInstance = false;
 		double FixedTimeAccumulationSeconds = 0.0;
 
 	public:
-		void BeginApplication(std::unique_ptr<Application> pApplication);
+		Engine();
+		~Engine();
+
+		void BeginApplication(std::unique_ptr<Core::Application> pApplication);
 
 		// Returns false if the console could not be created otherwise, returns true. 
 		bool CreateConsoleWindow();
 
 		// Returns false if the console could not be freed otherwise, returns true
 		bool RemoveConsoleWindow();
+
+		Core::NotificationManager& GetNotificationManager();
 
 	private:
 		void BeginApplicationMainLoop();

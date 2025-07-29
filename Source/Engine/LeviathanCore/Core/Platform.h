@@ -2,9 +2,11 @@
 
 namespace Core
 {
+	class NotificationManager;
+
 	namespace Platform
 	{
-		bool Initialize();
+		bool Initialize(Core::NotificationManager* pNotificationManager);
 		void PerFrameUpdate();
 		double GetFrameMicroseconds();
 		bool CreateConsole();

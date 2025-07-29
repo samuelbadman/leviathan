@@ -1,10 +1,12 @@
 #include "Platform.h"
-#include "ConsoleOutput.h"
+#include "NotificationManager.h"
 
 namespace
 {
 	namespace WindowsPlatformInternals
 	{
+		Core::NotificationManager* pEngineNotificationManager = nullptr;
+
 		LARGE_INTEGER TicksPerSecond = {};
 		LARGE_INTEGER LastTickCount = {};
 		uint64_t FrameMicroseconds = 0;
@@ -110,12 +112,26 @@ namespace
 				if (wParam == GIDC_ARRIVAL)
 				{
 					// Game controller connected.
-					DEBUG_CONSOLE_PRINTF("gamepad connected\n");
+					if (WindowsPlatformInternals::pEngineNotificationManager)
+					{
+						Core::NotificationData GameControllerConnectedNotificationData = {};
+						GameControllerConnectedNotificationData.Type = Core::NotificationType::GameControllerConnected;
+						GameControllerConnectedNotificationData.Payload.GameControllerConnected = {};
+
+						WindowsPlatformInternals::pEngineNotificationManager->SendNotification(GameControllerConnectedNotificationData);
+					}
 				}
 				else if (wParam == GIDC_REMOVAL)
 				{
 					// Game controller disconnected.
-					DEBUG_CONSOLE_PRINTF("gamepad disconnected\n");
+					if (WindowsPlatformInternals::pEngineNotificationManager)
+					{
+						Core::NotificationData GameControllerDisconnectedNotificationData = {};
+						GameControllerDisconnectedNotificationData.Type = Core::NotificationType::GameControllerDisconnected;
+						GameControllerDisconnectedNotificationData.Payload.GameControllerDisconnected = {};
+
+						WindowsPlatformInternals::pEngineNotificationManager->SendNotification(GameControllerDisconnectedNotificationData);
+					}
 				}
 
 				return 0;
@@ -197,9 +213,11 @@ namespace
 	}
 }
 
-bool Core::Platform::Initialize()
+bool Core::Platform::Initialize(Core::NotificationManager* pNotificationManager)
 {
 	WindowsPlatformInternals::InitializePerformanceCounter();
+
+	WindowsPlatformInternals::pEngineNotificationManager = pNotificationManager;
 
 	// Create an invisible window that is used to listen for gamepad connected/disconnected messages
 	if (!WindowsPlatformInternals::CreateInvisibleWindow())

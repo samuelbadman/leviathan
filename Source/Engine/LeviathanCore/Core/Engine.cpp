@@ -1,6 +1,21 @@
 #include "Engine.h"
 #include "Application.h"
 #include "Platform.h"
+#include "NotificationManager.h"
+
+Core::Engine::Engine()
+{
+	NotificationManagerInstance = std::make_unique<NotificationManager>();
+
+	if (!Platform::Initialize(NotificationManagerInstance.get()))
+	{
+		return;
+	}
+}
+
+Core::Engine::~Engine()
+{
+}
 
 void Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 {
@@ -11,11 +26,6 @@ void Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 
 	ApplicationInstance = std::move(pApplication);
 	RunningApplicationInstance = true;
-
-	if (!Platform::Initialize())
-	{
-		return;
-	}
 
 	BeginApplicationMainLoop();
 }
@@ -28,6 +38,11 @@ bool Core::Engine::CreateConsoleWindow()
 bool Core::Engine::RemoveConsoleWindow()
 {
 	return Platform::RemoveConsole();
+}
+
+Core::NotificationManager& Core::Engine::GetNotificationManager()
+{
+	return *NotificationManagerInstance;
 }
 
 void Core::Engine::BeginApplicationMainLoop()
