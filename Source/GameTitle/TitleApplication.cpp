@@ -12,11 +12,11 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	: Core::Application(EngineInstanceRunningApplication)
 {
 	GetEngine().CreateConsoleWindow();
-	CONSOLE_PRINTF("hello title application\n");
+	CONSOLE_PRINTF("hello title application\n\n");
 
-	D.BindFunction(&Free);
-	D.BindMethod<TitleApplication, &TitleApplication::Print>(this);
-	D.BindLambda([]() { CONSOLE_PRINTF("lambda print\n"); });
+	SD.BindFunction(&Free);
+	SD.BindMethod<TitleApplication, &TitleApplication::Print>(this);
+	SD.BindLambda([]() { CONSOLE_PRINTF("lambda print\n"); });
 }
 
 void TitleApplication::Print()
@@ -26,6 +26,10 @@ void TitleApplication::Print()
 
 void TitleApplication::Begin()
 {
-	D.Execute();
+	SD.Execute();
+
+	CONSOLE_PRINTF("\n\n");
+
+	MD.Execute();
 }
 

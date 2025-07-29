@@ -6,7 +6,8 @@
 class TitleApplication : public Core::Application
 {
 private:
-	Core::Delegate D = {};
+	Core::SingleDelegate SD = {};
+	Core::MultiDelegate MD = {};
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);
