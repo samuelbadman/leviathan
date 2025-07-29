@@ -1,15 +1,11 @@
 #include "TitleApplication.h"
 #include "Core/ConsoleOutput.h"
 
-#include "Core/Delegate.h"
-
 IMPLEMENT(TitleApplication)
-
-Core::Delegate d;
 
 void Free()
 {
-	CONSOLE_PRINTF("Free print");
+	CONSOLE_PRINTF("free print\n");
 }
 
 TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplication)
@@ -18,12 +14,18 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	GetEngine().CreateConsoleWindow();
 	CONSOLE_PRINTF("hello title application\n");
 
-	d.BindMethod<TitleApplication, &TitleApplication::Print>(this);
-	d.BindFunction<&Free>();
-	d();
+	D.BindFunction<&Free>();
+	D.BindMethod<TitleApplication, &TitleApplication::Print>(this);
+	D.BindLambda([]() { CONSOLE_PRINTF("lambda print\n"); });
 }
 
 void TitleApplication::Print()
 {
-	CONSOLE_PRINTF("TA Print");
+	CONSOLE_PRINTF("title app method print\n");
 }
+
+void TitleApplication::Begin()
+{
+	D.Execute();
+}
+

@@ -7,56 +7,57 @@ namespace Core
 	private:
 		using FunctionStubType = void(*)();
 		using MethodStubType = void(*)(void* object_ptr);
+		using LambdaStubType = void(*)();
 
 		FunctionStubType FunctionStubPtr = nullptr;
 
 		void* ObjPtr = nullptr;
 		MethodStubType MethodStubPtr = nullptr;
 
-		template <class T, void (T::* TMethod)()>
+		LambdaStubType LambdaStubPtr = nullptr;
+
+		template <class T, void (T::* Method)()>
 		static void MethodStub(void* ObjectPtr)
 		{
-			T* p = static_cast<T*>(ObjectPtr);
-			return (p->*TMethod)();
+			T* pObj = static_cast<T*>(ObjectPtr);
+			return (pObj->*Method)();
 		}
 
 	public:
-		template<void(*TFunction)()>
+		template<void(*Function)()>
 		void BindFunction()
 		{
-			if (ObjPtr && MethodStubPtr)
-			{
-				return;
-			}
-
-			FunctionStubPtr = TFunction;
+			FunctionStubPtr = Function;
 		}
 
-		template <class T, void (T::* TMethod)()>
+		template <class T, void (T::* Method)()>
 		void BindMethod(T* ObjectPtr)
 		{
-			if (FunctionStubPtr)
-			{
-				return;
-			}
-
 			ObjPtr = static_cast<void*>(ObjectPtr);
-			MethodStubPtr = &MethodStub<T, TMethod>;
+			MethodStubPtr = &MethodStub<T, Method>;
 		}
 
-		void operator()() const
+		template <class T>
+		void BindLambda(T Lambda)
+		{
+			LambdaStubPtr = Lambda;
+		}
+
+		void Execute()
 		{
 			if (FunctionStubPtr)
 			{
-				return FunctionStubPtr();
+				FunctionStubPtr();
 			}
-			else if (ObjPtr && MethodStubPtr)
+
+			if (ObjPtr && MethodStubPtr)
 			{
-				return (*MethodStubPtr)(ObjPtr);
+				(*MethodStubPtr)(ObjPtr);
 			}
-			else
+
+			if (LambdaStubPtr)
 			{
-				return; // TODO: Assert?
+				LambdaStubPtr();
 			}
 		}
 	};
