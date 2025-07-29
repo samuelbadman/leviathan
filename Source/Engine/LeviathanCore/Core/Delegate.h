@@ -24,11 +24,7 @@ namespace Core
 		}
 
 	public:
-		template<void(*Function)()>
-		void BindFunction()
-		{
-			FunctionStubPtr = Function;
-		}
+		void BindFunction(void(*Function)());
 
 		template <class T, void (T::* Method)()>
 		void BindMethod(T* ObjectPtr)
@@ -37,28 +33,7 @@ namespace Core
 			MethodStubPtr = &MethodStub<T, Method>;
 		}
 
-		template <class T>
-		void BindLambda(T Lambda)
-		{
-			LambdaStubPtr = Lambda;
-		}
-
-		void Execute()
-		{
-			if (FunctionStubPtr)
-			{
-				FunctionStubPtr();
-			}
-
-			if (ObjPtr && MethodStubPtr)
-			{
-				(*MethodStubPtr)(ObjPtr);
-			}
-
-			if (LambdaStubPtr)
-			{
-				LambdaStubPtr();
-			}
-		}
+		void BindLambda(void(*Lambda)());
+		void Execute();
 	};
 }

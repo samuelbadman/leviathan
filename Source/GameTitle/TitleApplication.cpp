@@ -14,7 +14,7 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	GetEngine().CreateConsoleWindow();
 	CONSOLE_PRINTF("hello title application\n");
 
-	D.BindFunction<&Free>();
+	D.BindFunction(&Free);
 	D.BindMethod<TitleApplication, &TitleApplication::Print>(this);
 	D.BindLambda([]() { CONSOLE_PRINTF("lambda print\n"); });
 }
