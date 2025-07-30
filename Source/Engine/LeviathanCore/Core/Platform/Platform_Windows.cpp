@@ -1,10 +1,16 @@
 #include "Platform.h"
-#include "NotificationManager.h"
+#include "Core/NotificationManager.h"
+#include "Core/Window.h"
 
 namespace
 {
 	namespace WindowsPlatformInternals
 	{
+		constexpr DWORD WindowStyle_Windowed = WS_OVERLAPPEDWINDOW;
+		constexpr DWORD WindowStyle_Borderless = WS_POPUPWINDOW;
+		constexpr DWORD WindowStyle_NoResize = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+		constexpr DWORD WindowStyle_NoDragSize = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME;
+
 		Core::NotificationManager* pEngineNotificationManager = nullptr;
 
 		LARGE_INTEGER TicksPerSecond = {};
@@ -142,27 +148,33 @@ namespace
 			}
 		}
 
-		bool CreateInvisibleWindow()
+		// Creates a new Win32 window with the specified parameters. ClassName parameter must be unique from all windows created. Returns true if the window
+		// is succesfully created otherwise, returns false. The HWND handle to the created window is returned in OutWindowHandle
+		bool CreateWindowAndReturnHandle(HWND& OutWindowHandle, WNDPROC WndProc, LPCSTR ClassName, UINT ClassStyle, LPCSTR WindowName, DWORD Style, int32_t X, int32_t Y,
+			int32_t Width, int32_t Height, HWND hWndParent, LPVOID CreateParameters)
 		{
-			WNDCLASSEX InvisibleWindowClass = {};
-			InvisibleWindowClass.cbSize = sizeof(WNDCLASSEX);
-			InvisibleWindowClass.style = 0;
-			InvisibleWindowClass.lpfnWndProc = &WindowsPlatformInternals::InvisibleWindowWndProc;
-			InvisibleWindowClass.cbClsExtra = 0;
-			InvisibleWindowClass.cbWndExtra = 0;
-			InvisibleWindowClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-			InvisibleWindowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-			InvisibleWindowClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-			InvisibleWindowClass.lpszMenuName = NULL;
-			InvisibleWindowClass.lpszClassName = "InvisibleWindowClass";
+			WNDCLASSEX WindowClass = {};
+			WindowClass.cbSize = sizeof(WNDCLASSEX);
+			WindowClass.style = ClassStyle;
+			WindowClass.lpfnWndProc = WndProc;
+			WindowClass.cbClsExtra = 0;
+			WindowClass.cbWndExtra = 0;
+			WindowClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+			WindowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+			WindowClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+			WindowClass.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+			WindowClass.lpszMenuName = NULL;
+			WindowClass.lpszClassName = ClassName;
 
-			if (!RegisterClassEx(&InvisibleWindowClass))
+			if (!RegisterClassEx(&WindowClass))
 			{
 				return false;
 			}
 
-			WindowsPlatformInternals::InvisibleWindowHandle = CreateWindowEx(0, InvisibleWindowClass.lpszClassName, "", 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL);
-			if (WindowsPlatformInternals::InvisibleWindowHandle == NULL)
+			OutWindowHandle = CreateWindowEx(0, WindowClass.lpszClassName, WindowName, Style, X, Y, Width, Height,
+				hWndParent, NULL, NULL, CreateParameters);
+
+			if (OutWindowHandle == NULL)
 			{
 				return false;
 			}
@@ -172,9 +184,9 @@ namespace
 
 		// Returns true if the raw input devices were succesfully registered otherwise, returns false. 
 		// Requires the invisible window to have been created and the invisible window handle to be valid
-		bool RegisterWindowsRawInputDevices()
+		bool RegisterWindowsRawInputDevices(HWND HandleToWindowReceivingDeviceConnectionMessages)
 		{
-			if (WindowsPlatformInternals::InvisibleWindowHandle == NULL)
+			if (HandleToWindowReceivingDeviceConnectionMessages == NULL)
 			{
 				return false;
 			}
@@ -196,7 +208,7 @@ namespace
 			Devices[1].usUsagePage = RawInputDeviceGameControllerUsagePage;
 			Devices[1].usUsage = RawInputDeviceGameControllerUsage;
 			Devices[1].dwFlags = RawInputDeviceGameControllerFlags;
-			Devices[1].hwndTarget = WindowsPlatformInternals::InvisibleWindowHandle; // Game controller connected/disconnected messages require a specific window to send messages to
+			Devices[1].hwndTarget = HandleToWindowReceivingDeviceConnectionMessages; // Game controller connected/disconnected messages require a specific window to send messages to
 
 			return (RegisterRawInputDevices(Devices.data(), Devices.size(), sizeof(RAWINPUTDEVICE)) == TRUE);
 		}
@@ -210,6 +222,53 @@ namespace
 				DispatchMessage(&Msg);
 			}
 		}
+
+		LRESULT CALLBACK WindowWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+		{
+			switch (Msg)
+			{
+			default: return DefWindowProc(hWnd, Msg, wParam, lParam);
+			}
+		}
+
+		LRESULT CALLBACK WindowInitWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+		{
+			switch (Msg)
+			{
+			case WM_NCCREATE:
+			{
+				// Get the parameters passed to CreateWindow()
+				const CREATESTRUCTW* const CreateParameters = reinterpret_cast<CREATESTRUCTW*>(lParam);
+
+				// Assumes the window instance pointer was passed to CreateWindow(). This functions is intended to be used with a window created during CreatePlatformWindow() so
+				// this should always be the case and it is safe to get the window instance pointer from the create parameters
+				Core::Window* WindowInstance = reinterpret_cast<Core::Window*>(CreateParameters->lpCreateParams);
+
+				// Set user data as the window instance to be retrieved during the window procedure function for created windows
+				SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(WindowInstance));
+
+				// Set the window procedure function for the window to use after creation to the window window procedure function
+				SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WindowsPlatformInternals::WindowWndProc));
+
+				// Call the window window procedure function
+				return WindowsPlatformInternals::WindowWndProc(hWnd, Msg, wParam, lParam);
+			}
+
+			default: return DefWindowProc(hWnd, Msg, wParam, lParam);
+			}
+		}
+
+		constexpr DWORD TranslateWindowMode(const Core::WindowMode Mode)
+		{
+			switch (Mode)
+			{
+			case Core::WindowMode::Windowed: return WindowsPlatformInternals::WindowStyle_Windowed;
+			case Core::WindowMode::Borderless: return WindowsPlatformInternals::WindowStyle_Borderless;
+			case Core::WindowMode::NoResize: return WindowsPlatformInternals::WindowStyle_NoResize;
+			case Core::WindowMode::NoDragSize: return WindowsPlatformInternals::WindowStyle_NoDragSize;
+			default: return 0;
+			}
+		}
 	}
 }
 
@@ -220,13 +279,14 @@ bool Core::Platform::Initialize(Core::NotificationManager* pNotificationManager)
 	WindowsPlatformInternals::pEngineNotificationManager = pNotificationManager;
 
 	// Create an invisible window that is used to listen for gamepad connected/disconnected messages
-	if (!WindowsPlatformInternals::CreateInvisibleWindow())
+	if (!WindowsPlatformInternals::CreateWindowAndReturnHandle(WindowsPlatformInternals::InvisibleWindowHandle, &WindowsPlatformInternals::InvisibleWindowWndProc,
+		"InvisibleWindowClass", 0, "", 0, 0, 0, 0, 0, NULL, NULL))
 	{
 		return false;
 	}
 
 	// Register raw input devices
-	if (!WindowsPlatformInternals::RegisterWindowsRawInputDevices())
+	if (!WindowsPlatformInternals::RegisterWindowsRawInputDevices(WindowsPlatformInternals::InvisibleWindowHandle))
 	{
 		return false;
 	}
@@ -264,4 +324,39 @@ bool Core::Platform::CreateConsole()
 bool Core::Platform::RemoveConsole()
 {
 	return WindowsPlatformInternals::RemoveConsole();
+}
+
+std::unique_ptr<Core::Window> Core::Platform::CreatePlatformWindow(const Core::WindowCreateParameters& Parameters)
+{
+	// Allocate temporary result
+	std::unique_ptr<Core::Window> Temp = std::make_unique<Core::Window>();
+
+	// Try to create the window
+	HWND Handle;
+	if (!WindowsPlatformInternals::CreateWindowAndReturnHandle(
+		Handle,
+		&WindowsPlatformInternals::WindowInitWndProc,
+		Parameters.UniqueWindowName,
+		0,
+		Parameters.WindowName,
+		WindowsPlatformInternals::TranslateWindowMode(Parameters.Mode), 
+		Parameters.HorizontalPosition,
+		Parameters.VerticalPosition, 
+		Parameters.Width,
+		Parameters.Height, 
+		(Parameters.ParentWindow) ? static_cast<HWND>(Parameters.ParentWindow->GetPlatformHandle()) : NULL, 
+		Temp.get())
+		)
+	{
+		return nullptr;
+	}
+
+	// Setup new window after succesful creation
+	Temp->SetPlatformHandle(static_cast<void*>(Handle));
+
+	// Show the window
+	ShowWindow(Handle, SW_SHOW);
+
+	// Return temp result
+	return Temp;
 }

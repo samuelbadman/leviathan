@@ -1,7 +1,8 @@
 #include "Engine.h"
 #include "Application.h"
-#include "Platform.h"
+#include "Platform/Platform.h"
 #include "NotificationManager.h"
+#include "Window.h"
 
 Core::Engine::Engine()
 {
@@ -38,6 +39,11 @@ bool Core::Engine::CreateConsoleWindow()
 bool Core::Engine::RemoveConsoleWindow()
 {
 	return Platform::RemoveConsole();
+}
+
+std::unique_ptr<Core::Window> Core::Engine::CreateWindowOnPlatform(const Core::WindowCreateParameters& Parameters)
+{
+	return Platform::CreatePlatformWindow(Parameters);
 }
 
 Core::NotificationManager& Core::Engine::GetNotificationManager()

@@ -1,16 +1,29 @@
 #include "TitleApplication.h"
 #include "Core/ConsoleOutput.h"
 #include "Core/NotificationManager.h"
+#include "Core/Window.h"
 
 IMPLEMENT(TitleApplication)
 
 TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplication)
 	: Core::Application(EngineInstanceRunningApplication)
 {
+	// Create console output window
 	GetEngine().CreateConsoleWindow();
 	CONSOLE_PRINTF("hello title application\n");
 
+	// Add title application notification listener
 	GetEngine().GetNotificationManager().AddNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
+
+	// Create a window for the title application
+	Core::WindowCreateParameters AppWindowCreateParameters = {};
+	AppWindowCreateParameters.UniqueWindowName = "AppWindow";
+	AppWindowCreateParameters.WindowName = "Title application";
+	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
+	AppWindowCreateParameters.Width = 1280;
+	AppWindowCreateParameters.Height = 720;
+
+	AppWindow = GetEngine().CreateWindowOnPlatform(AppWindowCreateParameters);
 }
 
 void TitleApplication::NotificationListener(const Core::NotificationData& Notification)

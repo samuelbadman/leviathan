@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PlatformEntryPointImplementation.h"
+#include "Platform/PlatformEntryPointImplementation.h"
 
 namespace Core
 {

@@ -33,23 +33,25 @@ endif()
 # Begin static library module target setup
 # Add core static library module target with source files to be compiled for all platforms
 add_library("LeviathanCore" STATIC 
-"Source/Engine/LeviathanCore/Core/PlatformEntryPointPrototype.h"
-"Source/Engine/LeviathanCore/Core/PlatformEntryPointImplementation.h"
+"Source/Engine/LeviathanCore/Core/Platform/PlatformEntryPointPrototype.h"
+"Source/Engine/LeviathanCore/Core/Platform/PlatformEntryPointImplementation.h"
 "Source/Engine/LeviathanCore/Core/Application.h"
 "Source/Engine/LeviathanCore/Core/Application.cpp"
 "Source/Engine/LeviathanCore/Core/Engine.h"
 "Source/Engine/LeviathanCore/Core/Engine.cpp"
-"Source/Engine/LeviathanCore/Core/Platform.h"
+"Source/Engine/LeviathanCore/Core/Platform/Platform.h"
 "Source/Engine/LeviathanCore/Core/ConsoleOutput.h"
 "Source/Engine/LeviathanCore/Core/ProgrammingTools/Delegate.h"
 "Source/Engine/LeviathanCore/Core/NotificationManager.h"
 "Source/Engine/LeviathanCore/Core/NotificationManager.cpp"
+"Source/Engine/LeviathanCore/Core/Window.h"
+"Source/Engine/LeviathanCore/Core/Window.cpp"
 )
 
 # Add source files to be compiled only for specific platform builds
 if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
 target_sources("LeviathanCore" PRIVATE
-"Source/Engine/LeviathanCore/Core/Platform_Windows.cpp"
+"Source/Engine/LeviathanCore/Core/Platform/Platform_Windows.cpp"
 )
 endif()
 
@@ -57,6 +59,11 @@ endif()
 # Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
 target_precompile_headers("LeviathanCore" PUBLIC 
 "Source/Engine/LeviathanCore/Core/CorePrecompiledHeader.h"
+)
+
+# Add static library module include directories
+target_include_directories("LeviathanCore" PRIVATE 
+"Source/Engine/LeviathanCore/"
 )
 # End static library module target setup
 

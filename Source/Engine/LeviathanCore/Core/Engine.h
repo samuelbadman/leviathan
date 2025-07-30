@@ -4,6 +4,9 @@ namespace Core
 {
 	class Application;
 	class NotificationManager;
+	class Window;
+
+	struct WindowCreateParameters;
 
 	/*
 	* Only a single instance of Engine should ever be created and it is responsible for managing low-level platform implementations that cannot be instantiated.
@@ -36,6 +39,9 @@ namespace Core
 
 		// Returns false if the console could not be freed otherwise, returns true
 		bool RemoveConsoleWindow();
+
+		// Returns a pointer to the instance of the created window if succesful otherwise, returns null
+		std::unique_ptr<Core::Window> CreateWindowOnPlatform(const Core::WindowCreateParameters& Parameters);
 
 		Core::NotificationManager& GetNotificationManager();
 
