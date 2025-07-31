@@ -225,6 +225,14 @@ namespace
 
 		LRESULT CALLBACK WindowWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		{
+			// Get window instance receiving the message from user data parameter
+			Core::Window* const WindowInstance = reinterpret_cast<Core::Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+
+			if (!WindowInstance)
+			{
+				return DefWindowProc(hWnd, Msg, wParam, lParam);
+			}
+
 			switch (Msg)
 			{
 			default: return DefWindowProc(hWnd, Msg, wParam, lParam);
