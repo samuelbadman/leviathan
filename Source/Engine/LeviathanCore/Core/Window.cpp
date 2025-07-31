@@ -2,8 +2,8 @@
 #include "Engine.h"
 #include "NotificationManager.h"
 
-Core::Window::Window(Core::Engine& Engine)
-	: EngineInstance(Engine)
+Core::Window::Window(Core::Engine& Engine, const Core::WindowCreateParameters& InCreationParameters)
+	: EngineInstance(Engine), CreationParameters(InCreationParameters)
 {
 }
 

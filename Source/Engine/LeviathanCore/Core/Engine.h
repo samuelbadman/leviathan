@@ -25,6 +25,7 @@ namespace Core
 	private:
 		std::unique_ptr<Core::NotificationManager> NotificationManagerInstance = nullptr;
 		std::unique_ptr<Core::Application> ApplicationInstance = nullptr;
+		bool SignalRestart = false;
 		bool RunningApplicationInstance = false;
 		double FixedTimeAccumulationSeconds = 0.0;
 
@@ -32,7 +33,8 @@ namespace Core
 		Engine();
 		~Engine();
 
-		void BeginApplication(std::unique_ptr<Core::Application> pApplication);
+		// Returns true if the engine should restart after BeginApplication() returns otherwise, returns false if the process should exit
+		bool BeginApplication(std::unique_ptr<Core::Application> pApplication);
 
 		// Returns false if the console could not be created otherwise, returns true. 
 		bool CreateConsoleWindow();
@@ -45,7 +47,7 @@ namespace Core
 		std::unique_ptr<Core::Window> CreateWindowOnPlatform(const Core::WindowCreateParameters& Parameters)
 		{
 			// Allocate temporary result
-			std::unique_ptr<Core::Window> Temp = std::make_unique<T>(*this);
+			std::unique_ptr<Core::Window> Temp = std::make_unique<T>(*this, Parameters);
 
 			// Create platform implementation window
 			if (!CallPlatformCreateWindowImplementation(*Temp, Parameters))
@@ -61,6 +63,7 @@ namespace Core
 		bool DestroyWindowOnPlatform(Core::Window& WindowToDestroy);
 
 		Core::NotificationManager& GetNotificationManager();
+		void Quit(bool RestartEngine = false);
 
 	private:
 		void BeginApplicationMainLoop();

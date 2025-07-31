@@ -5,7 +5,7 @@
 class TitleApplicationWindow : public Core::Window
 {
 public:
-	TitleApplicationWindow(Core::Engine& Engine);
+	TitleApplicationWindow(Core::Engine& Engine, const Core::WindowCreateParameters& InCreationParameters);
 
 private:
 	// Begin window interface

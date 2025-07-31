@@ -375,5 +375,10 @@ bool Core::Platform::CreatePlatformWindow(Core::Window& Temp, const Core::Window
 
 bool Core::Platform::DestroyPlatformWindow(Core::Window& WindowToDestroy)
 {
-	return (DestroyWindow(static_cast<HWND>(WindowToDestroy.GetPlatformHandle())) != 0);
+	if (!DestroyWindow(static_cast<HWND>(WindowToDestroy.GetPlatformHandle())))
+	{
+		return false;
+	}
+	
+	return UnregisterClass(WindowToDestroy.GetCreationParameters().UniqueWindowName, NULL);
 }

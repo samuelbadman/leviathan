@@ -6,7 +6,7 @@
 IMPLEMENT(TitleApplication)
 
 TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplication)
-	: Core::Application(EngineInstanceRunningApplication)
+	: Super(EngineInstanceRunningApplication)
 {
 	// Create console output window
 	GetEngine().CreateConsoleWindow();
@@ -24,6 +24,20 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	AppWindowCreateParameters.Height = 720;
 
 	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
+
+	if (AppWindow)
+	{
+		CONSOLE_PRINTF("successfully created title application window\n");
+	}
+}
+
+TitleApplication::~TitleApplication()
+{
+	// Remove console output window
+	GetEngine().RemoveConsoleWindow();
+
+	// Remove title application notification listener
+	GetEngine().GetNotificationManager().RemoveNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
 }
 
 void TitleApplication::NotificationListener(const Core::NotificationData& Notification)
@@ -42,6 +56,7 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 		if (Notification.Payload.WindowDestroyedPayload.DestroyedWindow == AppWindow.get())
 		{
 			CONSOLE_PRINTF("title application window has been destroyed\n");
+			GetEngine().Quit();
 		}
 		break;
 

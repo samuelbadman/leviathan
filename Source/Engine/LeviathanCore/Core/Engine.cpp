@@ -18,17 +18,19 @@ Core::Engine::~Engine()
 {
 }
 
-void Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
+bool Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 {
 	if ((RunningApplicationInstance) || (!pApplication))
 	{
-		return;
+		return false;
 	}
 
 	ApplicationInstance = std::move(pApplication);
 	RunningApplicationInstance = true;
 
 	BeginApplicationMainLoop();
+
+	return SignalRestart;
 }
 
 bool Core::Engine::CreateConsoleWindow()
@@ -54,6 +56,12 @@ bool Core::Engine::DestroyWindowOnPlatform(Core::Window& WindowToDestroy)
 Core::NotificationManager& Core::Engine::GetNotificationManager()
 {
 	return *NotificationManagerInstance;
+}
+
+void Core::Engine::Quit(bool RestartEngine)
+{
+	RunningApplicationInstance = false;
+	SignalRestart = RestartEngine;
 }
 
 void Core::Engine::BeginApplicationMainLoop()

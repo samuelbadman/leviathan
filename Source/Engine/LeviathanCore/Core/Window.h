@@ -31,25 +31,27 @@ namespace Core
 	private:
 		Core::Engine& EngineInstance;
 
+		// Copy of the parameters used to create the window instance
+		const Core::WindowCreateParameters CreationParameters;
+
 		void* PlatformHandle = nullptr;
 
 	public:
 		using Super = Window;
 
-		Window(Core::Engine& Engine);
+		Window(Core::Engine& Engine, const Core::WindowCreateParameters& InCreationParameters);
 		virtual ~Window();
+
+		inline const Core::WindowCreateParameters& GetCreationParameters() const { return CreationParameters; }
 
 		inline void* GetPlatformHandle() const { return PlatformHandle; }
 		void SetPlatformHandle(void* InHandle);
 
-		// Begin window interface
+		// Begin Window interface
 		virtual void OnCloseSignal();
 		virtual void OnDestroyed();
-		// End window interface
+		// End Window interface
 
 		void Close();
-
-	protected:
-		inline Core::Engine& GetEngine() const { return EngineInstance; }
 	};
 }
