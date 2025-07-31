@@ -2,8 +2,8 @@
 #include "Core/ConsoleOutput.h"	
 #include "Core/Engine.h"
 
-TitleApplicationWindow::TitleApplicationWindow(Core::Engine& Engine, const Core::WindowCreateParameters& InCreationParameters)
-	: Super(Engine, InCreationParameters)
+TitleApplicationWindow::TitleApplicationWindow(Core::Engine& Engine, const char* InUniqueName)
+	: Super(Engine, InUniqueName)
 {
 }
 

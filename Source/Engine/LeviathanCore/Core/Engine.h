@@ -47,7 +47,7 @@ namespace Core
 		std::unique_ptr<Core::Window> CreateWindowOnPlatform(const Core::WindowCreateParameters& Parameters)
 		{
 			// Allocate temporary result
-			std::unique_ptr<Core::Window> Temp = std::make_unique<T>(*this, Parameters);
+			std::unique_ptr<Core::Window> Temp = std::make_unique<T>(*this, Parameters.UniqueWindowName);
 
 			// Create platform implementation window
 			if (!CallPlatformCreateWindowImplementation(*Temp, Parameters))

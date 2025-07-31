@@ -380,5 +380,5 @@ bool Core::Platform::DestroyPlatformWindow(Core::Window& WindowToDestroy)
 		return false;
 	}
 	
-	return UnregisterClass(WindowToDestroy.GetCreationParameters().UniqueWindowName, NULL);
+	return UnregisterClass(WindowToDestroy.GetUniqueName(), NULL);
 }

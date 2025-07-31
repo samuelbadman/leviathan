@@ -31,18 +31,18 @@ namespace Core
 	private:
 		Core::Engine& EngineInstance;
 
-		// Copy of the parameters used to create the window instance
-		const Core::WindowCreateParameters CreationParameters;
+		// Copy of the window's unique name
+		const char* UniqueName;
 
 		void* PlatformHandle = nullptr;
 
 	public:
 		using Super = Window;
 
-		Window(Core::Engine& Engine, const Core::WindowCreateParameters& InCreationParameters);
+		Window(Core::Engine& Engine, const char* InUniqueName);
 		virtual ~Window();
 
-		inline const Core::WindowCreateParameters& GetCreationParameters() const { return CreationParameters; }
+		inline const char* GetUniqueName() const { return UniqueName; }
 
 		inline void* GetPlatformHandle() const { return PlatformHandle; }
 		void SetPlatformHandle(void* InHandle);
