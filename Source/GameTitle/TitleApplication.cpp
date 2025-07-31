@@ -1,7 +1,7 @@
 #include "TitleApplication.h"
 #include "Core/ConsoleOutput.h"
 #include "Core/NotificationManager.h"
-#include "Core/Window.h"
+#include "TitleApplicationWindow.h"
 
 IMPLEMENT(TitleApplication)
 
@@ -23,7 +23,7 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	AppWindowCreateParameters.Width = 1280;
 	AppWindowCreateParameters.Height = 720;
 
-	AppWindow = GetEngine().CreateWindowOnPlatform(AppWindowCreateParameters);
+	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
 }
 
 void TitleApplication::NotificationListener(const Core::NotificationData& Notification)
@@ -37,5 +37,14 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 	case Core::NotificationType::GameControllerDisconnected:
 		CONSOLE_PRINTF("game controller disconnected notification\n");
 		break;
+
+	case Core::NotificationType::WindowDestroyed:
+		if (Notification.Payload.WindowDestroyedPayload.DestroyedWindow == AppWindow.get())
+		{
+			CONSOLE_PRINTF("title application window has been destroyed\n");
+		}
+		break;
+
+	default: break;
 	}
 }

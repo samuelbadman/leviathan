@@ -9,6 +9,8 @@ namespace Core
 	struct NotificationData;
 }
 
+class TitleApplicationWindow;
+
 class TitleApplication : public Core::Application
 {
 private:

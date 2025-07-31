@@ -41,7 +41,24 @@ namespace Core
 		bool RemoveConsoleWindow();
 
 		// Returns a pointer to the instance of the created window if succesful otherwise, returns null
-		std::unique_ptr<Core::Window> CreateWindowOnPlatform(const Core::WindowCreateParameters& Parameters);
+		template<class T>
+		std::unique_ptr<Core::Window> CreateWindowOnPlatform(const Core::WindowCreateParameters& Parameters)
+		{
+			// Allocate temporary result
+			std::unique_ptr<Core::Window> Temp = std::make_unique<T>(*this);
+
+			// Create platform implementation window
+			if (!CallPlatformCreateWindowImplementation(*Temp, Parameters))
+			{
+				return nullptr;
+			}
+
+			// Return temporary window object
+			return Temp;
+		}
+
+		// Returns true if succesful otherwise, returns false. The window being destroyed must have been created on the same thread that is calling DestroyWindowOnPlatform()
+		bool DestroyWindowOnPlatform(Core::Window& WindowToDestroy);
 
 		Core::NotificationManager& GetNotificationManager();
 
@@ -49,5 +66,8 @@ namespace Core
 		void BeginApplicationMainLoop();
 		void FixedTickApplication(double FrameDeltaSeconds);
 		void TickApplication(double FrameDeltaSeconds);
+
+		// This function is used to hide the platform implementation include inside the translation unit for Engine stopping it being exposed to all code that uses the engine class
+		bool CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters);
 	};
 }

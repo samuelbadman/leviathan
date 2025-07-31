@@ -72,6 +72,8 @@ target_include_directories("LeviathanCore" PRIVATE
 add_executable("GameTitle" "${BUILD_EXECUTABLE_TARGET}" 
 "Source/GameTitle/TitleApplication.h" 
 "Source/GameTitle/TitleApplication.cpp"
+"Source/GameTitle/TitleApplicationWindow.h"
+"Source/GameTitle/TitleApplicationWindow.cpp"
 )
 
 # Link engine static library modules used by game title executable

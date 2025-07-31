@@ -10,6 +10,8 @@ namespace Core
 		Core::Engine& EngineInstance;
 
 	public:
+		using Super = Application;
+
 		Application(Core::Engine& EngineInstanceRunningApplication);
 		virtual ~Application() {};
 

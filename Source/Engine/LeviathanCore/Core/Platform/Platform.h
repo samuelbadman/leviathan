@@ -4,6 +4,7 @@ namespace Core
 {
 	class NotificationManager;
 	class Window;
+	class Engine;
 
 	struct WindowCreateParameters;
 
@@ -15,7 +16,9 @@ namespace Core
 		bool CreateConsole();
 		bool RemoveConsole();
 
-		// Creates a new platform window instance with the in parameters. Returns a pointer to the created window instance if succesful otherwise, returns null
-		std::unique_ptr<Core::Window> CreatePlatformWindow(const Core::WindowCreateParameters& Parameters);
+		// Creates a new platform window instance with the in parameters. Returns true if succesful otherwise, returns false
+		bool CreatePlatformWindow(Core::Window& Temp, const Core::WindowCreateParameters& Parameters);
+
+		bool DestroyPlatformWindow(Core::Window& WindowToDestroy);
 	}
 }

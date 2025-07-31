@@ -41,9 +41,14 @@ bool Core::Engine::RemoveConsoleWindow()
 	return Platform::RemoveConsole();
 }
 
-std::unique_ptr<Core::Window> Core::Engine::CreateWindowOnPlatform(const Core::WindowCreateParameters& Parameters)
+bool Core::Engine::DestroyWindowOnPlatform(Core::Window& WindowToDestroy)
 {
-	return Platform::CreatePlatformWindow(Parameters);
+	if (Platform::DestroyPlatformWindow(WindowToDestroy))
+	{
+		WindowToDestroy.SetPlatformHandle(nullptr);
+		return true;
+	}
+	return false;
 }
 
 Core::NotificationManager& Core::Engine::GetNotificationManager()
@@ -86,4 +91,9 @@ void Core::Engine::FixedTickApplication(double FrameDeltaSeconds)
 void Core::Engine::TickApplication(double FrameDeltaSeconds)
 {
 	ApplicationInstance->Tick(FrameDeltaSeconds);
+}
+
+bool Core::Engine::CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters)
+{
+	return Platform::CreatePlatformWindow(Temp, Parameters);
 }

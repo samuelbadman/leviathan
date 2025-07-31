@@ -122,7 +122,7 @@ namespace
 					{
 						Core::NotificationData GameControllerConnectedNotificationData = {};
 						GameControllerConnectedNotificationData.Type = Core::NotificationType::GameControllerConnected;
-						GameControllerConnectedNotificationData.Payload.GameControllerConnected = {};
+						GameControllerConnectedNotificationData.Payload.GameControllerConnectedPayload = {};
 
 						WindowsPlatformInternals::pEngineNotificationManager->SendNotification(GameControllerConnectedNotificationData);
 					}
@@ -134,7 +134,7 @@ namespace
 					{
 						Core::NotificationData GameControllerDisconnectedNotificationData = {};
 						GameControllerDisconnectedNotificationData.Type = Core::NotificationType::GameControllerDisconnected;
-						GameControllerDisconnectedNotificationData.Payload.GameControllerDisconnected = {};
+						GameControllerDisconnectedNotificationData.Payload.GameControllerDisconnectedPayload = {};
 
 						WindowsPlatformInternals::pEngineNotificationManager->SendNotification(GameControllerDisconnectedNotificationData);
 					}
@@ -235,6 +235,14 @@ namespace
 
 			switch (Msg)
 			{
+			case WM_CLOSE:
+				WindowInstance->OnCloseSignal();
+				return 0;
+
+			case WM_DESTROY:
+				WindowInstance->OnDestroyed();
+				return 0;
+
 			default: return DefWindowProc(hWnd, Msg, wParam, lParam);
 			}
 		}
@@ -334,11 +342,8 @@ bool Core::Platform::RemoveConsole()
 	return WindowsPlatformInternals::RemoveConsole();
 }
 
-std::unique_ptr<Core::Window> Core::Platform::CreatePlatformWindow(const Core::WindowCreateParameters& Parameters)
+bool Core::Platform::CreatePlatformWindow(Core::Window& Temp, const Core::WindowCreateParameters& Parameters)
 {
-	// Allocate temporary result
-	std::unique_ptr<Core::Window> Temp = std::make_unique<Core::Window>();
-
 	// Try to create the window
 	HWND Handle;
 	if (!WindowsPlatformInternals::CreateWindowAndReturnHandle(
@@ -353,18 +358,22 @@ std::unique_ptr<Core::Window> Core::Platform::CreatePlatformWindow(const Core::W
 		Parameters.Width,
 		Parameters.Height, 
 		(Parameters.ParentWindow) ? static_cast<HWND>(Parameters.ParentWindow->GetPlatformHandle()) : NULL, 
-		Temp.get())
+		&Temp)
 		)
 	{
-		return nullptr;
+		return false;
 	}
 
 	// Setup new window after succesful creation
-	Temp->SetPlatformHandle(static_cast<void*>(Handle));
+	Temp.SetPlatformHandle(static_cast<void*>(Handle));
 
 	// Show the window
 	ShowWindow(Handle, SW_SHOW);
 
-	// Return temp result
-	return Temp;
+	return true;
+}
+
+bool Core::Platform::DestroyPlatformWindow(Core::Window& WindowToDestroy)
+{
+	return (DestroyWindow(static_cast<HWND>(WindowToDestroy.GetPlatformHandle())) != 0);
 }

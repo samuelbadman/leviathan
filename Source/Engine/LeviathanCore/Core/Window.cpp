@@ -1,12 +1,41 @@
 #include "Window.h"
+#include "Engine.h"
+#include "NotificationManager.h"
+
+Core::Window::Window(Core::Engine& Engine)
+	: EngineInstance(Engine)
+{
+}
 
 Core::Window::~Window()
 {
-	// TODO: Destroy the platform window with the platform implementation. Possibly pass an engine instance reference to the window when creating 
-	// it so the window can access exposed platform implementation
+	if (PlatformHandle)
+	{
+		EngineInstance.DestroyWindowOnPlatform(*this);
+	}
 }
 
 void Core::Window::SetPlatformHandle(void* InHandle)
 {
 	PlatformHandle = InHandle;
+}
+
+void Core::Window::OnCloseSignal()
+{
+	EngineInstance.DestroyWindowOnPlatform(*this);
+}
+
+void Core::Window::OnDestroyed()
+{
+	Core::NotificationData WindowDestroyedNotificationData = {};
+	WindowDestroyedNotificationData.Type = Core::NotificationType::WindowDestroyed;
+	WindowDestroyedNotificationData.Payload.WindowDestroyedPayload = {};
+	WindowDestroyedNotificationData.Payload.WindowDestroyedPayload.DestroyedWindow = this;
+
+	EngineInstance.GetNotificationManager().SendNotification(WindowDestroyedNotificationData);
+}
+
+void Core::Window::Close()
+{
+	OnCloseSignal();
 }

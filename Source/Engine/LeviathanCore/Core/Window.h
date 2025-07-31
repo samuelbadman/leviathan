@@ -3,6 +3,7 @@
 namespace Core
 {
 	class Window;
+	class Engine;
 
 	enum class WindowMode : uint8_t
 	{
@@ -28,12 +29,27 @@ namespace Core
 	class Window
 	{
 	private:
+		Core::Engine& EngineInstance;
+
 		void* PlatformHandle = nullptr;
 
 	public:
-		~Window();
+		using Super = Window;
+
+		Window(Core::Engine& Engine);
+		virtual ~Window();
 
 		inline void* GetPlatformHandle() const { return PlatformHandle; }
 		void SetPlatformHandle(void* InHandle);
+
+		// Begin window interface
+		virtual void OnCloseSignal();
+		virtual void OnDestroyed();
+		// End window interface
+
+		void Close();
+
+	protected:
+		inline Core::Engine& GetEngine() const { return EngineInstance; }
 	};
 }
