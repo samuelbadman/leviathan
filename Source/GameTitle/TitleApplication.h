@@ -4,15 +4,15 @@
 
 namespace Core
 {
-	class Window;
-
 	struct NotificationData;
 }
+
+class TitleApplicationWindow;
 
 class TitleApplication : public Core::Application
 {
 private:
-	std::unique_ptr<Core::Window> AppWindow = nullptr;
+	std::unique_ptr<TitleApplicationWindow> AppWindow = nullptr;
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);

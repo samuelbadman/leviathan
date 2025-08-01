@@ -44,10 +44,10 @@ namespace Core
 
 		// Returns a pointer to the instance of the created window if succesful otherwise, returns null
 		template<class T>
-		std::unique_ptr<Core::Window> CreateWindowOnPlatform(const Core::WindowCreateParameters& Parameters)
+		std::unique_ptr<T> CreateWindowOnPlatform(const Core::WindowCreateParameters& Parameters)
 		{
 			// Allocate temporary result
-			std::unique_ptr<Core::Window> Temp = std::make_unique<T>(*this, Parameters.UniqueWindowName);
+			std::unique_ptr<T> Temp = std::make_unique<T>(*this, Parameters.UniqueWindowName);
 
 			// Create platform implementation window
 			if (!CallPlatformCreateWindowImplementation(*Temp, Parameters))
