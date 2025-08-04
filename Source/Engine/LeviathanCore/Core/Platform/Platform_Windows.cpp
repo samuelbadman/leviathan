@@ -235,6 +235,12 @@ namespace
 
 			switch (Msg)
 			{
+				// Keyboard input released events
+			case WM_SYSKEYUP:
+			case WM_KEYUP:
+				// TODO: Translate windows message key to Core::InputKey
+				return 0;
+
 				// Window size events
 			case WM_SIZE:
 				switch (wParam)
