@@ -48,6 +48,11 @@ namespace Core
 		void SetPlatformHandle(void* InHandle);
 
 		// Begin Window interface
+		virtual void OnMaximized() {};
+		virtual void OnMinimized() {};
+		virtual void OnResized(uint32_t NewWidth, uint32_t NewHeight) {};
+		virtual void OnEnterSizeMove() {};
+		virtual void OnExitSizeMove() {};
 		virtual void OnReceivedFocus() {};
 		virtual void OnLostFocus() {};
 		virtual void OnCloseSignal();

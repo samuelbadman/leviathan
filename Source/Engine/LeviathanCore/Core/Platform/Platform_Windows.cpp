@@ -235,6 +235,37 @@ namespace
 
 			switch (Msg)
 			{
+				// Window size events
+			case WM_SIZE:
+				switch (wParam)
+				{
+				case SIZE_MAXIMIZED:
+					WindowInstance->OnMaximized();
+					// Also generate a resized event as the window size has changed but windows does not send a SIZE_RESTORED messaged along with a SIZE_MAXIMIZED
+					WindowInstance->OnResized(LOWORD(lParam), HIWORD(lParam));
+					return 0;
+
+				case SIZE_MINIMIZED:
+					WindowInstance->OnMinimized();
+					return 0;
+
+				case SIZE_RESTORED:
+					WindowInstance->OnResized(LOWORD(lParam), HIWORD(lParam));
+					return 0;
+
+				default: return 0;
+				}
+
+				// Window size move events
+			case WM_ENTERSIZEMOVE:
+				WindowInstance->OnEnterSizeMove();
+				return 0;
+
+			case WM_EXITSIZEMOVE:
+				WindowInstance->OnExitSizeMove();
+				return 0;
+
+				// Window focus events
 			case WM_ACTIVATEAPP:
 				if (wParam == TRUE)
 				{
@@ -244,12 +275,15 @@ namespace
 				{
 					WindowInstance->OnLostFocus();
 				}
+
 				return 0;
 
+				// Window close events
 			case WM_CLOSE:
 				WindowInstance->OnCloseSignal();
 				return 0;
 
+				// Window destroyed events
 			case WM_DESTROY:
 				WindowInstance->OnDestroyed();
 				return 0;
