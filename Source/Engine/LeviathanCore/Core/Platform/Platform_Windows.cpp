@@ -235,6 +235,17 @@ namespace
 
 			switch (Msg)
 			{
+			case WM_ACTIVATEAPP:
+				if (wParam == TRUE)
+				{
+					WindowInstance->OnReceivedFocus();
+				}
+				else if (wParam == FALSE)
+				{
+					WindowInstance->OnLostFocus();
+				}
+				return 0;
+
 			case WM_CLOSE:
 				WindowInstance->OnCloseSignal();
 				return 0;

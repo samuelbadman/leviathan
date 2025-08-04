@@ -48,6 +48,8 @@ namespace Core
 		void SetPlatformHandle(void* InHandle);
 
 		// Begin Window interface
+		virtual void OnReceivedFocus() {};
+		virtual void OnLostFocus() {};
 		virtual void OnCloseSignal();
 		virtual void OnDestroyed();
 		// End Window interface

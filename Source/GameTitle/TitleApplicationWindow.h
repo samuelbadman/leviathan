@@ -9,6 +9,8 @@ public:
 
 private:
 	// Begin window interface
+	virtual void OnReceivedFocus() override;
+	virtual void OnLostFocus() override;
 	virtual void OnCloseSignal() override;
 	// End window interface
 };

@@ -7,6 +7,16 @@ TitleApplicationWindow::TitleApplicationWindow(Core::Engine& Engine, const char*
 {
 }
 
+void TitleApplicationWindow::OnReceivedFocus()
+{
+	CONSOLE_PRINTF("title application window received focus\n");
+}
+
+void TitleApplicationWindow::OnLostFocus()
+{
+	CONSOLE_PRINTF("title application window lost focus\n");
+}
+
 void TitleApplicationWindow::OnCloseSignal()
 {
 	CONSOLE_PRINTF("title application window received close signal\n");
