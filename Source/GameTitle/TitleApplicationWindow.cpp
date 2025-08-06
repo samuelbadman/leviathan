@@ -7,6 +7,21 @@ TitleApplicationWindow::TitleApplicationWindow(Core::Engine& Engine, const char*
 {
 }
 
+void TitleApplicationWindow::OnInputEvent(const Core::WindowInputEventArgs& EventArgs)
+{
+	std::string EventString;
+	switch (EventArgs.Event)
+	{
+	case Core::WindowInputEvent::Pressed: EventString = "Pressed"; break;
+	case Core::WindowInputEvent::Repeat: EventString = "Repeat"; break;
+	case Core::WindowInputEvent::Released: EventString = "Released"; break;
+	default: EventString = "None"; break;
+	}
+
+	CONSOLE_PRINTF("title application window input event. Key: %s, Event: %s, Data: %f, Scan code: %d\n", EventArgs.Key.ToString().c_str(), 
+		EventString.c_str(), EventArgs.Data, EventArgs.Key.GetScanCode());
+}
+
 void TitleApplicationWindow::OnMaximized()
 {
 	CONSOLE_PRINTF("title application window maximized\n");

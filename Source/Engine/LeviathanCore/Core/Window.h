@@ -1,5 +1,7 @@
 #pragma once
 
+#include "InputKey.h"
+
 namespace Core
 {
 	class Window;
@@ -14,6 +16,14 @@ namespace Core
 		MAX
 	};
 
+	enum class WindowInputEvent : uint8_t
+	{
+		Pressed,
+		Repeat,
+		Released,
+		MAX
+	};
+
 	struct WindowCreateParameters
 	{
 		const char* UniqueWindowName = nullptr;
@@ -24,6 +34,13 @@ namespace Core
 		int32_t Width = 0;
 		int32_t Height = 0;
 		Core::Window* ParentWindow = nullptr;
+	};
+
+	struct WindowInputEventArgs
+	{
+		Core::InputKey Key = {};
+		Core::WindowInputEvent Event = Core::WindowInputEvent::MAX;
+		float Data = 0.0f;
 	};
 
 	class Window
@@ -48,6 +65,8 @@ namespace Core
 		void SetPlatformHandle(void* InHandle);
 
 		// Begin Window interface
+		virtual void OnForceClose();
+		virtual void OnInputEvent(const Core::WindowInputEventArgs& EventArgs) {};
 		virtual void OnMaximized() {};
 		virtual void OnMinimized() {};
 		virtual void OnResized(uint32_t NewWidth, uint32_t NewHeight) {};

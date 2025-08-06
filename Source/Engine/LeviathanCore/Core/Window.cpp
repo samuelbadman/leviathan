@@ -20,6 +20,11 @@ void Core::Window::SetPlatformHandle(void* InHandle)
 	PlatformHandle = InHandle;
 }
 
+void Core::Window::OnForceClose()
+{
+	Close();
+}
+
 void Core::Window::OnCloseSignal()
 {
 	EngineInstance.DestroyWindowOnPlatform(*this);

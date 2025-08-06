@@ -1,279 +1,316 @@
 #include "InputKey.h"
 
-Core::InputKey::InputKey(Core::InputKey::Keys InKey)
-	: Key(InKey)
+Core::InputKey::InputKey(Core::Keys InKey, uint16_t InScanCode)
+	: Key(InKey),
+	ScanCode(InScanCode)
 {
 }
 
-constexpr bool Core::InputKey::IsKeyCodeKeyboardKey(const Core::InputKey::Keys InKeyCode)
-{
-	return 
-		(InKeyCode == Core::InputKey::Keys::Backspace) ||
-		(InKeyCode == Core::InputKey::Keys::Tab) ||
-		(InKeyCode == Core::InputKey::Keys::Enter) ||
-		(InKeyCode == Core::InputKey::Keys::LeftShift) ||
-		(InKeyCode == Core::InputKey::Keys::RightShift) ||
-		(InKeyCode == Core::InputKey::Keys::CapsLock) ||
-		(InKeyCode == Core::InputKey::Keys::Escape) ||
-		(InKeyCode == Core::InputKey::Keys::SpaceBar) ||
-		(InKeyCode == Core::InputKey::Keys::PageUp) ||
-		(InKeyCode == Core::InputKey::Keys::PageDown) ||
-		(InKeyCode == Core::InputKey::Keys::End) ||
-		(InKeyCode == Core::InputKey::Keys::Home) ||
-		(InKeyCode == Core::InputKey::Keys::Insert) ||
-		(InKeyCode == Core::InputKey::Keys::Delete) ||
-		(InKeyCode == Core::InputKey::Keys::Left) ||
-		(InKeyCode == Core::InputKey::Keys::Right) ||
-		(InKeyCode == Core::InputKey::Keys::Up) ||
-		(InKeyCode == Core::InputKey::Keys::Down) ||
-		(InKeyCode == Core::InputKey::Keys::Zero) ||
-		(InKeyCode == Core::InputKey::Keys::One) ||
-		(InKeyCode == Core::InputKey::Keys::Two) ||
-		(InKeyCode == Core::InputKey::Keys::Three) ||
-		(InKeyCode == Core::InputKey::Keys::Four) ||
-		(InKeyCode == Core::InputKey::Keys::Five) ||
-		(InKeyCode == Core::InputKey::Keys::Six) ||
-		(InKeyCode == Core::InputKey::Keys::Seven) ||
-		(InKeyCode == Core::InputKey::Keys::Eight) ||
-		(InKeyCode == Core::InputKey::Keys::Nine) ||
-		(InKeyCode == Core::InputKey::Keys::A) ||
-		(InKeyCode == Core::InputKey::Keys::B) ||
-		(InKeyCode == Core::InputKey::Keys::C) ||
-		(InKeyCode == Core::InputKey::Keys::D) ||
-		(InKeyCode == Core::InputKey::Keys::E) ||
-		(InKeyCode == Core::InputKey::Keys::F) ||
-		(InKeyCode == Core::InputKey::Keys::G) ||
-		(InKeyCode == Core::InputKey::Keys::H) ||
-		(InKeyCode == Core::InputKey::Keys::I) ||
-		(InKeyCode == Core::InputKey::Keys::J) ||
-		(InKeyCode == Core::InputKey::Keys::K) ||
-		(InKeyCode == Core::InputKey::Keys::L) ||
-		(InKeyCode == Core::InputKey::Keys::M) ||
-		(InKeyCode == Core::InputKey::Keys::N) ||
-		(InKeyCode == Core::InputKey::Keys::O) ||
-		(InKeyCode == Core::InputKey::Keys::P) ||
-		(InKeyCode == Core::InputKey::Keys::Q) ||
-		(InKeyCode == Core::InputKey::Keys::R) ||
-		(InKeyCode == Core::InputKey::Keys::S) ||
-		(InKeyCode == Core::InputKey::Keys::T) ||
-		(InKeyCode == Core::InputKey::Keys::U) ||
-		(InKeyCode == Core::InputKey::Keys::V) ||
-		(InKeyCode == Core::InputKey::Keys::W) ||
-		(InKeyCode == Core::InputKey::Keys::X) ||
-		(InKeyCode == Core::InputKey::Keys::Y) ||
-		(InKeyCode == Core::InputKey::Keys::Z) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad0) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad1) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad2) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad3) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad4) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad5) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad6) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad7) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad8) ||
-		(InKeyCode == Core::InputKey::Keys::Numpad9) ||
-		(InKeyCode == Core::InputKey::Keys::F1) ||
-		(InKeyCode == Core::InputKey::Keys::F2) ||
-		(InKeyCode == Core::InputKey::Keys::F3) ||
-		(InKeyCode == Core::InputKey::Keys::F4) ||
-		(InKeyCode == Core::InputKey::Keys::F5) ||
-		(InKeyCode == Core::InputKey::Keys::F6) ||
-		(InKeyCode == Core::InputKey::Keys::F7) ||
-		(InKeyCode == Core::InputKey::Keys::F8) ||
-		(InKeyCode == Core::InputKey::Keys::F9) ||
-		(InKeyCode == Core::InputKey::Keys::F10) ||
-		(InKeyCode == Core::InputKey::Keys::F11) ||
-		(InKeyCode == Core::InputKey::Keys::F12) ||
-		(InKeyCode == Core::InputKey::Keys::LeftCtrl) ||
-		(InKeyCode == Core::InputKey::Keys::RightCtrl) ||
-		(InKeyCode == Core::InputKey::Keys::Alt);
-}
-
-constexpr bool Core::InputKey::IsKeyboardKey() const
-{
-	return Core::InputKey::IsKeyCodeKeyboardKey(Key);
-}
-
-constexpr bool Core::InputKey::IsKeyCodeMouseKey(const Core::InputKey::Keys InKeyCode)
+bool Core::InputKey::IsKeyboardKey() const
 {
 	return
-		(InKeyCode == Core::InputKey::Keys::LeftMouseButton) ||
-		(InKeyCode == Core::InputKey::Keys::RightMouseButton) ||
-		(InKeyCode == Core::InputKey::Keys::MiddleMouseButton) ||
-		(InKeyCode == Core::InputKey::Keys::MouseWheelUpAxis) ||
-		(InKeyCode == Core::InputKey::Keys::MouseWheelDownAxis) ||
-		(InKeyCode == Core::InputKey::Keys::MouseXAxis) ||
-		(InKeyCode == Core::InputKey::Keys::MouseYAxis);
+		Key == Core::Keys::Backspace ||
+		Key == Core::Keys::Tab ||
+		Key == Core::Keys::Enter ||
+		Key == Core::Keys::CapsLock ||
+		Key == Core::Keys::Escape ||
+		Key == Core::Keys::SpaceBar ||
+		Key == Core::Keys::PageUp ||
+		Key == Core::Keys::PageDown ||
+		Key == Core::Keys::End ||
+		Key == Core::Keys::Home ||
+		Key == Core::Keys::Insert ||
+		Key == Core::Keys::Delete ||
+		Key == Core::Keys::Left ||
+		Key == Core::Keys::Right ||
+		Key == Core::Keys::Up ||
+		Key == Core::Keys::Down ||
+		Key == Core::Keys::One ||
+		Key == Core::Keys::Two ||
+		Key == Core::Keys::Three ||
+		Key == Core::Keys::Four ||
+		Key == Core::Keys::Five ||
+		Key == Core::Keys::Six ||
+		Key == Core::Keys::Seven ||
+		Key == Core::Keys::Eight ||
+		Key == Core::Keys::Nine ||
+		Key == Core::Keys::Zero ||
+		Key == Core::Keys::A ||
+		Key == Core::Keys::B ||
+		Key == Core::Keys::C ||
+		Key == Core::Keys::D ||
+		Key == Core::Keys::E ||
+		Key == Core::Keys::F ||
+		Key == Core::Keys::G ||
+		Key == Core::Keys::H ||
+		Key == Core::Keys::I ||
+		Key == Core::Keys::J ||
+		Key == Core::Keys::K ||
+		Key == Core::Keys::L ||
+		Key == Core::Keys::M ||
+		Key == Core::Keys::N ||
+		Key == Core::Keys::O ||
+		Key == Core::Keys::P ||
+		Key == Core::Keys::Q ||
+		Key == Core::Keys::R ||
+		Key == Core::Keys::S ||
+		Key == Core::Keys::T ||
+		Key == Core::Keys::U ||
+		Key == Core::Keys::V ||
+		Key == Core::Keys::W ||
+		Key == Core::Keys::X ||
+		Key == Core::Keys::Y ||
+		Key == Core::Keys::Z ||
+		Key == Core::Keys::Numpad0 ||
+		Key == Core::Keys::Numpad1 ||
+		Key == Core::Keys::Numpad2 ||
+		Key == Core::Keys::Numpad3 ||
+		Key == Core::Keys::Numpad4 ||
+		Key == Core::Keys::Numpad5 ||
+		Key == Core::Keys::Numpad6 ||
+		Key == Core::Keys::Numpad7 ||
+		Key == Core::Keys::Numpad8 ||
+		Key == Core::Keys::Numpad9 ||
+		Key == Core::Keys::NumpadMultiply ||
+		Key == Core::Keys::NumpadPlus ||
+		Key == Core::Keys::NumpadMinus ||
+		Key == Core::Keys::NumpadDecimal ||
+		Key == Core::Keys::NumpadDivide ||
+		Key == Core::Keys::F1 ||
+		Key == Core::Keys::F2 ||
+		Key == Core::Keys::F3 ||
+		Key == Core::Keys::F4 ||
+		Key == Core::Keys::F5 ||
+		Key == Core::Keys::F6 ||
+		Key == Core::Keys::F7 ||
+		Key == Core::Keys::F8 ||
+		Key == Core::Keys::F9 ||
+		Key == Core::Keys::F10 ||
+		Key == Core::Keys::F11 ||
+		Key == Core::Keys::F12 ||
+		Key == Core::Keys::NumLock ||
+		Key == Core::Keys::ScrollLock ||
+		Key == Core::Keys::LeftShift ||
+		Key == Core::Keys::RightShift ||
+		Key == Core::Keys::LeftCtrl ||
+		Key == Core::Keys::RightCtrl ||
+		Key == Core::Keys::LeftAlt ||
+		Key == Core::Keys::RightAlt ||
+		Key == Core::Keys::SemiColon ||
+		Key == Core::Keys::Equals ||
+		Key == Core::Keys::Comma ||
+		Key == Core::Keys::Dash ||
+		Key == Core::Keys::Period ||
+		Key == Core::Keys::ForwardSlash ||
+		Key == Core::Keys::Hash ||
+		Key == Core::Keys::LeftBrace ||
+		Key == Core::Keys::Backslash ||
+		Key == Core::Keys::RightBrace ||
+		Key == Core::Keys::Apostrophe;
 }
 
-constexpr bool Core::InputKey::IsMouseKey() const
+bool Core::InputKey::IsMouseKey() const
 {
-	return Core::InputKey::IsKeyCodeMouseKey(Key);
+	return
+		Key == Core::Keys::LeftMouseButton ||
+		Key == Core::Keys::RightMouseButton ||
+		Key == Core::Keys::MiddleMouseButton ||
+		Key == Core::Keys::MouseWheelUpAxis ||
+		Key == Core::Keys::MouseWheelDownAxis ||
+		Key == Core::Keys::MouseXAxis ||
+		Key == Core::Keys::MouseYAxis;
 }
 
-constexpr bool Core::InputKey::IsKeyCodeGamepadKey(const Core::InputKey::Keys InKeyCode)
+bool Core::InputKey::IsGamepadKey() const
 {
-	return 
-		(InKeyCode == Core::InputKey::Keys::GamepadFaceButtonBottom) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadFaceButtonRight) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadFaceButtonLeft) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadFaceButtonTop) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadDPadUp) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadDPadDown) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadDPadLeft) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadDPadRight) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftThumbstickButton) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightThumbstickButton) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadSpecialLeft) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadSpecialRight) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftShoulder) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightShoulder) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftThumbstickXAxis) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftThumbstickYAxis) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightThumbstickXAxis) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightThumbstickYAxis) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftThumbstickUp) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftThumbstickDown) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftThumbstickLeft) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftThumbstickRight) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightThumbstickUp) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightThumbstickDown) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightThumbstickLeft) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightThumbstickRight) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftTrigger) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightTrigger) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadLeftTriggerAxis) ||
-		(InKeyCode == Core::InputKey::Keys::GamepadRightTriggerAxis);
-}
-
-constexpr bool Core::InputKey::IsGamepadKey() const
-{
-	return Core::InputKey::IsKeyCodeGamepadKey(Key);
+	return
+		Key == Core::Keys::GamepadFaceButtonBottom ||
+		Key == Core::Keys::GamepadFaceButtonRight ||
+		Key == Core::Keys::GamepadFaceButtonLeft ||
+		Key == Core::Keys::GamepadFaceButtonTop ||
+		Key == Core::Keys::GamepadDPadUp ||
+		Key == Core::Keys::GamepadDPadDown ||
+		Key == Core::Keys::GamepadDPadLeft ||
+		Key == Core::Keys::GamepadDPadRight ||
+		Key == Core::Keys::GamepadLeftThumbstickButton ||
+		Key == Core::Keys::GamepadRightThumbstickButton ||
+		Key == Core::Keys::GamepadSpecialLeft ||
+		Key == Core::Keys::GamepadSpecialRight ||
+		Key == Core::Keys::GamepadLeftShoulder ||
+		Key == Core::Keys::GamepadRightShoulder ||
+		Key == Core::Keys::GamepadLeftThumbstickXAxis ||
+		Key == Core::Keys::GamepadLeftThumbstickYAxis ||
+		Key == Core::Keys::GamepadRightThumbstickXAxis ||
+		Key == Core::Keys::GamepadRightThumbstickYAxis ||
+		Key == Core::Keys::GamepadLeftThumbstickUp ||
+		Key == Core::Keys::GamepadLeftThumbstickDown ||
+		Key == Core::Keys::GamepadLeftThumbstickLeft ||
+		Key == Core::Keys::GamepadLeftThumbstickRight ||
+		Key == Core::Keys::GamepadRightThumbstickUp ||
+		Key == Core::Keys::GamepadRightThumbstickDown ||
+		Key == Core::Keys::GamepadRightThumbstickLeft ||
+		Key == Core::Keys::GamepadRightThumbstickRight ||
+		Key == Core::Keys::GamepadLeftTrigger ||
+		Key == Core::Keys::GamepadRightTrigger ||
+		Key == Core::Keys::GamepadLeftTriggerAxis ||
+		Key == Core::Keys::GamepadRightTriggerAxis;
 }
 
 std::string Core::InputKey::ToString() const
 {
 	switch (Key)
 	{
-	case Core::InputKey::Keys::Backspace: return "Backspace";
-	case Core::InputKey::Keys::Tab: return "Tab";
-	case Core::InputKey::Keys::Enter: return "Enter";
-	case Core::InputKey::Keys::LeftShift: return "Left shift";
-	case Core::InputKey::Keys::RightShift: return "Right shift";
-	case Core::InputKey::Keys::CapsLock: return "Caps lock";
-	case Core::InputKey::Keys::Escape: return "Escape";
-	case Core::InputKey::Keys::SpaceBar: return "Space bar";
-	case Core::InputKey::Keys::PageUp: return "Page up";
-	case Core::InputKey::Keys::PageDown: return "Page down";
-	case Core::InputKey::Keys::End: return "End";
-	case Core::InputKey::Keys::Home: return "Home";
-	case Core::InputKey::Keys::Insert: return "Insert";
-	case Core::InputKey::Keys::Delete: return "Delete";
-	case Core::InputKey::Keys::Left: return "Left";
-	case Core::InputKey::Keys::Right: return "Right";
-	case Core::InputKey::Keys::Up: return "Up";
-	case Core::InputKey::Keys::Down: return "Down";
-	case Core::InputKey::Keys::Zero: return "0";
-	case Core::InputKey::Keys::One: return "1";
-	case Core::InputKey::Keys::Two: return "2";
-	case Core::InputKey::Keys::Three: return "3";
-	case Core::InputKey::Keys::Four: return "4";
-	case Core::InputKey::Keys::Five: return "5";
-	case Core::InputKey::Keys::Six: return "6";
-	case Core::InputKey::Keys::Seven: return "7";
-	case Core::InputKey::Keys::Eight: return "8";
-	case Core::InputKey::Keys::Nine: return "9";
-	case Core::InputKey::Keys::A: return "A";
-	case Core::InputKey::Keys::B: return "B";
-	case Core::InputKey::Keys::C: return "C";
-	case Core::InputKey::Keys::D: return "D";
-	case Core::InputKey::Keys::E: return "E";
-	case Core::InputKey::Keys::F: return "F";
-	case Core::InputKey::Keys::G: return "G";
-	case Core::InputKey::Keys::H: return "H";
-	case Core::InputKey::Keys::I: return "I";
-	case Core::InputKey::Keys::J: return "J";
-	case Core::InputKey::Keys::K: return "K";
-	case Core::InputKey::Keys::L: return "L";
-	case Core::InputKey::Keys::M: return "M";
-	case Core::InputKey::Keys::N: return "N";
-	case Core::InputKey::Keys::O: return "O";
-	case Core::InputKey::Keys::P: return "P";
-	case Core::InputKey::Keys::Q: return "Q";
-	case Core::InputKey::Keys::R: return "R";
-	case Core::InputKey::Keys::S: return "S";
-	case Core::InputKey::Keys::T: return "T";
-	case Core::InputKey::Keys::U: return "U";
-	case Core::InputKey::Keys::V: return "V";
-	case Core::InputKey::Keys::W: return "W";
-	case Core::InputKey::Keys::X: return "X";
-	case Core::InputKey::Keys::Y: return "Y";
-	case Core::InputKey::Keys::Z: return "Z";
-	case Core::InputKey::Keys::Numpad0: return "Numpad 0";
-	case Core::InputKey::Keys::Numpad1: return "Numpad 1";
-	case Core::InputKey::Keys::Numpad2: return "Numpad 2";
-	case Core::InputKey::Keys::Numpad3: return "Numpad 3";
-	case Core::InputKey::Keys::Numpad4: return "Numpad 4";
-	case Core::InputKey::Keys::Numpad5: return "Numpad 5";
-	case Core::InputKey::Keys::Numpad6: return "Numpad 6";
-	case Core::InputKey::Keys::Numpad7: return "Numpad 7";
-	case Core::InputKey::Keys::Numpad8: return "Numpad 8";
-	case Core::InputKey::Keys::Numpad9: return "Numpad 9";
-	case Core::InputKey::Keys::F1: return "F1";
-	case Core::InputKey::Keys::F2: return "F2";
-	case Core::InputKey::Keys::F3: return "F3";
-	case Core::InputKey::Keys::F4: return "F4";
-	case Core::InputKey::Keys::F5: return "F5";
-	case Core::InputKey::Keys::F6: return "F6";
-	case Core::InputKey::Keys::F7: return "F7";
-	case Core::InputKey::Keys::F8: return "F8";
-	case Core::InputKey::Keys::F9: return "F9";
-	case Core::InputKey::Keys::F10: return "F10";
-	case Core::InputKey::Keys::F11: return "F11";
-	case Core::InputKey::Keys::F12: return "F12";
-	case Core::InputKey::Keys::LeftCtrl: return "Left ctrl";
-	case Core::InputKey::Keys::RightCtrl: return "Right ctrl";
-	case Core::InputKey::Keys::Alt: return "Alt";
-	case Core::InputKey::Keys::LeftMouseButton: return "Left mouse button";
-	case Core::InputKey::Keys::RightMouseButton: return "Right mouse button";
-	case Core::InputKey::Keys::MiddleMouseButton: return "Middle mouse button";
-	case Core::InputKey::Keys::MouseWheelUpAxis: return "Mouse wheel up axis";
-	case Core::InputKey::Keys::MouseWheelDownAxis: return "Mouse wheel down axis";
-	case Core::InputKey::Keys::MouseXAxis: return "Mouse X axis";
-	case Core::InputKey::Keys::MouseYAxis: return "Mouse Y axis";
-	case Core::InputKey::Keys::GamepadFaceButtonBottom: return "Gamepad face button bottom";
-	case Core::InputKey::Keys::GamepadFaceButtonRight: return "Gamepad face button right";
-	case Core::InputKey::Keys::GamepadFaceButtonLeft: return "Gamepad face button left";
-	case Core::InputKey::Keys::GamepadFaceButtonTop: return "Gamepad face button top";
-	case Core::InputKey::Keys::GamepadDPadUp: return "Gamepad DPad up";
-	case Core::InputKey::Keys::GamepadDPadDown: return "Gamepad DPad down";
-	case Core::InputKey::Keys::GamepadDPadLeft: return "Gamepad DPad left";
-	case Core::InputKey::Keys::GamepadDPadRight: return "Gamepad DPad right";
-	case Core::InputKey::Keys::GamepadLeftThumbstickButton: return "Gamepad left thumbstick button";
-	case Core::InputKey::Keys::GamepadRightThumbstickButton: return "Gamepad right thumbstick button";
-	case Core::InputKey::Keys::GamepadSpecialLeft: return "Gamepad special left";
-	case Core::InputKey::Keys::GamepadSpecialRight: return "Gamepad special right";
-	case Core::InputKey::Keys::GamepadLeftShoulder: return "Gamepad left shoulder";
-	case Core::InputKey::Keys::GamepadRightShoulder: return "Gamepad right shoulder";
-	case Core::InputKey::Keys::GamepadLeftThumbstickXAxis: return "Gamepad left thumbstick X axis";
-	case Core::InputKey::Keys::GamepadLeftThumbstickYAxis: return "Gamepad left thumbstick Y axis";
-	case Core::InputKey::Keys::GamepadRightThumbstickXAxis: return "Gamepad right thumbstick X axis";
-	case Core::InputKey::Keys::GamepadRightThumbstickYAxis: return "Gamepad right thumbstick Y axis";
-	case Core::InputKey::Keys::GamepadLeftThumbstickUp: return "Gamepad left thumbstick up";
-	case Core::InputKey::Keys::GamepadLeftThumbstickDown: return "Gamepad left thumbstick down";
-	case Core::InputKey::Keys::GamepadLeftThumbstickLeft: return "Gamepad left thumbstick left";
-	case Core::InputKey::Keys::GamepadLeftThumbstickRight: return "Gamepad left thumbstick right";
-	case Core::InputKey::Keys::GamepadRightThumbstickUp: return "Gamepad right thumbstick up";
-	case Core::InputKey::Keys::GamepadRightThumbstickDown: return "Gamepad right thumbstick down";
-	case Core::InputKey::Keys::GamepadRightThumbstickLeft: return "Gamepad right thumbstick left";
-	case Core::InputKey::Keys::GamepadRightThumbstickRight: return "Gamepad right thumbstick right";
-	case Core::InputKey::Keys::GamepadLeftTrigger: return "Gamepad left trigger";
-	case Core::InputKey::Keys::GamepadRightTrigger: return "Gamepad right trigger";
-	case Core::InputKey::Keys::GamepadLeftTriggerAxis: return "Gamepad left trigger axis";
-	case Core::InputKey::Keys::GamepadRightTriggerAxis: return "Gamepad right trigger axis";
+	case Core::Keys::Backspace: return "Backspace";
+	case Core::Keys::Tab: return "Tab";
+	case Core::Keys::Enter: return "Enter";
+	case Core::Keys::CapsLock: return "Caps lock";
+	case Core::Keys::Escape: return "Escape";
+	case Core::Keys::SpaceBar: return "Space bar";
+	case Core::Keys::PageUp: return "Page up";
+	case Core::Keys::PageDown: return "Page down";
+	case Core::Keys::End: return "End";
+	case Core::Keys::Home: return "Home";
+	case Core::Keys::Insert: return "Insert";
+	case Core::Keys::Delete: return "Delete";
+	case Core::Keys::Left: return "Left";
+	case Core::Keys::Right: return "Right";
+	case Core::Keys::Up: return "Up";
+	case Core::Keys::Down: return "Down";
 
-	case Core::InputKey::Keys::MAX:
+	case Core::Keys::Zero: return "0";
+	case Core::Keys::One: return "1";
+	case Core::Keys::Two: return "2";
+	case Core::Keys::Three: return "3";
+	case Core::Keys::Four: return "4";
+	case Core::Keys::Five: return "5";
+	case Core::Keys::Six: return "6";
+	case Core::Keys::Seven: return "7";
+	case Core::Keys::Eight: return "8";
+	case Core::Keys::Nine: return "9";
+	case Core::Keys::A: return "A";
+	case Core::Keys::B: return "B";
+	case Core::Keys::C: return "C";
+	case Core::Keys::D: return "D";
+	case Core::Keys::E: return "E";
+	case Core::Keys::F: return "F";
+	case Core::Keys::G: return "G";
+	case Core::Keys::H: return "H";
+	case Core::Keys::I: return "I";
+	case Core::Keys::J: return "J";
+	case Core::Keys::K: return "K";
+	case Core::Keys::L: return "L";
+	case Core::Keys::M: return "M";
+	case Core::Keys::N: return "N";
+	case Core::Keys::O: return "O";
+	case Core::Keys::P: return "P";
+	case Core::Keys::Q: return "Q";
+	case Core::Keys::R: return "R";
+	case Core::Keys::S: return "S";
+	case Core::Keys::T: return "T";
+	case Core::Keys::U: return "U";
+	case Core::Keys::V: return "V";
+	case Core::Keys::W: return "W";
+	case Core::Keys::X: return "X";
+	case Core::Keys::Y: return "Y";
+	case Core::Keys::Z: return "Z";
+	case Core::Keys::Numpad0: return "Numpad 0";
+	case Core::Keys::Numpad1: return "Numpad 1";
+	case Core::Keys::Numpad2: return "Numpad 2";
+	case Core::Keys::Numpad3: return "Numpad 3";
+	case Core::Keys::Numpad4: return "Numpad 4";
+	case Core::Keys::Numpad5: return "Numpad 5";
+	case Core::Keys::Numpad6: return "Numpad 6";
+	case Core::Keys::Numpad7: return "Numpad 7";
+	case Core::Keys::Numpad8: return "Numpad 8";
+	case Core::Keys::Numpad9: return "Numpad 9";
+	case Core::Keys::NumpadMultiply: return "Numpad *";
+	case Core::Keys::NumpadPlus: return "Numpad +";
+	case Core::Keys::NumpadMinus: return "Numpad -";
+	case Core::Keys::NumpadDecimal: return "Numpad .";
+	case Core::Keys::NumpadDivide: return "Numpad /";
+	case Core::Keys::F1: return "F1";
+	case Core::Keys::F2: return "F2";
+	case Core::Keys::F3: return "F3";
+	case Core::Keys::F4: return "F4";
+	case Core::Keys::F5: return "F5";
+	case Core::Keys::F6: return "F6";
+	case Core::Keys::F7: return "F7";
+	case Core::Keys::F8: return "F8";
+	case Core::Keys::F9: return "F9";
+	case Core::Keys::F10: return "F10";
+	case Core::Keys::F11: return "F11";
+	case Core::Keys::F12: return "F12";
+
+	case Core::Keys::NumLock: return "Num lock";
+	case Core::Keys::ScrollLock: return "Scroll lock";
+
+	case Core::Keys::LeftShift: return "Left shift";
+	case Core::Keys::RightShift: return "Right shift";
+	case Core::Keys::LeftCtrl: return "Left ctrl";
+	case Core::Keys::RightCtrl: return "Right ctrl";
+	case Core::Keys::LeftAlt: return "Left alt";
+	case Core::Keys::RightAlt: return "Right alt";
+
+	case Core::Keys::SemiColon: return "Semicolon/colon";
+	case Core::Keys::Equals: return "Equals/plus";
+	case Core::Keys::Comma: return "Comma/left angular bracket";
+	case Core::Keys::Dash: return "Dash/underscore";
+	case Core::Keys::Period: return "Period/right angular bracket";
+	case Core::Keys::ForwardSlash: return "Forward slash/question mark";
+	case Core::Keys::Hash: return "hash/tilde";
+	case Core::Keys::LeftBrace: return "Left square/curly brace";
+	case Core::Keys::Backslash: return "Backwards slash/pipe";
+	case Core::Keys::RightBrace: return "Right square/curly brace";
+	case Core::Keys::Apostrophe: return "Apostrophe/@";
+
+	case Core::Keys::LeftMouseButton: return "Left mouse button";
+	case Core::Keys::RightMouseButton: return "Right mouse button";
+	case Core::Keys::MiddleMouseButton: return "Middle mouse button";
+	case Core::Keys::MouseWheelUpAxis: return "Mouse wheel up axis";
+	case Core::Keys::MouseWheelDownAxis: return "Mouse wheel down axis";
+	case Core::Keys::MouseXAxis: return "Mouse X axis";
+	case Core::Keys::MouseYAxis: return "Mouse Y axis";
+
+	case Core::Keys::GamepadFaceButtonBottom: return "Gamepad face button bottom";
+	case Core::Keys::GamepadFaceButtonRight: return "Gamepad face button right";
+	case Core::Keys::GamepadFaceButtonLeft: return "Gamepad face button left";
+	case Core::Keys::GamepadFaceButtonTop: return "Gamepad face button top";
+	case Core::Keys::GamepadDPadUp: return "Gamepad DPad up";
+	case Core::Keys::GamepadDPadDown: return "Gamepad DPad down";
+	case Core::Keys::GamepadDPadLeft: return "Gamepad DPad left";
+	case Core::Keys::GamepadDPadRight: return "Gamepad DPad right";
+	case Core::Keys::GamepadLeftThumbstickButton: return "Gamepad left thumbstick button";
+	case Core::Keys::GamepadRightThumbstickButton: return "Gamepad right thumbstick button";
+	case Core::Keys::GamepadSpecialLeft: return "Gamepad special left";
+	case Core::Keys::GamepadSpecialRight: return "Gamepad special right";
+	case Core::Keys::GamepadLeftShoulder: return "Gamepad left shoulder";
+	case Core::Keys::GamepadRightShoulder: return "Gamepad right shoulder";
+	case Core::Keys::GamepadLeftThumbstickXAxis: return "Gamepad left thumbstick X axis";
+	case Core::Keys::GamepadLeftThumbstickYAxis: return "Gamepad left thumbstick Y axis";
+	case Core::Keys::GamepadRightThumbstickXAxis: return "Gamepad right thumbstick X axis";
+	case Core::Keys::GamepadRightThumbstickYAxis: return "Gamepad right thumbstick Y axis";
+	case Core::Keys::GamepadLeftThumbstickUp: return "Gamepad left thumbstick up";
+	case Core::Keys::GamepadLeftThumbstickDown: return "Gamepad left thumbstick down";
+	case Core::Keys::GamepadLeftThumbstickLeft: return "Gamepad left thumbstick left";
+	case Core::Keys::GamepadLeftThumbstickRight: return "Gamepad left thumbstick right";
+	case Core::Keys::GamepadRightThumbstickUp: return "Gamepad right thumbstick up";
+	case Core::Keys::GamepadRightThumbstickDown: return "Gamepad right thumbstick down";
+	case Core::Keys::GamepadRightThumbstickLeft: return "Gamepad right thumbstick left";
+	case Core::Keys::GamepadRightThumbstickRight: return "Gamepad right thumbstick right";
+	case Core::Keys::GamepadLeftTrigger: return "Gamepad left trigger";
+	case Core::Keys::GamepadRightTrigger: return "Gamepad right trigger";
+	case Core::Keys::GamepadLeftTriggerAxis: return "Gamepad left trigger axis";
+	case Core::Keys::GamepadRightTriggerAxis: return "Gamepad right trigger axis";
+
+	case Core::Keys::Unknown: return "Unknown key";
+
+	case Core::Keys::MAX:
 	default:
 		return "Invalid key";
 	}
+}
+
+bool Core::InputKey::operator==(const Core::Keys CompareKey) const
+{
+	return (Key == CompareKey);
 }

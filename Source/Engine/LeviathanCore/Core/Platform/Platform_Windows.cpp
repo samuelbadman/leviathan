@@ -223,6 +223,216 @@ namespace
 			}
 		}
 
+		Core::InputKey TranslateVirtualKey(WORD VirtualKey, WORD ScanCode)
+		{
+			switch (VirtualKey)
+			{
+				/*Backspace*/
+			case VK_BACK: return Core::InputKey(Core::Keys::Backspace, ScanCode);
+				/*Tab*/
+			case VK_TAB: return Core::InputKey(Core::Keys::Tab, ScanCode);
+				/*Enter*/
+			case VK_RETURN: return Core::InputKey(Core::Keys::Enter, ScanCode);
+				/*CapsLock*/
+			case VK_CAPITAL: return Core::InputKey(Core::Keys::CapsLock, ScanCode);
+				/*Escape*/
+			case VK_ESCAPE: return Core::InputKey(Core::Keys::Escape, ScanCode);
+				/*SpaceBar*/
+			case VK_SPACE: return Core::InputKey(Core::Keys::SpaceBar, ScanCode);
+				/*PageUp*/
+			case VK_PRIOR: return Core::InputKey(Core::Keys::PageUp, ScanCode);
+				/*PageDown*/
+			case VK_NEXT: return Core::InputKey(Core::Keys::PageDown, ScanCode);
+				/*End*/
+			case VK_END: return Core::InputKey(Core::Keys::End, ScanCode);
+				/*Home*/
+			case VK_HOME: return Core::InputKey(Core::Keys::Home, ScanCode);
+				/*Insert*/
+			case VK_INSERT: return Core::InputKey(Core::Keys::Insert, ScanCode);
+				/*Delete*/
+			case VK_DELETE: return Core::InputKey(Core::Keys::Delete, ScanCode);
+				/*Left*/
+			case VK_LEFT: return Core::InputKey(Core::Keys::Left, ScanCode);
+				/*Right*/
+			case VK_RIGHT: return Core::InputKey(Core::Keys::Right, ScanCode);
+				/*Up*/
+			case VK_UP: return Core::InputKey(Core::Keys::Up, ScanCode);
+				/*Down*/
+			case VK_DOWN: return Core::InputKey(Core::Keys::Down, ScanCode);
+
+				/*Zero*/
+			case '0': return Core::InputKey(Core::Keys::Zero, ScanCode);
+				/*One*/
+			case '1': return Core::InputKey(Core::Keys::One, ScanCode);
+				/*Two*/
+			case '2': return Core::InputKey(Core::Keys::Two, ScanCode);
+				/*Three*/
+			case '3': return Core::InputKey(Core::Keys::Three, ScanCode);
+				/*Four*/
+			case '4': return Core::InputKey(Core::Keys::Four, ScanCode);
+				/*Five*/
+			case '5': return Core::InputKey(Core::Keys::Five, ScanCode);
+				/*Six*/
+			case '6': return Core::InputKey(Core::Keys::Six, ScanCode);
+				/*Seven*/
+			case '7': return Core::InputKey(Core::Keys::Seven, ScanCode);
+				/*Eight*/
+			case '8': return Core::InputKey(Core::Keys::Eight, ScanCode);
+				/*Nine*/
+			case '9': return Core::InputKey(Core::Keys::Nine, ScanCode);
+				/*A*/
+			case 'A': return Core::InputKey(Core::Keys::A, ScanCode);
+				/*B*/
+			case 'B': return Core::InputKey(Core::Keys::B, ScanCode);
+				/*C*/
+			case 'C': return Core::InputKey(Core::Keys::C, ScanCode);
+				/*D*/
+			case 'D': return Core::InputKey(Core::Keys::D, ScanCode);
+				/*E*/
+			case 'E': return Core::InputKey(Core::Keys::E, ScanCode);
+				/*F*/
+			case 'F': return Core::InputKey(Core::Keys::F, ScanCode);
+				/*G*/
+			case 'G': return Core::InputKey(Core::Keys::G, ScanCode);
+				/*H*/
+			case 'H': return Core::InputKey(Core::Keys::H, ScanCode);
+				/*I*/
+			case 'I': return Core::InputKey(Core::Keys::I, ScanCode);
+				/*J*/
+			case 'J': return Core::InputKey(Core::Keys::J, ScanCode);
+				/*K*/
+			case 'K': return Core::InputKey(Core::Keys::K, ScanCode);
+				/*L*/
+			case 'L': return Core::InputKey(Core::Keys::L, ScanCode);
+				/*M*/
+			case 'M': return Core::InputKey(Core::Keys::M, ScanCode);
+				/*N*/
+			case 'N': return Core::InputKey(Core::Keys::N, ScanCode);
+				/*O*/
+			case 'O': return Core::InputKey(Core::Keys::O, ScanCode);
+				/*P*/
+			case 'P': return Core::InputKey(Core::Keys::P, ScanCode);
+				/*Q*/
+			case 'Q': return Core::InputKey(Core::Keys::Q, ScanCode);
+				/*R*/
+			case 'R': return Core::InputKey(Core::Keys::R, ScanCode);
+				/*S*/
+			case 'S': return Core::InputKey(Core::Keys::S, ScanCode);
+				/*T*/
+			case 'T': return Core::InputKey(Core::Keys::T, ScanCode);
+				/*U*/
+			case 'U': return Core::InputKey(Core::Keys::U, ScanCode);
+				/*V*/
+			case 'V': return Core::InputKey(Core::Keys::V, ScanCode);
+				/*W*/
+			case 'W': return Core::InputKey(Core::Keys::W, ScanCode);
+				/*X*/
+			case 'X': return Core::InputKey(Core::Keys::X, ScanCode);
+				/*Y*/
+			case 'Y': return Core::InputKey(Core::Keys::Y, ScanCode);
+				/*Z*/
+			case 'Z': return Core::InputKey(Core::Keys::Z, ScanCode);
+				/*Numpad0*/
+			case VK_NUMPAD0: return Core::InputKey(Core::Keys::Numpad0, ScanCode);
+				/*Numpad1*/
+			case VK_NUMPAD1: return Core::InputKey(Core::Keys::Numpad1, ScanCode);
+				/*Numpad2*/
+			case VK_NUMPAD2: return Core::InputKey(Core::Keys::Numpad2, ScanCode);
+				/*Numpad3*/
+			case VK_NUMPAD3: return Core::InputKey(Core::Keys::Numpad3, ScanCode);
+				/*Numpad4*/
+			case VK_NUMPAD4: return Core::InputKey(Core::Keys::Numpad4, ScanCode);
+				/*Numpad5*/
+			case VK_NUMPAD5: return Core::InputKey(Core::Keys::Numpad5, ScanCode);
+				/*Numpad6*/
+			case VK_NUMPAD6: return Core::InputKey(Core::Keys::Numpad6, ScanCode);
+				/*Numpad7*/
+			case VK_NUMPAD7: return Core::InputKey(Core::Keys::Numpad7, ScanCode);
+				/*Numpad8*/
+			case VK_NUMPAD8: return Core::InputKey(Core::Keys::Numpad8, ScanCode);
+				/*Numpad9*/
+			case VK_NUMPAD9: return Core::InputKey(Core::Keys::Numpad9, ScanCode);
+				/*Numpad**/
+			case VK_MULTIPLY: return Core::InputKey(Core::Keys::NumpadMultiply, ScanCode);
+				/*Numpad+*/
+			case VK_ADD: return Core::InputKey(Core::Keys::NumpadPlus, ScanCode);
+				/*Numpad-*/
+			case VK_SUBTRACT: return Core::InputKey(Core::Keys::NumpadMinus, ScanCode);
+				/*Numpad.*/
+			case VK_DECIMAL: return Core::InputKey(Core::Keys::NumpadDecimal, ScanCode);
+				/*Numpad/*/
+			case VK_DIVIDE: return Core::InputKey(Core::Keys::NumpadDivide, ScanCode);
+				/*F1*/
+			case VK_F1: return Core::InputKey(Core::Keys::F1, ScanCode);
+				/*F2*/
+			case VK_F2: return Core::InputKey(Core::Keys::F2, ScanCode);
+				/*F3*/
+			case VK_F3: return Core::InputKey(Core::Keys::F3, ScanCode);
+				/*F4*/
+			case VK_F4: return Core::InputKey(Core::Keys::F4, ScanCode);
+				/*F5*/
+			case VK_F5: return Core::InputKey(Core::Keys::F5, ScanCode);
+				/*F6*/
+			case VK_F6: return Core::InputKey(Core::Keys::F6, ScanCode);
+				/*F7*/
+			case VK_F7: return Core::InputKey(Core::Keys::F7, ScanCode);
+				/*F8*/
+			case VK_F8: return Core::InputKey(Core::Keys::F8, ScanCode);
+				/*F9*/
+			case VK_F9: return Core::InputKey(Core::Keys::F9, ScanCode);
+				/*F10*/
+			case VK_F10: return Core::InputKey(Core::Keys::F10, ScanCode);
+				/*F11*/
+			case VK_F11: return Core::InputKey(Core::Keys::F11, ScanCode);
+				/*F12*/
+			case VK_F12: return Core::InputKey(Core::Keys::F12, ScanCode);
+
+				/*NumLock*/
+			case VK_NUMLOCK: return Core::InputKey(Core::Keys::NumLock, ScanCode);
+				/*ScrollLock*/
+			case VK_SCROLL: return Core::InputKey(Core::Keys::ScrollLock, ScanCode);
+
+				/*LeftShift*/
+			case VK_LSHIFT: return Core::InputKey(Core::Keys::LeftShift, ScanCode);
+				/*RightShift*/
+			case VK_RSHIFT: return Core::InputKey(Core::Keys::RightShift, ScanCode);
+				/*LeftCtrl*/
+			case VK_LCONTROL: return Core::InputKey(Core::Keys::LeftCtrl, ScanCode);
+				/*RightCtrl*/
+			case VK_RCONTROL: return Core::InputKey(Core::Keys::RightCtrl, ScanCode);
+				/*LeftAlt*/
+			case VK_LMENU: return Core::InputKey(Core::Keys::LeftAlt, ScanCode);
+				/*RightAlt*/
+			case VK_RMENU: return Core::InputKey(Core::Keys::RightAlt, ScanCode);
+
+				/*SemiColon*/
+			case VK_OEM_1: return Core::InputKey(Core::Keys::SemiColon, ScanCode);
+				/*EqualsPlus*/
+			case VK_OEM_PLUS: return Core::InputKey(Core::Keys::Equals, ScanCode);
+				/*CommaLeftAngularBrace*/
+			case VK_OEM_COMMA: return Core::InputKey(Core::Keys::Comma, ScanCode);
+				/*DashUnderscore*/
+			case VK_OEM_MINUS: return Core::InputKey(Core::Keys::Dash, ScanCode);
+				/*PeriodRightAngularBrace*/
+			case VK_OEM_PERIOD: return Core::InputKey(Core::Keys::Period, ScanCode);
+				/*ForwardSlashQuestionMark*/
+			case VK_OEM_2: return Core::InputKey(Core::Keys::ForwardSlash, ScanCode);
+				/*Apostrophe@*/
+			case VK_OEM_3: return Core::InputKey(Core::Keys::Apostrophe, ScanCode);
+				/*LeftSquareBraceCurlyBrace*/
+			case VK_OEM_4: return Core::InputKey(Core::Keys::LeftBrace, ScanCode);
+				/*BackslashPipe*/
+			case VK_OEM_5: return Core::InputKey(Core::Keys::Backslash, ScanCode);
+				/*RightSquareBraceCurlyBrace*/
+			case VK_OEM_6: return Core::InputKey(Core::Keys::RightBrace, ScanCode);
+				/*GraveAccentTilde*/
+			case VK_OEM_7: return Core::InputKey(Core::Keys::Hash, ScanCode);
+
+				/*Unhandled virtual key*/
+			default: return Core::InputKey(Core::Keys::Unknown, ScanCode);
+			}
+		}
+
 		LRESULT CALLBACK WindowWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		{
 			// Get window instance receiving the message from user data parameter
@@ -235,13 +445,69 @@ namespace
 
 			switch (Msg)
 			{
-				// Keyboard input released events
+				// Mouse input events
+
+
+				// Keyboard input events
 			case WM_SYSKEYUP:
 			case WM_KEYUP:
-				// TODO: Translate windows message key to Core::InputKey
-				return 0;
+			case WM_SYSKEYDOWN:
+			case WM_KEYDOWN:
+			{
+				WORD VirtualKeyCode = LOWORD(wParam);
 
-				// Window size events
+				WORD KeyFlags = HIWORD(lParam);
+
+				WORD ScanCode = LOBYTE(KeyFlags);
+				BOOL IsExtendedKey = (KeyFlags & KF_EXTENDED) == KF_EXTENDED;
+
+				if (IsExtendedKey)
+				{
+					ScanCode = MAKEWORD(ScanCode, 0xE0);
+				}
+
+				BOOL WasKeyDown = (KeyFlags & KF_REPEAT) == KF_REPEAT;
+				//WORD RepeatCount = LOWORD(lParam);
+
+				BOOL IsKeyReleased = (KeyFlags & KF_UP) == KF_UP;
+
+				switch (VirtualKeyCode)
+				{
+				case VK_SHIFT:
+				case VK_CONTROL:
+				case VK_MENU:
+					VirtualKeyCode = LOWORD(MapVirtualKeyW(ScanCode, MAPVK_VSC_TO_VK_EX));
+					break;
+				}
+
+				// Check if the window should be force closed on alt+f4 keyboard shortcut
+				bool IsAltF4 = (((lParam & (1 << 29)) != 0) && (static_cast<int16_t>(wParam) == VK_F4));
+				if (!IsKeyReleased && IsAltF4)
+				{
+					WindowInstance->OnForceClose();
+					return 0;
+				}
+
+				// Translate virtual key code to engine key
+				Core::WindowInputEventArgs EventArgs;
+				EventArgs.Key = TranslateVirtualKey(VirtualKeyCode, ScanCode);
+
+				if (IsKeyReleased)
+				{
+					EventArgs.Event = Core::WindowInputEvent::Released;
+					EventArgs.Data = 0.0f;
+				}
+				else
+				{
+					EventArgs.Event = (WasKeyDown) ? Core::WindowInputEvent::Repeat : Core::WindowInputEvent::Pressed;
+					EventArgs.Data = 1.0f;
+				}
+
+				WindowInstance->OnInputEvent(EventArgs);
+				return 0;
+			}
+
+			// Window size events
 			case WM_SIZE:
 				switch (wParam)
 				{
@@ -403,12 +669,12 @@ bool Core::Platform::CreatePlatformWindow(Core::Window& Temp, const Core::Window
 		Parameters.UniqueWindowName,
 		0,
 		Parameters.WindowName,
-		WindowsPlatformInternals::TranslateWindowMode(Parameters.Mode), 
+		WindowsPlatformInternals::TranslateWindowMode(Parameters.Mode),
 		Parameters.HorizontalPosition,
-		Parameters.VerticalPosition, 
+		Parameters.VerticalPosition,
 		Parameters.Width,
-		Parameters.Height, 
-		(Parameters.ParentWindow) ? static_cast<HWND>(Parameters.ParentWindow->GetPlatformHandle()) : NULL, 
+		Parameters.Height,
+		(Parameters.ParentWindow) ? static_cast<HWND>(Parameters.ParentWindow->GetPlatformHandle()) : NULL,
 		&Temp)
 		)
 	{
@@ -430,6 +696,6 @@ bool Core::Platform::DestroyPlatformWindow(Core::Window& WindowToDestroy)
 	{
 		return false;
 	}
-	
+
 	return UnregisterClass(WindowToDestroy.GetUniqueName(), NULL);
 }

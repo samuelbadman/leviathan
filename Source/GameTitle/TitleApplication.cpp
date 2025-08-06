@@ -20,8 +20,8 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	AppWindowCreateParameters.UniqueWindowName = "AppWindow";
 	AppWindowCreateParameters.WindowName = "Title application";
 	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
-	AppWindowCreateParameters.Width = 1280;
-	AppWindowCreateParameters.Height = 720;
+	AppWindowCreateParameters.Width = 640;
+	AppWindowCreateParameters.Height = 360;
 
 	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
 
