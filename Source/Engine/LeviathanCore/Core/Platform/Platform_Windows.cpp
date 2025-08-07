@@ -984,3 +984,13 @@ bool Core::Platform::SetCursorPositionRelativeToWindow(int32_t X, int32_t Y, con
 
 	return SetCursorPos(Position.x, Position.y);
 }
+
+bool Core::Platform::IsPlatformWindowFocused(const Core::Window& TargetWindow)
+{
+	return (GetFocus() == static_cast<HWND>(TargetWindow.GetPlatformHandle()));
+}
+
+bool Core::Platform::IsPlatformWindowMinimized(const Core::Window& TargetWindow)
+{
+	return IsIconic(static_cast<HWND>(TargetWindow.GetPlatformHandle()));
+}

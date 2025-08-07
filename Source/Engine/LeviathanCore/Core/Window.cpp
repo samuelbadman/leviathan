@@ -99,12 +99,22 @@ Core::Rectangle Core::Window::GetClientRegion() const
 	return EngineInstance.GetWindowClientRegionOnPlatform(*this);
 }
 
-void Core::Window::CaptureCursorInWindowRegion()
+void Core::Window::CaptureCursorInWindowRegion() const
 {
 	EngineInstance.CaptureCursorOnPlatform(GetRegion());
 }
 
-void Core::Window::CaptureCursorInClientRegion()
+void Core::Window::CaptureCursorInClientRegion() const
 {
 	EngineInstance.CaptureCursorOnPlatform(GetClientRegion());
+}
+
+bool Core::Window::IsFocused() const
+{
+	return EngineInstance.IsWindowFocusedOnPlatform(*this);
+}
+
+bool Core::Window::IsMinimized() const
+{
+	return EngineInstance.IsWindowMinimizedOnPlatform(*this);
 }

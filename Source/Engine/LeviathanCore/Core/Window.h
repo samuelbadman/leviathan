@@ -111,8 +111,10 @@ namespace Core
 		void ExitFullscreen();
 		Core::Rectangle GetRegion() const;
 		Core::Rectangle GetClientRegion() const;
-		void CaptureCursorInWindowRegion();
-		void CaptureCursorInClientRegion();
+		void CaptureCursorInWindowRegion() const;
+		void CaptureCursorInClientRegion() const;
+		bool IsFocused() const;
+		bool IsMinimized() const;
 
 	protected:
 		inline Core::Engine& GetEngine() const { return EngineInstance; }

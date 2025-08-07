@@ -28,5 +28,7 @@ namespace Core
 		Core::Rectangle GetPlatformWindowClientRegion(const Core::Window& TargetWindow);
 		bool SetCursorPosition(int32_t X, int32_t Y);
 		bool SetCursorPositionRelativeToWindow(int32_t X, int32_t Y, const Core::Window& TargetWindow);
+		bool IsPlatformWindowFocused(const Core::Window& TargetWindow);
+		bool IsPlatformWindowMinimized(const Core::Window& TargetWindow);
 	}
 }

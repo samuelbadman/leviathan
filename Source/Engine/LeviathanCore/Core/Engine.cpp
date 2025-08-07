@@ -93,6 +93,16 @@ bool Core::Engine::SetCursorPositionRelativeToWindowOnPlatform(int32_t X, int32_
 	return Platform::SetCursorPositionRelativeToWindow(X, Y, RelativeWindow);
 }
 
+bool Core::Engine::IsWindowFocusedOnPlatform(const Core::Window& TargetWindow)
+{
+	return Platform::IsPlatformWindowFocused(TargetWindow);
+}
+
+bool Core::Engine::IsWindowMinimizedOnPlatform(const Core::Window& TargetWindow) const
+{
+	return Platform::IsPlatformWindowMinimized(TargetWindow);
+}
+
 Core::NotificationManager& Core::Engine::GetNotificationManager() const
 {
 	return *NotificationManagerInstance;

@@ -13,11 +13,11 @@ void TitleApplicationWindow::OnInputKey(const Core::InputEventArgs& EventArgs)
 	{
 		if (IsFullscreen())
 		{
-			MakeFullscreen();
+			ExitFullscreen();
 		}
 		else
 		{
-			ExitFullscreen();
+			MakeFullscreen();
 		}
 	}
 	else if (EventArgs.Key == Core::Keys::C && EventArgs.Event == Core::InputEvent::Pressed)

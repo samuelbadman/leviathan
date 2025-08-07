@@ -93,6 +93,12 @@ namespace Core
 		// such as graphicsReturns true if succesful otherwise, false
 		bool SetCursorPositionRelativeToWindowOnPlatform(int32_t X, int32_t Y, const Core::Window& RelativeWindow) const;
 
+		// Returns true if the target window is focused otherwise, returns false if the target window is not focused
+		bool IsWindowFocusedOnPlatform(const Core::Window& TargetWindow);
+
+		// Returns true if the target window is minimized otherwise, returns false if the target window is not minimzed
+		bool IsWindowMinimizedOnPlatform(const Core::Window& TargetWindow) const;
+
 		Core::NotificationManager& GetNotificationManager() const;
 		void Quit(bool RestartEngine = false);
 
