@@ -816,11 +816,6 @@ bool Core::Platform::DestroyPlatformWindow(Core::Window& WindowToDestroy)
 
 bool Core::Platform::MakePlatformWindowFullscreen(Core::Window& WindowToMakeFullscreen)
 {
-	if (WindowToMakeFullscreen.IsFullscreen())
-	{
-		return false;
-	}
-
 	// Retrieve HWND from window
 	HWND hWnd = static_cast<HWND>(WindowToMakeFullscreen.GetPlatformHandle());
 
@@ -839,16 +834,6 @@ bool Core::Platform::MakePlatformWindowFullscreen(Core::Window& WindowToMakeFull
 	const int32_t MonitorWidth = static_cast<int>(MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left);
 	const int32_t MonitorHeight = static_cast<int>(MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top);
 
-	// Save position and size of the window to revert to when exiting fullscreen
-	RECT WindowRect;
-	if (!GetWindowRect(hWnd, &WindowRect))
-	{
-		return false;
-	}
-
-	WindowToMakeFullscreen.SetTopLeftCoordOnEnterFullscreen(static_cast<int32_t>(WindowRect.left), static_cast<int32_t>(WindowRect.top));
-	WindowToMakeFullscreen.SetDimensionsOnEnterFullscreen(static_cast<int32_t>(WindowRect.right - WindowRect.left), static_cast<int32_t>(WindowRect.bottom - WindowRect.top));
-
 	// Move window to top left of monitor and resize to width and height of the monitor
 	if (!SetWindowPos(hWnd, HWND_TOP, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top, MonitorWidth, MonitorHeight, SWP_FRAMECHANGED | SWP_NOACTIVATE))
 	{
@@ -864,19 +849,12 @@ bool Core::Platform::MakePlatformWindowFullscreen(Core::Window& WindowToMakeFull
 	// Show the window maximized
 	ShowWindow(hWnd, SW_MAXIMIZE);
 
-	// Update flags, call events and return succesfully entered fullscreen
-	WindowToMakeFullscreen.SetFullscreenFlag(true);
-	WindowToMakeFullscreen.OnEnterFullscreen();
+	// Return succesfully entered fullscreen
 	return true;
 }
 
 bool Core::Platform::ExitPlatformWindowFullscreen(Core::Window& WindowToExitFullscreen)
 {
-	if (!WindowToExitFullscreen.IsFullscreen())
-	{
-		return false;
-	}
-
 	// Retrieve platform window handle
 	HWND hWnd = static_cast<HWND>(WindowToExitFullscreen.GetPlatformHandle());
 
@@ -901,9 +879,7 @@ bool Core::Platform::ExitPlatformWindowFullscreen(Core::Window& WindowToExitFull
 	// Show the window
 	ShowWindow(hWnd, SW_SHOW);
 
-	// Update flags, call events and return succesfully exited fullscreen
-	WindowToExitFullscreen.SetFullscreenFlag(false);
-	WindowToExitFullscreen.OnExitFullscreen();
+	// Return succesfully exited fullscreen
 	return true;
 }
 
@@ -993,4 +969,17 @@ bool Core::Platform::IsPlatformWindowFocused(const Core::Window& TargetWindow)
 bool Core::Platform::IsPlatformWindowMinimized(const Core::Window& TargetWindow)
 {
 	return IsIconic(static_cast<HWND>(TargetWindow.GetPlatformHandle()));
+}
+
+bool Core::Platform::SetPlatformWindowMode(const Core::WindowMode NewMode, Core::Window& TargetWindow)
+{
+	HWND hWnd = static_cast<HWND>(TargetWindow.GetPlatformHandle());
+
+	if (!SetWindowLongPtr(hWnd, GWL_STYLE, WindowsPlatformInternals::TranslateWindowMode(NewMode)))
+	{
+		return false;
+	}
+
+	ShowWindow(hWnd, SW_SHOW);
+	return true;
 }

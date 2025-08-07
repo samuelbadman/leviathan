@@ -115,6 +115,7 @@ namespace Core
 		void CaptureCursorInClientRegion() const;
 		bool IsFocused() const;
 		bool IsMinimized() const;
+		bool ChangeMode(const Core::WindowMode NewMode);
 
 	protected:
 		inline Core::Engine& GetEngine() const { return EngineInstance; }

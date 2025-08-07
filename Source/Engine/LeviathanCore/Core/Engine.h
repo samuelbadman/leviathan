@@ -2,6 +2,8 @@
 
 namespace Core
 {
+	enum class WindowMode : uint8_t;
+
 	class Application;
 	class NotificationManager;
 	class Window;
@@ -98,6 +100,9 @@ namespace Core
 
 		// Returns true if the target window is minimized otherwise, returns false if the target window is not minimzed
 		bool IsWindowMinimizedOnPlatform(const Core::Window& TargetWindow) const;
+
+		// Returns true if the target window's mode was succesfully changed otherwise, returns false
+		bool ChangeWindowModeOnPlatform(const Core::WindowMode NewMode, Core::Window& TargetWindow) const;
 
 		Core::NotificationManager& GetNotificationManager() const;
 		void Quit(bool RestartEngine = false);

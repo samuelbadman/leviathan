@@ -118,3 +118,8 @@ bool Core::Window::IsMinimized() const
 {
 	return EngineInstance.IsWindowMinimizedOnPlatform(*this);
 }
+
+bool Core::Window::ChangeMode(const Core::WindowMode NewMode)
+{
+	return EngineInstance.ChangeWindowModeOnPlatform(NewMode, *this);
+}

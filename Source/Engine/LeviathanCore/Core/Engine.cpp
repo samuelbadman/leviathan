@@ -55,12 +55,42 @@ bool Core::Engine::DestroyWindowOnPlatform(Core::Window& WindowToDestroy) const
 
 bool Core::Engine::MakeWindowFullscreenOnPlatform(Core::Window& WindowToMakeFullscreen) const
 {
-	return Platform::MakePlatformWindowFullscreen(WindowToMakeFullscreen);
+	if (WindowToMakeFullscreen.IsFullscreen())
+	{
+		return false;
+	}
+
+	const Core::Rectangle RegionBeforeFullscreen = GetWindowRegionOnPlatform(WindowToMakeFullscreen);
+
+	WindowToMakeFullscreen.SetTopLeftCoordOnEnterFullscreen(static_cast<int32_t>(RegionBeforeFullscreen.Left), static_cast<int32_t>(RegionBeforeFullscreen.Top));
+	WindowToMakeFullscreen.SetDimensionsOnEnterFullscreen(static_cast<int32_t>(RegionBeforeFullscreen.Right - RegionBeforeFullscreen.Left),
+		static_cast<int32_t>(RegionBeforeFullscreen.Bottom - RegionBeforeFullscreen.Top));
+
+	if (!Platform::MakePlatformWindowFullscreen(WindowToMakeFullscreen))
+	{
+		return false;
+	}
+
+	WindowToMakeFullscreen.SetFullscreenFlag(true);
+	WindowToMakeFullscreen.OnEnterFullscreen();
+	return true;
 }
 
 bool Core::Engine::ExitWindowFullscreenOnPlatform(Core::Window& WindowToExitFullscreen) const
 {
-	return Platform::ExitPlatformWindowFullscreen(WindowToExitFullscreen);
+	if (!WindowToExitFullscreen.IsFullscreen())
+	{
+		return false;
+	}
+
+	if (!Platform::ExitPlatformWindowFullscreen(WindowToExitFullscreen))
+	{
+		return false;
+	}
+
+	WindowToExitFullscreen.SetFullscreenFlag(false);
+	WindowToExitFullscreen.OnExitFullscreen();
+	return true;
 }
 
 bool Core::Engine::CaptureCursorOnPlatform(Core::Rectangle& CaptureRegion) const
@@ -101,6 +131,22 @@ bool Core::Engine::IsWindowFocusedOnPlatform(const Core::Window& TargetWindow)
 bool Core::Engine::IsWindowMinimizedOnPlatform(const Core::Window& TargetWindow) const
 {
 	return Platform::IsPlatformWindowMinimized(TargetWindow);
+}
+
+bool Core::Engine::ChangeWindowModeOnPlatform(const Core::WindowMode NewMode, Core::Window& TargetWindow) const
+{
+	if (NewMode == Core::WindowMode::MAX || TargetWindow.GetModeFlag() == NewMode || TargetWindow.IsFullscreen())
+	{
+		return false;
+	}
+
+	if (Platform::SetPlatformWindowMode(NewMode, TargetWindow))
+	{
+		TargetWindow.SetModeFlag(NewMode);
+		return true;
+	}
+
+	return false;
 }
 
 Core::NotificationManager& Core::Engine::GetNotificationManager() const

@@ -39,6 +39,10 @@ void TitleApplicationWindow::OnInputKey(const Core::InputEventArgs& EventArgs)
 	{
 		GetEngine().SetCursorPositionRelativeToWindowOnPlatform(0, 0, *this);
 	}
+	else if (EventArgs.Key == Core::Keys::M && EventArgs.Event == Core::InputEvent::Pressed)
+	{
+		ChangeMode(Core::WindowMode::Borderless);
+	}
 
 	std::string EventString;
 	switch (EventArgs.Event)

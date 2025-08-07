@@ -2,6 +2,8 @@
 
 namespace Core
 {
+	enum class WindowMode : uint8_t;
+
 	class NotificationManager;
 	class Window;
 
@@ -30,5 +32,6 @@ namespace Core
 		bool SetCursorPositionRelativeToWindow(int32_t X, int32_t Y, const Core::Window& TargetWindow);
 		bool IsPlatformWindowFocused(const Core::Window& TargetWindow);
 		bool IsPlatformWindowMinimized(const Core::Window& TargetWindow);
+		bool SetPlatformWindowMode(const Core::WindowMode NewMode, Core::Window& TargetWindow);
 	}
 }
