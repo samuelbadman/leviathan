@@ -35,6 +35,10 @@ void TitleApplicationWindow::OnInputKey(const Core::InputEventArgs& EventArgs)
 			IsCursorCaptured = true;
 		}
 	}
+	else if (EventArgs.Key == Core::Keys::S && EventArgs.Event == Core::InputEvent::Pressed)
+	{
+		GetEngine().SetCursorPositionRelativeToWindowOnPlatform(0, 0, *this);
+	}
 
 	std::string EventString;
 	switch (EventArgs.Event)

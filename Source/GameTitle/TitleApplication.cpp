@@ -9,7 +9,7 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	: Super(EngineInstanceRunningApplication)
 {
 	// Create console output window
-	GetEngine().CreateConsoleWindow();
+	GetEngine().CreateConsoleWindowOnPlatform();
 	CONSOLE_PRINTF("hello title application\n");
 
 	// Add title application notification listener
@@ -34,7 +34,7 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 TitleApplication::~TitleApplication()
 {
 	// Remove console output window
-	GetEngine().RemoveConsoleWindow();
+	GetEngine().RemoveConsoleWindowOnPlatform();
 
 	// Remove title application notification listener
 	GetEngine().GetNotificationManager().RemoveNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);

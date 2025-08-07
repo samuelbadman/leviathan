@@ -26,5 +26,7 @@ namespace Core
 		bool UncaptureCursor();
 		Core::Rectangle GetPlatformWindowRegion(const Core::Window& TargetWindow);
 		Core::Rectangle GetPlatformWindowClientRegion(const Core::Window& TargetWindow);
+		bool SetCursorPosition(int32_t X, int32_t Y);
+		bool SetCursorPositionRelativeToWindow(int32_t X, int32_t Y, const Core::Window& TargetWindow);
 	}
 }

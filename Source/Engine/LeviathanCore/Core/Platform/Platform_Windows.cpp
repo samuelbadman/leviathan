@@ -965,3 +965,22 @@ Core::Rectangle Core::Platform::GetPlatformWindowClientRegion(const Core::Window
 
 	return Temp;
 }
+
+bool Core::Platform::SetCursorPosition(int32_t X, int32_t Y)
+{
+	return SetCursorPos(X, Y);
+}
+
+bool Core::Platform::SetCursorPositionRelativeToWindow(int32_t X, int32_t Y, const Core::Window& TargetWindow)
+{
+	POINT Position = {};
+	Position.x = X;
+	Position.y = Y;
+
+	if (!ClientToScreen(static_cast<HWND>(TargetWindow.GetPlatformHandle()), &Position))
+	{
+		return false;
+	}
+
+	return SetCursorPos(Position.x, Position.y);
+}

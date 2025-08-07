@@ -38,10 +38,10 @@ namespace Core
 		bool BeginApplication(std::unique_ptr<Core::Application> pApplication);
 
 		// Returns false if the console could not be created otherwise, returns true. 
-		bool CreateConsoleWindow();
+		bool CreateConsoleWindowOnPlatform() const;
 
 		// Returns false if the console could not be freed otherwise, returns true
-		bool RemoveConsoleWindow();
+		bool RemoveConsoleWindowOnPlatform() const;
 
 		// Returns a pointer to the instance of the created window if succesful otherwise, returns null
 		template<class T>
@@ -64,29 +64,36 @@ namespace Core
 		}
 
 		// Returns true if succesful otherwise, returns false. The window being destroyed must have been created on the same thread that is calling DestroyWindowOnPlatform()
-		bool DestroyWindowOnPlatform(Core::Window& WindowToDestroy);
+		bool DestroyWindowOnPlatform(Core::Window& WindowToDestroy) const;
 
 		// Returns true if the window was succesfully made fullscreen otherwise, returns false
-		bool MakeWindowFullscreenOnPlatform(Core::Window& WindowToMakeFullscreen);
+		bool MakeWindowFullscreenOnPlatform(Core::Window& WindowToMakeFullscreen) const;
 
 		// Returns true if the window succesfully left fullscreen otherwise, returns false
-		bool ExitWindowFullscreenOnPlatform(Core::Window& WindowToExitFullscreen);
+		bool ExitWindowFullscreenOnPlatform(Core::Window& WindowToExitFullscreen) const;
 
 		// Captures the cursor inside the rectangle dimensions preventing from moving outside of the region. Returns true if the cursor is succesfully capture
 		// otherwise, returns false
-		bool CaptureCursorOnPlatform(Core::Rectangle& CaptureRegion);
+		bool CaptureCursorOnPlatform(Core::Rectangle& CaptureRegion) const;
 
 		// Uncaptures the cursor. Returns true if succesful otherwise false
-		bool UncaptureCursorOnPlatform();
+		bool UncaptureCursorOnPlatform() const;
 
 		// Returns the rectangle region the window covers describing the window's top left position and width and height
-		Core::Rectangle GetWindowRegionOnPlatform(const Core::Window& TargetWindow);
+		Core::Rectangle GetWindowRegionOnPlatform(const Core::Window& TargetWindow) const;
 
 		// Returns the rectangle region the client area of the window covers describing the window's client area top left position and width and height. The client area 
 		// is the part of the window that display's output such as graphics
-		Core::Rectangle GetWindowClientRegionOnPlatform(const Core::Window& TargetWindow);
+		Core::Rectangle GetWindowClientRegionOnPlatform(const Core::Window& TargetWindow) const;
 
-		Core::NotificationManager& GetNotificationManager();
+		// Sets the position of the cursor in screen space relative to the entire monitor screen. Returns true if succesful otherwise, false
+		bool SetCursorPositionOnPlatform(int32_t X, int32_t Y) const;
+
+		// Sets the position of the cursor in screen space relative to the passed window's client area. The client area is the part of the window that display's output 
+		// such as graphicsReturns true if succesful otherwise, false
+		bool SetCursorPositionRelativeToWindowOnPlatform(int32_t X, int32_t Y, const Core::Window& RelativeWindow) const;
+
+		Core::NotificationManager& GetNotificationManager() const;
 		void Quit(bool RestartEngine = false);
 
 	private:
@@ -95,6 +102,6 @@ namespace Core
 		void TickApplication(double FrameDeltaSeconds);
 
 		// This function is used to hide the platform implementation include inside the translation unit for Engine stopping it being exposed to all code that uses the engine class
-		bool CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters);
+		bool CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters) const;
 	};
 }

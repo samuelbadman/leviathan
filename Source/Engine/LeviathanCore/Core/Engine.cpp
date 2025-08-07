@@ -33,17 +33,17 @@ bool Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 	return SignalRestart;
 }
 
-bool Core::Engine::CreateConsoleWindow()
+bool Core::Engine::CreateConsoleWindowOnPlatform() const
 {
 	return Platform::CreateConsole();
 }
 
-bool Core::Engine::RemoveConsoleWindow()
+bool Core::Engine::RemoveConsoleWindowOnPlatform() const
 {
 	return Platform::RemoveConsole();
 }
 
-bool Core::Engine::DestroyWindowOnPlatform(Core::Window& WindowToDestroy)
+bool Core::Engine::DestroyWindowOnPlatform(Core::Window& WindowToDestroy) const
 {
 	if (Platform::DestroyPlatformWindow(WindowToDestroy))
 	{
@@ -53,37 +53,47 @@ bool Core::Engine::DestroyWindowOnPlatform(Core::Window& WindowToDestroy)
 	return false;
 }
 
-bool Core::Engine::MakeWindowFullscreenOnPlatform(Core::Window& WindowToMakeFullscreen)
+bool Core::Engine::MakeWindowFullscreenOnPlatform(Core::Window& WindowToMakeFullscreen) const
 {
 	return Platform::MakePlatformWindowFullscreen(WindowToMakeFullscreen);
 }
 
-bool Core::Engine::ExitWindowFullscreenOnPlatform(Core::Window& WindowToExitFullscreen)
+bool Core::Engine::ExitWindowFullscreenOnPlatform(Core::Window& WindowToExitFullscreen) const
 {
 	return Platform::ExitPlatformWindowFullscreen(WindowToExitFullscreen);
 }
 
-bool Core::Engine::CaptureCursorOnPlatform(Core::Rectangle& CaptureRegion)
+bool Core::Engine::CaptureCursorOnPlatform(Core::Rectangle& CaptureRegion) const
 {
 	return Platform::CaptureCursor(CaptureRegion);
 }
 
-bool Core::Engine::UncaptureCursorOnPlatform()
+bool Core::Engine::UncaptureCursorOnPlatform() const
 {
 	return Platform::UncaptureCursor();
 }
 
-Core::Rectangle Core::Engine::GetWindowRegionOnPlatform(const Core::Window& TargetWindow)
+Core::Rectangle Core::Engine::GetWindowRegionOnPlatform(const Core::Window& TargetWindow) const
 {
 	return Platform::GetPlatformWindowRegion(TargetWindow);
 }
 
-Core::Rectangle Core::Engine::GetWindowClientRegionOnPlatform(const Core::Window& TargetWindow)
+Core::Rectangle Core::Engine::GetWindowClientRegionOnPlatform(const Core::Window& TargetWindow) const
 {
 	return Platform::GetPlatformWindowClientRegion(TargetWindow);
 }
 
-Core::NotificationManager& Core::Engine::GetNotificationManager()
+bool Core::Engine::SetCursorPositionOnPlatform(int32_t X, int32_t Y) const
+{
+	return Platform::SetCursorPosition(X, Y);
+}
+
+bool Core::Engine::SetCursorPositionRelativeToWindowOnPlatform(int32_t X, int32_t Y, const Core::Window& RelativeWindow) const
+{
+	return Platform::SetCursorPositionRelativeToWindow(X, Y, RelativeWindow);
+}
+
+Core::NotificationManager& Core::Engine::GetNotificationManager() const
 {
 	return *NotificationManagerInstance;
 }
@@ -131,7 +141,7 @@ void Core::Engine::TickApplication(double FrameDeltaSeconds)
 	ApplicationInstance->Tick(FrameDeltaSeconds);
 }
 
-bool Core::Engine::CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters)
+bool Core::Engine::CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters) const
 {
 	return Platform::CreatePlatformWindow(Temp, Parameters);
 }
