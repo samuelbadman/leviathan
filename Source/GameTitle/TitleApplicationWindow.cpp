@@ -9,6 +9,18 @@ TitleApplicationWindow::TitleApplicationWindow(Core::Engine& Engine, const char*
 
 void TitleApplicationWindow::OnInputKey(const Core::InputEventArgs& EventArgs)
 {
+	if (EventArgs.Key == Core::Keys::F && EventArgs.Event == Core::InputEvent::Pressed)
+	{
+		if (IsFullscreen())
+		{
+			GetEngine().ExitWindowFullscreenOnPlatform(*this);
+		}
+		else
+		{
+			GetEngine().MakeWindowFullscreenOnPlatform(*this);
+		}
+	}
+
 	std::string EventString;
 	switch (EventArgs.Event)
 	{
@@ -50,6 +62,16 @@ void TitleApplicationWindow::OnMinimized()
 void TitleApplicationWindow::OnResized(uint32_t NewWidth, uint32_t NewHeight)
 {
 	CONSOLE_PRINTF("title application window resized. New width: %d, New height: %d\n", NewWidth, NewHeight);
+}
+
+void TitleApplicationWindow::OnEnterFullscreen()
+{
+	CONSOLE_PRINTF("title application window entered fullscreen\n");
+}
+
+void TitleApplicationWindow::OnExitFullscreen()
+{
+	CONSOLE_PRINTF("title application window exited fullscreen\n");
 }
 
 void TitleApplicationWindow::OnEnterSizeMove()

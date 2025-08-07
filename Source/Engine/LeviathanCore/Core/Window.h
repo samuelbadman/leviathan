@@ -53,6 +53,10 @@ namespace Core
 		const char* UniqueName;
 
 		void* PlatformHandle = nullptr;
+		bool FullscreenFlag = false;
+		Core::WindowMode ModeFlag = Core::WindowMode::MAX;
+		std::array<int32_t, 2> TopLeftCoordOnEnterFullscreen = { 0, 0 };
+		std::array<int32_t, 2> DimensionsOnEnterFullscreen = { 0, 0 };
 
 	public:
 		using Super = Window;
@@ -65,6 +69,18 @@ namespace Core
 		inline void* GetPlatformHandle() const { return PlatformHandle; }
 		void SetPlatformHandle(void* InHandle);
 
+		inline bool IsFullscreen() const { return FullscreenFlag; }
+		void SetFullscreenFlag(const bool NewFullscreen);
+
+		inline Core::WindowMode GetModeFlag() const { return ModeFlag; }
+		void SetModeFlag(const Core::WindowMode NewMode);
+
+		void GetTopLeftCoordOnEnterFullscreen(int32_t& X, int32_t& Y) const;
+		void SetTopLeftCoordOnEnterFullscreen(const int32_t X, const int32_t Y);
+
+		void GetDimensionsOnEnterFullscreen(int32_t& Width, int32_t& Height) const;
+		void SetDimensionsOnEnterFullscreen(const int32_t Width, const int32_t Height);
+
 		// Begin Window interface
 		virtual void OnForceClose();
 		virtual void OnInputKey(const Core::InputEventArgs& EventArgs) {};
@@ -72,6 +88,8 @@ namespace Core
 		virtual void OnMaximized() {};
 		virtual void OnMinimized() {};
 		virtual void OnResized(uint32_t NewWidth, uint32_t NewHeight) {};
+		virtual void OnEnterFullscreen() {};
+		virtual void OnExitFullscreen() {};
 		virtual void OnEnterSizeMove() {};
 		virtual void OnExitSizeMove() {};
 		virtual void OnReceivedFocus() {};
@@ -81,5 +99,8 @@ namespace Core
 		// End Window interface
 
 		void Close();
+
+	protected:
+		inline Core::Engine& GetEngine() const { return EngineInstance; }
 	};
 }

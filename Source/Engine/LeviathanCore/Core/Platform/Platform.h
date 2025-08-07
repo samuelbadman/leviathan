@@ -4,7 +4,6 @@ namespace Core
 {
 	class NotificationManager;
 	class Window;
-	class Engine;
 
 	struct WindowCreateParameters;
 
@@ -20,5 +19,7 @@ namespace Core
 		bool CreatePlatformWindow(Core::Window& Temp, const Core::WindowCreateParameters& Parameters);
 
 		bool DestroyPlatformWindow(Core::Window& WindowToDestroy);
+		bool MakePlatformWindowFullscreen(Core::Window& WindowToMakeFullscreen);
+		bool ExitPlatformWindowFullscreen(Core::Window& WindowToExitFullscreen);
 	}
 }

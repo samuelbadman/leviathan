@@ -562,7 +562,7 @@ namespace
 				return 0;
 			}
 
-				// Keyboard input events
+			// Keyboard input events
 			case WM_SYSKEYUP:
 			case WM_KEYUP:
 			case WM_SYSKEYDOWN:
@@ -812,4 +812,97 @@ bool Core::Platform::DestroyPlatformWindow(Core::Window& WindowToDestroy)
 	}
 
 	return UnregisterClass(WindowToDestroy.GetUniqueName(), NULL);
+}
+
+bool Core::Platform::MakePlatformWindowFullscreen(Core::Window& WindowToMakeFullscreen)
+{
+	if (WindowToMakeFullscreen.IsFullscreen())
+	{
+		return false;
+	}
+
+	// Retrieve HWND from window
+	HWND hWnd = static_cast<HWND>(WindowToMakeFullscreen.GetPlatformHandle());
+
+	// Retrieve info of the nearest monitor to the window
+	HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+
+	MONITORINFO MonitorInfo = {};
+	MonitorInfo.cbSize = sizeof(MONITORINFO);
+
+	if (!GetMonitorInfo(hMonitor, &MonitorInfo))
+	{
+		return false;
+	}
+
+	// Calculate monitor width and height
+	const int32_t MonitorWidth = static_cast<int>(MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left);
+	const int32_t MonitorHeight = static_cast<int>(MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top);
+
+	// Save position and size of the window to revert to when exiting fullscreen
+	RECT WindowRect;
+	if (!GetWindowRect(hWnd, &WindowRect))
+	{
+		return false;
+	}
+
+	WindowToMakeFullscreen.SetTopLeftCoordOnEnterFullscreen(static_cast<int32_t>(WindowRect.left), static_cast<int32_t>(WindowRect.top));
+	WindowToMakeFullscreen.SetDimensionsOnEnterFullscreen(static_cast<int32_t>(WindowRect.right - WindowRect.left), static_cast<int32_t>(WindowRect.bottom - WindowRect.top));
+
+	// Move window to top left of monitor and resize to width and height of the monitor
+	if (!SetWindowPos(hWnd, HWND_TOP, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top, MonitorWidth, MonitorHeight, SWP_FRAMECHANGED | SWP_NOACTIVATE))
+	{
+		return false;
+	}
+
+	// Remove window borders
+	if (!SetWindowLong(hWnd, GWL_STYLE, 0))
+	{
+		return false;
+	}
+
+	// Show the window maximized
+	ShowWindow(hWnd, SW_MAXIMIZE);
+
+	// Update flags, call events and return succesfully entered fullscreen
+	WindowToMakeFullscreen.SetFullscreenFlag(true);
+	WindowToMakeFullscreen.OnEnterFullscreen();
+	return true;
+}
+
+bool Core::Platform::ExitPlatformWindowFullscreen(Core::Window& WindowToExitFullscreen)
+{
+	if (!WindowToExitFullscreen.IsFullscreen())
+	{
+		return false;
+	}
+
+	// Retrieve platform window handle
+	HWND hWnd = static_cast<HWND>(WindowToExitFullscreen.GetPlatformHandle());
+
+	// Revert position and size of window to what they were before entering fullscreen
+	int32_t PreviousTopLeftX, PreviousTopLeftY;
+	WindowToExitFullscreen.GetTopLeftCoordOnEnterFullscreen(PreviousTopLeftX, PreviousTopLeftY);
+
+	int32_t PreviousWidth, PreviousHeight;
+	WindowToExitFullscreen.GetDimensionsOnEnterFullscreen(PreviousWidth, PreviousHeight);
+
+	if (!SetWindowPos(hWnd, HWND_TOP, PreviousTopLeftX, PreviousTopLeftY, PreviousWidth, PreviousHeight, SWP_FRAMECHANGED | SWP_NOACTIVATE))
+	{
+		return false;
+	}
+
+	// Revert window mode to what it was before entering fullscreen
+	if (!SetWindowLong(hWnd, GWL_STYLE, WindowsPlatformInternals::TranslateWindowMode(WindowToExitFullscreen.GetModeFlag())))
+	{
+		return false;
+	}
+
+	// Show the window
+	ShowWindow(hWnd, SW_SHOW);
+
+	// Update flags, call events and return succesfully exited fullscreen
+	WindowToExitFullscreen.SetFullscreenFlag(false);
+	WindowToExitFullscreen.OnExitFullscreen();
+	return true;
 }

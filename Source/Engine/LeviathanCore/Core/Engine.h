@@ -49,6 +49,9 @@ namespace Core
 			// Allocate temporary result
 			std::unique_ptr<T> Temp = std::make_unique<T>(*this, Parameters.UniqueWindowName);
 
+			// Set the window's mode flag
+			Temp->SetModeFlag(Parameters.Mode);
+
 			// Create platform implementation window
 			if (!CallPlatformCreateWindowImplementation(*Temp, Parameters))
 			{
@@ -61,6 +64,12 @@ namespace Core
 
 		// Returns true if succesful otherwise, returns false. The window being destroyed must have been created on the same thread that is calling DestroyWindowOnPlatform()
 		bool DestroyWindowOnPlatform(Core::Window& WindowToDestroy);
+
+		// Returns true if the window was succesfully made fullscreen otherwise, returns false
+		bool MakeWindowFullscreenOnPlatform(Core::Window& WindowToMakeFullscreen);
+
+		// Returns true if the window succesfully left fullscreen otherwise, returns false
+		bool ExitWindowFullscreenOnPlatform(Core::Window& WindowToExitFullscreen);
 
 		Core::NotificationManager& GetNotificationManager();
 		void Quit(bool RestartEngine = false);

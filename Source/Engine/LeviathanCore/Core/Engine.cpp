@@ -53,6 +53,16 @@ bool Core::Engine::DestroyWindowOnPlatform(Core::Window& WindowToDestroy)
 	return false;
 }
 
+bool Core::Engine::MakeWindowFullscreenOnPlatform(Core::Window& WindowToMakeFullscreen)
+{
+	return Platform::MakePlatformWindowFullscreen(WindowToMakeFullscreen);
+}
+
+bool Core::Engine::ExitWindowFullscreenOnPlatform(Core::Window& WindowToExitFullscreen)
+{
+	return Platform::ExitPlatformWindowFullscreen(WindowToExitFullscreen);
+}
+
 Core::NotificationManager& Core::Engine::GetNotificationManager()
 {
 	return *NotificationManagerInstance;

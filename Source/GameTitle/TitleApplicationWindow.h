@@ -14,6 +14,8 @@ private:
 	virtual void OnMaximized() override;
 	virtual void OnMinimized() override;
 	virtual void OnResized(uint32_t NewWidth, uint32_t NewHeight) override;
+	virtual void OnEnterFullscreen() override;
+	virtual void OnExitFullscreen() override;
 	virtual void OnEnterSizeMove() override;
 	virtual void OnExitSizeMove() override;
 	virtual void OnReceivedFocus() override;
