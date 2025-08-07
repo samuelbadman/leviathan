@@ -16,11 +16,12 @@ namespace Core
 		MAX
 	};
 
-	enum class WindowInputEvent : uint8_t
+	enum class InputEvent : uint8_t
 	{
 		Pressed,
 		Repeat,
 		Released,
+		Axis,
 		MAX
 	};
 
@@ -36,10 +37,10 @@ namespace Core
 		Core::Window* ParentWindow = nullptr;
 	};
 
-	struct WindowInputEventArgs
+	struct InputEventArgs
 	{
 		Core::InputKey Key = {};
-		Core::WindowInputEvent Event = Core::WindowInputEvent::MAX;
+		Core::InputEvent Event = Core::InputEvent::MAX;
 		float Data = 0.0f;
 	};
 
@@ -66,7 +67,8 @@ namespace Core
 
 		// Begin Window interface
 		virtual void OnForceClose();
-		virtual void OnInputEvent(const Core::WindowInputEventArgs& EventArgs) {};
+		virtual void OnInputKey(const Core::InputEventArgs& EventArgs) {};
+		virtual void OnInputAxis(const Core::InputEventArgs& EventArgs) {};
 		virtual void OnMaximized() {};
 		virtual void OnMinimized() {};
 		virtual void OnResized(uint32_t NewWidth, uint32_t NewHeight) {};

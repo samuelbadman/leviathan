@@ -446,7 +446,121 @@ namespace
 			switch (Msg)
 			{
 				// Mouse input events
+			case WM_LBUTTONDOWN:
+			{
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::InputKey(Core::Keys::LeftMouseButton);
+				EventArgs.Event = Core::InputEvent::Pressed;
+				EventArgs.Data = 1.0f;
 
+				WindowInstance->OnInputKey(EventArgs);
+				return 0;
+			}
+
+			case WM_RBUTTONDOWN:
+			{
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::InputKey(Core::Keys::RightMouseButton);
+				EventArgs.Event = Core::InputEvent::Pressed;
+				EventArgs.Data = 1.0f;
+
+				WindowInstance->OnInputKey(EventArgs);
+				return 0;
+			}
+
+			case WM_MBUTTONDOWN:
+			{
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::InputKey(Core::Keys::MiddleMouseButton);
+				EventArgs.Event = Core::InputEvent::Pressed;
+				EventArgs.Data = 1.0f;
+
+				WindowInstance->OnInputKey(EventArgs);
+				return 0;
+			}
+
+			case WM_LBUTTONUP:
+			{
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::InputKey(Core::Keys::LeftMouseButton);
+				EventArgs.Event = Core::InputEvent::Released;
+				EventArgs.Data = 0.0f;
+
+				WindowInstance->OnInputKey(EventArgs);
+				return 0;
+			}
+
+			case WM_RBUTTONUP:
+			{
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::InputKey(Core::Keys::RightMouseButton);
+				EventArgs.Event = Core::InputEvent::Released;
+				EventArgs.Data = 0.0f;
+
+				WindowInstance->OnInputKey(EventArgs);
+				return 0;
+			}
+
+			case WM_MBUTTONUP:
+			{
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::InputKey(Core::Keys::MiddleMouseButton);
+				EventArgs.Event = Core::InputEvent::Released;
+				EventArgs.Data = 0.0f;
+
+				WindowInstance->OnInputKey(EventArgs);
+				return 0;
+			}
+
+			case WM_INPUT:
+			{
+				UINT DataSize = 0;
+				GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, nullptr, &DataSize, sizeof(RAWINPUTHEADER));
+
+				if (DataSize == 0)
+				{
+					return 0;
+				}
+
+				static std::unique_ptr<BYTE[]> RawData = std::make_unique<BYTE[]>(DataSize);
+				if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, RawData.get(), &DataSize, sizeof(RAWINPUTHEADER)) != DataSize)
+				{
+					return 0;
+				}
+
+				const RAWINPUT* const RawInput = reinterpret_cast<const RAWINPUT*>(RawData.get());
+				if (RawInput->header.dwType != RIM_TYPEMOUSE)
+				{
+					return 0;
+				}
+
+				// Raw mouse delta
+				std::array<Core::InputEventArgs, 2> RawMouseDeltaEventArgs = {};
+				RawMouseDeltaEventArgs[0].Key = Core::InputKey(Core::Keys::MouseXAxis);
+				RawMouseDeltaEventArgs[0].Event = Core::InputEvent::Axis;
+				RawMouseDeltaEventArgs[0].Data = static_cast<float>(RawInput->data.mouse.lLastX);
+
+				RawMouseDeltaEventArgs[1].Key = Core::InputKey(Core::Keys::MouseYAxis);
+				RawMouseDeltaEventArgs[1].Event = Core::InputEvent::Axis;
+				RawMouseDeltaEventArgs[1].Data = static_cast<float>(RawInput->data.mouse.lLastY);
+
+				WindowInstance->OnInputAxis(RawMouseDeltaEventArgs[0]);
+				WindowInstance->OnInputAxis(RawMouseDeltaEventArgs[1]);
+				return 0;
+			}
+
+			case WM_MOUSEWHEEL:
+			{
+				const int16_t WheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::Keys::MouseWheelAxis;
+				EventArgs.Event = Core::InputEvent::Axis;
+				EventArgs.Data = (WheelDelta > 0) ? 1.0f : -1.0f;
+
+				WindowInstance->OnInputAxis(EventArgs);
+				return 0;
+			}
 
 				// Keyboard input events
 			case WM_SYSKEYUP:
@@ -489,21 +603,21 @@ namespace
 				}
 
 				// Translate virtual key code to engine key
-				Core::WindowInputEventArgs EventArgs;
+				Core::InputEventArgs EventArgs;
 				EventArgs.Key = TranslateVirtualKey(VirtualKeyCode, ScanCode);
 
 				if (IsKeyReleased)
 				{
-					EventArgs.Event = Core::WindowInputEvent::Released;
+					EventArgs.Event = Core::InputEvent::Released;
 					EventArgs.Data = 0.0f;
 				}
 				else
 				{
-					EventArgs.Event = (WasKeyDown) ? Core::WindowInputEvent::Repeat : Core::WindowInputEvent::Pressed;
+					EventArgs.Event = (WasKeyDown) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
 					EventArgs.Data = 1.0f;
 				}
 
-				WindowInstance->OnInputEvent(EventArgs);
+				WindowInstance->OnInputKey(EventArgs);
 				return 0;
 			}
 

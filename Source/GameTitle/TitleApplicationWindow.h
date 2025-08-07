@@ -9,7 +9,8 @@ public:
 
 private:
 	// Begin window interface
-	virtual void OnInputEvent(const Core::WindowInputEventArgs& EventArgs) override;
+	virtual void OnInputKey(const Core::InputEventArgs& EventArgs) override;
+	virtual void OnInputAxis(const Core::InputEventArgs& EventArgs) override;
 	virtual void OnMaximized() override;
 	virtual void OnMinimized() override;
 	virtual void OnResized(uint32_t NewWidth, uint32_t NewHeight) override;

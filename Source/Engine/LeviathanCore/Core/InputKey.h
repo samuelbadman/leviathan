@@ -110,8 +110,7 @@ namespace Core
 		LeftMouseButton,
 		RightMouseButton,
 		MiddleMouseButton,
-		MouseWheelUpAxis,
-		MouseWheelDownAxis,
+		MouseWheelAxis,
 		MouseXAxis,
 		MouseYAxis,
 

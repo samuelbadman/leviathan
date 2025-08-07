@@ -115,8 +115,7 @@ bool Core::InputKey::IsMouseKey() const
 		Key == Core::Keys::LeftMouseButton ||
 		Key == Core::Keys::RightMouseButton ||
 		Key == Core::Keys::MiddleMouseButton ||
-		Key == Core::Keys::MouseWheelUpAxis ||
-		Key == Core::Keys::MouseWheelDownAxis ||
+		Key == Core::Keys::MouseWheelAxis ||
 		Key == Core::Keys::MouseXAxis ||
 		Key == Core::Keys::MouseYAxis;
 }
@@ -266,8 +265,7 @@ std::string Core::InputKey::ToString() const
 	case Core::Keys::LeftMouseButton: return "Left mouse button";
 	case Core::Keys::RightMouseButton: return "Right mouse button";
 	case Core::Keys::MiddleMouseButton: return "Middle mouse button";
-	case Core::Keys::MouseWheelUpAxis: return "Mouse wheel up axis";
-	case Core::Keys::MouseWheelDownAxis: return "Mouse wheel down axis";
+	case Core::Keys::MouseWheelAxis: return "Mouse wheel axis";
 	case Core::Keys::MouseXAxis: return "Mouse X axis";
 	case Core::Keys::MouseYAxis: return "Mouse Y axis";
 
