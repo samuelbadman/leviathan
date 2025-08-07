@@ -906,3 +906,62 @@ bool Core::Platform::ExitPlatformWindowFullscreen(Core::Window& WindowToExitFull
 	WindowToExitFullscreen.OnExitFullscreen();
 	return true;
 }
+
+bool Core::Platform::CaptureCursor(const Core::Rectangle& CaptureRegion)
+{
+	RECT CaptureRect = {};
+	CaptureRect.top = CaptureRegion.Top;
+	CaptureRect.bottom = CaptureRegion.Bottom;
+	CaptureRect.left = CaptureRegion.Left;
+	CaptureRect.right = CaptureRegion.Right;
+
+	return ClipCursor(&CaptureRect);
+}
+
+bool Core::Platform::UncaptureCursor()
+{
+	return ClipCursor(NULL);
+}
+
+Core::Rectangle Core::Platform::GetPlatformWindowRegion(const Core::Window& TargetWindow)
+{
+	Core::Rectangle Temp = {};
+
+	RECT WindowRect;
+	if (GetWindowRect(static_cast<HWND>(TargetWindow.GetPlatformHandle()), &WindowRect))
+	{
+		Temp.Top = WindowRect.top;
+		Temp.Bottom = WindowRect.bottom;
+		Temp.Left = WindowRect.left;
+		Temp.Right = WindowRect.right;
+	}
+
+	return Temp;
+}
+
+Core::Rectangle Core::Platform::GetPlatformWindowClientRegion(const Core::Window& TargetWindow)
+{
+	Core::Rectangle Temp = {};
+
+	HWND hWnd = static_cast<HWND>(TargetWindow.GetPlatformHandle());
+
+	RECT ClientRect;
+	if (GetClientRect(hWnd, &ClientRect))
+	{
+		POINT ClientTopLeft = {};
+		ClientTopLeft.x = ClientRect.left;
+		ClientTopLeft.y = ClientRect.top;
+
+		if (!ClientToScreen(hWnd, &ClientTopLeft))
+		{
+			return Temp;
+		}
+
+		Temp.Left = ClientTopLeft.x;
+		Temp.Top = ClientTopLeft.y;
+		Temp.Bottom = ClientTopLeft.y + ClientRect.bottom;
+		Temp.Right = ClientTopLeft.x + ClientRect.right;
+	}
+
+	return Temp;
+}

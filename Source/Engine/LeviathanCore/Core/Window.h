@@ -44,6 +44,14 @@ namespace Core
 		float Data = 0.0f;
 	};
 
+	struct Rectangle
+	{
+		int32_t Top = 0;
+		int32_t Left = 0;
+		int32_t Bottom = 0;
+		int32_t Right = 0;
+	};
+
 	class Window
 	{
 	private:
@@ -99,6 +107,12 @@ namespace Core
 		// End Window interface
 
 		void Close();
+		void MakeFullscreen();
+		void ExitFullscreen();
+		Core::Rectangle GetRegion() const;
+		Core::Rectangle GetClientRegion() const;
+		void CaptureCursorInWindowRegion();
+		void CaptureCursorInClientRegion();
 
 	protected:
 		inline Core::Engine& GetEngine() const { return EngineInstance; }

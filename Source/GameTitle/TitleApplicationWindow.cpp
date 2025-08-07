@@ -13,11 +13,26 @@ void TitleApplicationWindow::OnInputKey(const Core::InputEventArgs& EventArgs)
 	{
 		if (IsFullscreen())
 		{
-			GetEngine().ExitWindowFullscreenOnPlatform(*this);
+			MakeFullscreen();
 		}
 		else
 		{
-			GetEngine().MakeWindowFullscreenOnPlatform(*this);
+			ExitFullscreen();
+		}
+	}
+	else if (EventArgs.Key == Core::Keys::C && EventArgs.Event == Core::InputEvent::Pressed)
+	{
+		static bool IsCursorCaptured = false;
+
+		if (IsCursorCaptured)
+		{
+			GetEngine().UncaptureCursorOnPlatform();
+			IsCursorCaptured = false;
+		}
+		else
+		{
+			CaptureCursorInClientRegion();
+			IsCursorCaptured = true;
 		}
 	}
 

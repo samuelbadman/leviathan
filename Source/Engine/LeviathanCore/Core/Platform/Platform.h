@@ -6,6 +6,7 @@ namespace Core
 	class Window;
 
 	struct WindowCreateParameters;
+	struct Rectangle;
 
 	namespace Platform
 	{
@@ -21,5 +22,9 @@ namespace Core
 		bool DestroyPlatformWindow(Core::Window& WindowToDestroy);
 		bool MakePlatformWindowFullscreen(Core::Window& WindowToMakeFullscreen);
 		bool ExitPlatformWindowFullscreen(Core::Window& WindowToExitFullscreen);
+		bool CaptureCursor(const Core::Rectangle& CaptureRegion);
+		bool UncaptureCursor();
+		Core::Rectangle GetPlatformWindowRegion(const Core::Window& TargetWindow);
+		Core::Rectangle GetPlatformWindowClientRegion(const Core::Window& TargetWindow);
 	}
 }

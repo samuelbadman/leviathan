@@ -63,6 +63,26 @@ bool Core::Engine::ExitWindowFullscreenOnPlatform(Core::Window& WindowToExitFull
 	return Platform::ExitPlatformWindowFullscreen(WindowToExitFullscreen);
 }
 
+bool Core::Engine::CaptureCursorOnPlatform(Core::Rectangle& CaptureRegion)
+{
+	return Platform::CaptureCursor(CaptureRegion);
+}
+
+bool Core::Engine::UncaptureCursorOnPlatform()
+{
+	return Platform::UncaptureCursor();
+}
+
+Core::Rectangle Core::Engine::GetWindowRegionOnPlatform(const Core::Window& TargetWindow)
+{
+	return Platform::GetPlatformWindowRegion(TargetWindow);
+}
+
+Core::Rectangle Core::Engine::GetWindowClientRegionOnPlatform(const Core::Window& TargetWindow)
+{
+	return Platform::GetPlatformWindowClientRegion(TargetWindow);
+}
+
 Core::NotificationManager& Core::Engine::GetNotificationManager()
 {
 	return *NotificationManagerInstance;

@@ -78,3 +78,33 @@ void Core::Window::Close()
 {
 	OnCloseSignal();
 }
+
+void Core::Window::MakeFullscreen()
+{
+	EngineInstance.MakeWindowFullscreenOnPlatform(*this);
+}
+
+void Core::Window::ExitFullscreen()
+{
+	EngineInstance.ExitWindowFullscreenOnPlatform(*this);
+}
+
+Core::Rectangle Core::Window::GetRegion() const
+{
+	return EngineInstance.GetWindowRegionOnPlatform(*this);
+}
+
+Core::Rectangle Core::Window::GetClientRegion() const
+{
+	return EngineInstance.GetWindowClientRegionOnPlatform(*this);
+}
+
+void Core::Window::CaptureCursorInWindowRegion()
+{
+	EngineInstance.CaptureCursorOnPlatform(GetRegion());
+}
+
+void Core::Window::CaptureCursorInClientRegion()
+{
+	EngineInstance.CaptureCursorOnPlatform(GetClientRegion());
+}

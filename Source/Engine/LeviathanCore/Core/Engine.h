@@ -7,6 +7,7 @@ namespace Core
 	class Window;
 
 	struct WindowCreateParameters;
+	struct Rectangle;
 
 	/*
 	* Only a single instance of Engine should ever be created and it is responsible for managing low-level platform implementations that cannot be instantiated.
@@ -70,6 +71,20 @@ namespace Core
 
 		// Returns true if the window succesfully left fullscreen otherwise, returns false
 		bool ExitWindowFullscreenOnPlatform(Core::Window& WindowToExitFullscreen);
+
+		// Captures the cursor inside the rectangle dimensions preventing from moving outside of the region. Returns true if the cursor is succesfully capture
+		// otherwise, returns false
+		bool CaptureCursorOnPlatform(Core::Rectangle& CaptureRegion);
+
+		// Uncaptures the cursor. Returns true if succesful otherwise false
+		bool UncaptureCursorOnPlatform();
+
+		// Returns the rectangle region the window covers describing the window's top left position and width and height
+		Core::Rectangle GetWindowRegionOnPlatform(const Core::Window& TargetWindow);
+
+		// Returns the rectangle region the client area of the window covers describing the window's client area top left position and width and height. The client area 
+		// is the part of the window that display's output such as graphics
+		Core::Rectangle GetWindowClientRegionOnPlatform(const Core::Window& TargetWindow);
 
 		Core::NotificationManager& GetNotificationManager();
 		void Quit(bool RestartEngine = false);
