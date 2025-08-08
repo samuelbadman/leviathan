@@ -21,6 +21,7 @@ namespace Core
 		Pressed,
 		Repeat,
 		Released,
+		DoubleClick,
 		Axis,
 		MAX
 	};

@@ -6,11 +6,6 @@ namespace
 {
 	namespace WindowsPlatformInternals
 	{
-		constexpr DWORD WindowStyle_Windowed = WS_OVERLAPPEDWINDOW;
-		constexpr DWORD WindowStyle_Borderless = WS_POPUPWINDOW;
-		constexpr DWORD WindowStyle_NoResize = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-		constexpr DWORD WindowStyle_NoDragSize = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME;
-
 		Core::NotificationManager* pEngineNotificationManager = nullptr;
 
 		LARGE_INTEGER TicksPerSecond = {};
@@ -512,6 +507,42 @@ namespace
 				return 0;
 			}
 
+			case WM_LBUTTONDBLCLK:
+			{
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::InputKey(Core::Keys::LeftMouseButton);
+				EventArgs.Event = Core::InputEvent::DoubleClick;
+				EventArgs.Data = 1.0f;
+
+				WindowInstance->OnInputKey(EventArgs);
+
+				return 0;
+			}
+
+			case WM_RBUTTONDBLCLK:
+			{
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::InputKey(Core::Keys::RightMouseButton);
+				EventArgs.Event = Core::InputEvent::DoubleClick;
+				EventArgs.Data = 1.0f;
+
+				WindowInstance->OnInputKey(EventArgs);
+
+				return 0;
+			}
+
+			case WM_MBUTTONDBLCLK:
+			{
+				Core::InputEventArgs EventArgs;
+				EventArgs.Key = Core::InputKey(Core::Keys::MiddleMouseButton);
+				EventArgs.Event = Core::InputEvent::DoubleClick;
+				EventArgs.Data = 1.0f;
+
+				WindowInstance->OnInputKey(EventArgs);
+
+				return 0;
+			}
+
 			case WM_INPUT:
 			{
 				UINT DataSize = 0;
@@ -707,12 +738,17 @@ namespace
 
 		constexpr DWORD TranslateWindowMode(const Core::WindowMode Mode)
 		{
+			constexpr DWORD WindowStyle_Windowed = WS_OVERLAPPEDWINDOW;
+			constexpr DWORD WindowStyle_Borderless = WS_POPUPWINDOW;
+			constexpr DWORD WindowStyle_NoResize = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+			constexpr DWORD WindowStyle_NoDragSize = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME;
+
 			switch (Mode)
 			{
-			case Core::WindowMode::Windowed: return WindowsPlatformInternals::WindowStyle_Windowed;
-			case Core::WindowMode::Borderless: return WindowsPlatformInternals::WindowStyle_Borderless;
-			case Core::WindowMode::NoResize: return WindowsPlatformInternals::WindowStyle_NoResize;
-			case Core::WindowMode::NoDragSize: return WindowsPlatformInternals::WindowStyle_NoDragSize;
+			case Core::WindowMode::Windowed: return WindowStyle_Windowed;
+			case Core::WindowMode::Borderless: return WindowStyle_Borderless;
+			case Core::WindowMode::NoResize: return WindowStyle_NoResize;
+			case Core::WindowMode::NoDragSize: return WindowStyle_NoDragSize;
 			default: return 0;
 			}
 		}
@@ -781,7 +817,7 @@ bool Core::Platform::CreatePlatformWindow(Core::Window& Temp, const Core::Window
 		Handle,
 		&WindowsPlatformInternals::WindowInitWndProc,
 		Parameters.UniqueWindowName,
-		0,
+		CS_DBLCLKS,
 		Parameters.WindowName,
 		WindowsPlatformInternals::TranslateWindowMode(Parameters.Mode),
 		Parameters.HorizontalPosition,

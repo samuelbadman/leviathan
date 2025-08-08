@@ -65,6 +65,7 @@ void TitleApplicationWindow::OnInputKey(const Core::InputEventArgs& EventArgs)
 	case Core::InputEvent::Pressed: EventString = "Pressed"; break;
 	case Core::InputEvent::Repeat: EventString = "Repeat"; break;
 	case Core::InputEvent::Released: EventString = "Released"; break;
+	case Core::InputEvent::DoubleClick: EventString = "Double clicked"; break;
 	default: EventString = "None"; break;
 	}
 
@@ -80,6 +81,7 @@ void TitleApplicationWindow::OnInputAxis(const Core::InputEventArgs& EventArgs)
 	case Core::InputEvent::Pressed: EventString = "Pressed"; break;
 	case Core::InputEvent::Repeat: EventString = "Repeat"; break;
 	case Core::InputEvent::Released: EventString = "Released"; break;
+	case Core::InputEvent::DoubleClick: EventString = "Double clicked"; break;
 	default: EventString = "None"; break;
 	}
 
