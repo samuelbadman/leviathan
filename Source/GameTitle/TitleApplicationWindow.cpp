@@ -43,6 +43,21 @@ void TitleApplicationWindow::OnInputKey(const Core::InputEventArgs& EventArgs)
 	{
 		ChangeMode(Core::WindowMode::Borderless);
 	}
+	else if (EventArgs.Key == Core::Keys::H && EventArgs.Event == Core::InputEvent::Pressed)
+	{
+		static bool IsCursorShown = true;
+
+		if (IsCursorShown)
+		{
+			GetEngine().SetShowMouseCursor(false);
+			IsCursorShown = false;
+		}
+		else
+		{
+			GetEngine().SetShowMouseCursor(true);
+			IsCursorShown = true;
+		}
+	}
 
 	std::string EventString;
 	switch (EventArgs.Event)

@@ -149,6 +149,11 @@ bool Core::Engine::ChangeWindowModeOnPlatform(const Core::WindowMode NewMode, Co
 	return false;
 }
 
+void Core::Engine::SetShowMouseCursor(bool Show) const
+{
+	Platform::ShowMouseCursor(Show);
+}
+
 Core::NotificationManager& Core::Engine::GetNotificationManager() const
 {
 	return *NotificationManagerInstance;

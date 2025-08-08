@@ -33,5 +33,6 @@ namespace Core
 		bool IsPlatformWindowFocused(const Core::Window& TargetWindow);
 		bool IsPlatformWindowMinimized(const Core::Window& TargetWindow);
 		bool SetPlatformWindowMode(const Core::WindowMode NewMode, Core::Window& TargetWindow);
+		void ShowMouseCursor(bool Show);
 	}
 }

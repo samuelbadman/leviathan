@@ -104,6 +104,8 @@ namespace Core
 		// Returns true if the target window's mode was succesfully changed otherwise, returns false
 		bool ChangeWindowModeOnPlatform(const Core::WindowMode NewMode, Core::Window& TargetWindow) const;
 
+		void SetShowMouseCursor(bool Show) const;
+
 		Core::NotificationManager& GetNotificationManager() const;
 		void Quit(bool RestartEngine = false);
 

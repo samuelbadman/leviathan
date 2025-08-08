@@ -983,3 +983,8 @@ bool Core::Platform::SetPlatformWindowMode(const Core::WindowMode NewMode, Core:
 	ShowWindow(hWnd, SW_SHOW);
 	return true;
 }
+
+void Core::Platform::ShowMouseCursor(bool Show)
+{
+	ShowCursor(Show);
+}
