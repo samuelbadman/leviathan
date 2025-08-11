@@ -48,6 +48,7 @@ add_library("LeviathanCore" STATIC
 "Source/Engine/LeviathanCore/Core/Window.cpp"
 "Source/Engine/LeviathanCore/Core/InputKey.h"
 "Source/Engine/LeviathanCore/Core/InputKey.cpp"
+"Source/Engine/LeviathanCore/Core/ProgrammingTools/Bits.h"
 )
 
 # Add source files to be compiled only for specific platform builds
