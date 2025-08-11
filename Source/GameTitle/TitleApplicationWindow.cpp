@@ -75,18 +75,18 @@ void TitleApplicationWindow::OnInputKey(const Core::InputEventArgs& EventArgs)
 
 void TitleApplicationWindow::OnInputAxis(const Core::InputEventArgs& EventArgs)
 {
-	std::string EventString;
-	switch (EventArgs.Event)
-	{
-	case Core::InputEvent::Pressed: EventString = "Pressed"; break;
-	case Core::InputEvent::Repeat: EventString = "Repeat"; break;
-	case Core::InputEvent::Released: EventString = "Released"; break;
-	case Core::InputEvent::DoubleClick: EventString = "Double clicked"; break;
-	default: EventString = "None"; break;
-	}
+	//std::string EventString;
+	//switch (EventArgs.Event)
+	//{
+	//case Core::InputEvent::Pressed: EventString = "Pressed"; break;
+	//case Core::InputEvent::Repeat: EventString = "Repeat"; break;
+	//case Core::InputEvent::Released: EventString = "Released"; break;
+	//case Core::InputEvent::DoubleClick: EventString = "Double clicked"; break;
+	//default: EventString = "None"; break;
+	//}
 
-	CONSOLE_PRINTF("title application window input axis event. Key: %s, Event: %s, Data: %f, Scan code: %d\n", EventArgs.Key.ToString().c_str(),
-		EventString.c_str(), EventArgs.Data, EventArgs.Key.GetScanCode());
+	//CONSOLE_PRINTF("title application window input axis event. Key: %s, Event: %s, Data: %f, Scan code: %d\n", EventArgs.Key.ToString().c_str(),
+	//	EventString.c_str(), EventArgs.Data, EventArgs.Key.GetScanCode());
 }
 
 void TitleApplicationWindow::OnMaximized()

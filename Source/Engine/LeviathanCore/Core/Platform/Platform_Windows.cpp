@@ -116,8 +116,8 @@ namespace
 					if (WindowsPlatformInternals::pEngineNotificationManager)
 					{
 						Core::NotificationData GameControllerConnectedNotificationData = {};
-						GameControllerConnectedNotificationData.Type = Core::NotificationType::GameControllerConnected;
-						GameControllerConnectedNotificationData.Payload.GameControllerConnectedPayload = {};
+						GameControllerConnectedNotificationData.Type = Core::NotificationType::RawGamepadConnected;
+						GameControllerConnectedNotificationData.Payload.RawGamepadConnectedPayload = {};
 
 						WindowsPlatformInternals::pEngineNotificationManager->SendNotification(GameControllerConnectedNotificationData);
 					}
@@ -128,8 +128,8 @@ namespace
 					if (WindowsPlatformInternals::pEngineNotificationManager)
 					{
 						Core::NotificationData GameControllerDisconnectedNotificationData = {};
-						GameControllerDisconnectedNotificationData.Type = Core::NotificationType::GameControllerDisconnected;
-						GameControllerDisconnectedNotificationData.Payload.GameControllerDisconnectedPayload = {};
+						GameControllerDisconnectedNotificationData.Type = Core::NotificationType::RawGamepadDisconnected;
+						GameControllerDisconnectedNotificationData.Payload.RawGamepadDisconnectedPayload = {};
 
 						WindowsPlatformInternals::pEngineNotificationManager->SendNotification(GameControllerDisconnectedNotificationData);
 					}

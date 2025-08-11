@@ -49,12 +49,18 @@ add_library("LeviathanCore" STATIC
 "Source/Engine/LeviathanCore/Core/InputKey.h"
 "Source/Engine/LeviathanCore/Core/InputKey.cpp"
 "Source/Engine/LeviathanCore/Core/ProgrammingTools/Bits.h"
+"Source/Engine/LeviathanCore/Core/Platform/Gamepad.h"
 )
 
-# Add source files to be compiled only for specific platform builds
+# Add source files to be compiled and libraries to link against only for specific platform builds
 if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
 target_sources("LeviathanCore" PRIVATE
 "Source/Engine/LeviathanCore/Core/Platform/Platform_Windows.cpp"
+"Source/Engine/LeviathanCore/Core/Platform/Gamepad_XInput.cpp"
+)
+
+target_link_libraries("LeviathanCore" 
+"xinput.lib"
 )
 endif()
 
