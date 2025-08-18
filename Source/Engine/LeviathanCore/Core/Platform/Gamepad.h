@@ -8,5 +8,6 @@ namespace Core
 	{
 		void Initialize(Core::NotificationManager* pNotificationManager);
 		void OnRawGamepadConnectionEvent();
+		void PollConnectedGamepads();
 	}
 }

@@ -780,6 +780,7 @@ bool Core::Platform::Initialize(Core::NotificationManager* pNotificationManager)
 void Core::Platform::PerFrameUpdate()
 {
 	WindowsPlatformInternals::UpdatePerformanceCounter();
+	// TODO: Split into separate function to handle gamepad user messages
 	WindowsPlatformInternals::DispatchSystemMessages();
 }
 

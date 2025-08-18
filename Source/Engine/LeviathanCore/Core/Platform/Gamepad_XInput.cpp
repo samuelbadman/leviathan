@@ -14,6 +14,45 @@ namespace
 		uint8_t ConnectedGamepadBitflag = 0;
 		std::array<XINPUT_STATE, XUSER_MAX_COUNT> PreviousStates = {};
 		std::array<XINPUT_STATE, XUSER_MAX_COUNT> CurrentStates = {};
+
+		void PollGamepadButton(const uint8_t GamepadConnectionIndex, const WORD Button)
+		{
+			if (Button != XINPUT_GAMEPAD_A &&
+				Button != XINPUT_GAMEPAD_B &&
+				Button != XINPUT_GAMEPAD_X &&
+				Button != XINPUT_GAMEPAD_Y &&
+				Button != XINPUT_GAMEPAD_DPAD_UP &&
+				Button != XINPUT_GAMEPAD_DPAD_DOWN &&
+				Button != XINPUT_GAMEPAD_DPAD_LEFT &&
+				Button != XINPUT_GAMEPAD_DPAD_RIGHT &&
+				Button != XINPUT_GAMEPAD_LEFT_THUMB &&
+				Button != XINPUT_GAMEPAD_RIGHT_THUMB &&
+				Button != XINPUT_GAMEPAD_BACK &&
+				Button != XINPUT_GAMEPAD_START &&
+				Button != XINPUT_GAMEPAD_LEFT_SHOULDER &&
+				Button != XINPUT_GAMEPAD_RIGHT_SHOULDER)
+			{
+				return;
+			}
+
+			const int32_t PreviousButtonState = XInputGamepadInternals::PreviousStates[GamepadConnectionIndex].Gamepad.wButtons & Button;
+			const int32_t CurrentButtonState = XInputGamepadInternals::CurrentStates[GamepadConnectionIndex].Gamepad.wButtons & Button;
+
+			if (CurrentButtonState != 0)
+			{
+				// Button pressed
+				CONSOLE_PRINTF("Gamepad A pressed. Was repeat: %d\n", PreviousButtonState == CurrentButtonState);
+				// TODO: Send custom WM_USER+X win32 message to be processed during platform dispatch system message. How to send param data like pressed/released/repeat/float axis value
+			}
+			else
+			{
+				if (PreviousButtonState != CurrentButtonState)
+				{
+					// Button released
+					CONSOLE_PRINTF("Gamepad A released\n");
+				}
+			}
+		}
 	}
 }
 
@@ -89,4 +128,49 @@ void Core::Gamepad::OnRawGamepadConnectionEvent()
 			CONSOLE_PRINTF("gamepad at connection %d is disconnected\n", i);
 		}
 	}
+}
+
+void Core::Gamepad::PollConnectedGamepads()
+{
+	// Poll
+	for (uint8_t i = 0; i < XUSER_MAX_COUNT; ++i)
+	{
+		if (CHECK_BIT(XInputGamepadInternals::ConnectedGamepadBitflag, i))
+		{
+			// Gamepad is connected at index i
+			// Retrieve gamepad current state 
+			if (XInputGetState(static_cast<DWORD>(i), &XInputGamepadInternals::CurrentStates[i]) != ERROR_SUCCESS)
+			{
+				// Something went wrong. Either the gamepad is not connected and XInputGetState returned ERROR_DEVICE_NOT_CONNECTED or some other error occurred
+				continue;
+			}
+
+			// Poll gamepad button inputs
+
+			//GamepadFaceButtonBottom = XINPUT_GAMEPAD_A,
+			//	GamepadFaceButtonRight = XINPUT_GAMEPAD_B,
+			//	GamepadFaceButtonLeft = XINPUT_GAMEPAD_X,
+			//	GamepadFaceButtonTop = XINPUT_GAMEPAD_Y,
+			//	GamepadDPadUp = XINPUT_GAMEPAD_DPAD_UP,
+			//	GamepadDPadDown = XINPUT_GAMEPAD_DPAD_DOWN,
+			//	GamepadDPadLeft = XINPUT_GAMEPAD_DPAD_LEFT,
+			//	GamepadDPadRight = XINPUT_GAMEPAD_DPAD_RIGHT,
+			//	GamepadLeftThumbstickButton = XINPUT_GAMEPAD_LEFT_THUMB,
+			//	GamepadRightThumbstickButton = XINPUT_GAMEPAD_RIGHT_THUMB,
+			//	GamepadSpecialLeft = XINPUT_GAMEPAD_BACK,
+			//	GamepadSpecialRight = XINPUT_GAMEPAD_START,
+			//	GamepadLeftShoulder = XINPUT_GAMEPAD_LEFT_SHOULDER,
+			//	GamepadRightShoulder = XINPUT_GAMEPAD_RIGHT_SHOULDER,
+
+			XInputGamepadInternals::PollGamepadButton(i, XINPUT_GAMEPAD_A);
+			// TODO: Do above for each gamepad button
+
+
+
+			// Update gamepad previous state
+			XInputGamepadInternals::PreviousStates[i] = XInputGamepadInternals::CurrentStates[i];
+		}
+	}
+
+
 }

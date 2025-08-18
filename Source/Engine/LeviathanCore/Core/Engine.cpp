@@ -183,6 +183,8 @@ void Core::Engine::BeginApplicationMainLoop()
 		//const double AverageMilliseconds = 1.0 / AverageFPS;
 		//const uint32_t AverageFPSWhole = static_cast<uint32_t>(AverageFPS);
 
+		Gamepad::PollConnectedGamepads();
+
 		FixedTickApplication(FrameDeltaSeconds);
 		TickApplication(FrameDeltaSeconds);
 	}
