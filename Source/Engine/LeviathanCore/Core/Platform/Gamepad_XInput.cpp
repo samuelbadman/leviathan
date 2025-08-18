@@ -9,6 +9,9 @@ namespace
 {
 	namespace XInputGamepadInternals
 	{
+		constexpr uint16_t MaxThumbstickValue = 32767;
+		constexpr uint8_t MaxTriggerValue = 255;
+
 		Core::NotificationManager* NotificationManager = nullptr;
 
 		uint8_t ConnectedGamepadBitflag = 0;
@@ -56,17 +59,24 @@ namespace
 			}
 		}
 
-		float NormalizeThumbstickAxisValue(const SHORT Value)
+		float CalcThumbstickAnalogValue(const SHORT Value)
 		{
-			static constexpr uint16_t MaxAnalogStickValue = 32767;
-			return (std::max(-1.0f, Value / static_cast<float>(MaxAnalogStickValue)));
+			return (std::max(-1.0f, Value / static_cast<float>(MaxThumbstickValue)));
 		}
 
-		void PollThumbstick_Analog(const uint8_t GamepadConnectionIndex)
+		int16_t CalcThumbstickDigitalValue(const SHORT Value)
 		{
-			static constexpr uint16_t MaxAnalogStickValue = 32767;
-			const float NormalizedAxisValue = (std::max(-1.0f, 
-				XInputGamepadInternals::CurrentStates[GamepadConnectionIndex].Gamepad.sThumbLX / static_cast<float>(MaxAnalogStickValue)));
+			return Value / MaxThumbstickValue;
+		}
+
+		float CalcTriggerAnalogValue(const BYTE Value)
+		{
+			return static_cast<float>(Value) / static_cast<float>(XInputGamepadInternals::MaxTriggerValue);
+		}
+
+		int8_t CalcTriggerDigitalValue(const BYTE Value)
+		{
+			return Value / XInputGamepadInternals::MaxTriggerValue;
 		}
 	}
 }
@@ -181,11 +191,55 @@ void Core::Gamepad::PollConnectedGamepads()
 			// TODO: Do above for each gamepad button
 
 			// Analog gamepad thumbstick inputs
-			const float NormalizedLeftThumbstickXAxisValue = XInputGamepadInternals::NormalizeThumbstickAxisValue(XInputGamepadInternals::CurrentStates[i].Gamepad.sThumbLX);
+			const float LeftThumbstickXAxisValue = XInputGamepadInternals::CalcThumbstickAnalogValue(XInputGamepadInternals::CurrentStates[i].Gamepad.sThumbLX);
 			// TODO: win32 message. Data: Connection index, thumbstick/axis, float axis value
 			//TODO: Above for each analog thumbstick axis 
 
+			// Analog gamepad trigger inputs
+			const float LeftTriggerAnalogValue = XInputGamepadInternals::CalcTriggerAnalogValue(XInputGamepadInternals::CurrentStates[i].Gamepad.bLeftTrigger);
+			// TODO: win32 message. Data: connection index, trigger, float axis value
+			// TODO: above for each trigger
 
+			// Digital gamepad thumbstick inputs
+			// Left thumbstick X axis
+			{
+				const int16_t PreviousDigitalValue = XInputGamepadInternals::CalcThumbstickDigitalValue(XInputGamepadInternals::PreviousStates[i].Gamepad.sThumbLX);
+				const int16_t CurrentDigitalValue = XInputGamepadInternals::CalcThumbstickDigitalValue(XInputGamepadInternals::CurrentStates[i].Gamepad.sThumbLX);
+
+				if (CurrentDigitalValue > 0)
+				{
+					// Pushed right/up
+					CONSOLE_PRINTF("Stick pushed right, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+					// TODO: win32 message. Data: Connection index, thumbstick/axis, was repeat
+				}
+				else if (CurrentDigitalValue < 0)
+				{
+					// Pushed left/down
+					CONSOLE_PRINTF("Stick pushed left, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+					// TODO: win32 message. Data: Connection index, thumbstick/axis, was repeat
+				}
+			}
+			// TODO: Above for each thumbstick, x and y axis
+
+			// Digital gamepad trigger inputs
+			{
+				const uint8_t PreviousDigitalValue = XInputGamepadInternals::CalcTriggerDigitalValue(XInputGamepadInternals::PreviousStates[i].Gamepad.bLeftTrigger);
+				const uint8_t CurrentDigitalValue = XInputGamepadInternals::CalcTriggerDigitalValue(XInputGamepadInternals::CurrentStates[i].Gamepad.bLeftTrigger);
+
+				if (PreviousDigitalValue != CurrentDigitalValue)
+				{
+					// Pressed/released
+					CONSOLE_PRINTF("Trigger pressed/released: %d, was repeat %d\n", CurrentDigitalValue, 0);
+				}
+
+				if (CurrentDigitalValue == 1)
+				{
+					// Repeat
+					CONSOLE_PRINTF("Trigger pressed/released: %d, was repeat %d\n", CurrentDigitalValue, 1);
+				}
+			}
+			// TODO: win32 message. Data: connection id, trigger, pressed/released, was repeat
+			// TODO: above for each trigger
 
 			// Update gamepad previous state
 			XInputGamepadInternals::PreviousStates[i] = XInputGamepadInternals::CurrentStates[i];
