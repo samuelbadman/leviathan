@@ -328,35 +328,35 @@ namespace
 				/*Z*/
 			case 'Z': return Core::InputKey(Core::Keys::Z, ScanCode);
 				/*Numpad0*/
-			case VK_NUMPAD0: return Core::InputKey(Core::Keys::Numpad0, ScanCode);
+			case VK_NUMPAD0: return Core::InputKey(Core::Keys::Numpad_0, ScanCode);
 				/*Numpad1*/
-			case VK_NUMPAD1: return Core::InputKey(Core::Keys::Numpad1, ScanCode);
+			case VK_NUMPAD1: return Core::InputKey(Core::Keys::Numpad_1, ScanCode);
 				/*Numpad2*/
-			case VK_NUMPAD2: return Core::InputKey(Core::Keys::Numpad2, ScanCode);
+			case VK_NUMPAD2: return Core::InputKey(Core::Keys::Numpad_2, ScanCode);
 				/*Numpad3*/
-			case VK_NUMPAD3: return Core::InputKey(Core::Keys::Numpad3, ScanCode);
+			case VK_NUMPAD3: return Core::InputKey(Core::Keys::Numpad_3, ScanCode);
 				/*Numpad4*/
-			case VK_NUMPAD4: return Core::InputKey(Core::Keys::Numpad4, ScanCode);
+			case VK_NUMPAD4: return Core::InputKey(Core::Keys::Numpad_4, ScanCode);
 				/*Numpad5*/
-			case VK_NUMPAD5: return Core::InputKey(Core::Keys::Numpad5, ScanCode);
+			case VK_NUMPAD5: return Core::InputKey(Core::Keys::Numpad_5, ScanCode);
 				/*Numpad6*/
-			case VK_NUMPAD6: return Core::InputKey(Core::Keys::Numpad6, ScanCode);
+			case VK_NUMPAD6: return Core::InputKey(Core::Keys::Numpad_6, ScanCode);
 				/*Numpad7*/
-			case VK_NUMPAD7: return Core::InputKey(Core::Keys::Numpad7, ScanCode);
+			case VK_NUMPAD7: return Core::InputKey(Core::Keys::Numpad_7, ScanCode);
 				/*Numpad8*/
-			case VK_NUMPAD8: return Core::InputKey(Core::Keys::Numpad8, ScanCode);
+			case VK_NUMPAD8: return Core::InputKey(Core::Keys::Numpad_8, ScanCode);
 				/*Numpad9*/
-			case VK_NUMPAD9: return Core::InputKey(Core::Keys::Numpad9, ScanCode);
+			case VK_NUMPAD9: return Core::InputKey(Core::Keys::Numpad_9, ScanCode);
 				/*Numpad**/
-			case VK_MULTIPLY: return Core::InputKey(Core::Keys::NumpadMultiply, ScanCode);
+			case VK_MULTIPLY: return Core::InputKey(Core::Keys::Numpad_Multiply, ScanCode);
 				/*Numpad+*/
-			case VK_ADD: return Core::InputKey(Core::Keys::NumpadPlus, ScanCode);
+			case VK_ADD: return Core::InputKey(Core::Keys::Numpad_Plus, ScanCode);
 				/*Numpad-*/
-			case VK_SUBTRACT: return Core::InputKey(Core::Keys::NumpadMinus, ScanCode);
+			case VK_SUBTRACT: return Core::InputKey(Core::Keys::Numpad_Minus, ScanCode);
 				/*Numpad.*/
-			case VK_DECIMAL: return Core::InputKey(Core::Keys::NumpadDecimal, ScanCode);
+			case VK_DECIMAL: return Core::InputKey(Core::Keys::Numpad_Decimal, ScanCode);
 				/*Numpad/*/
-			case VK_DIVIDE: return Core::InputKey(Core::Keys::NumpadDivide, ScanCode);
+			case VK_DIVIDE: return Core::InputKey(Core::Keys::Numpad_Divide, ScanCode);
 				/*F1*/
 			case VK_F1: return Core::InputKey(Core::Keys::F1, ScanCode);
 				/*F2*/
@@ -567,11 +567,11 @@ namespace
 
 				// Raw mouse delta
 				std::array<Core::InputEventArgs, 2> RawMouseDeltaEventArgs = {};
-				RawMouseDeltaEventArgs[0].Key = Core::InputKey(Core::Keys::MouseXAxis);
+				RawMouseDeltaEventArgs[0].Key = Core::InputKey(Core::Keys::Mouse_X_Axis);
 				RawMouseDeltaEventArgs[0].Event = Core::InputEvent::Axis;
 				RawMouseDeltaEventArgs[0].Data = static_cast<float>(RawInput->data.mouse.lLastX);
 
-				RawMouseDeltaEventArgs[1].Key = Core::InputKey(Core::Keys::MouseYAxis);
+				RawMouseDeltaEventArgs[1].Key = Core::InputKey(Core::Keys::Mouse_Y_Axis);
 				RawMouseDeltaEventArgs[1].Event = Core::InputEvent::Axis;
 				RawMouseDeltaEventArgs[1].Data = static_cast<float>(RawInput->data.mouse.lLastY);
 

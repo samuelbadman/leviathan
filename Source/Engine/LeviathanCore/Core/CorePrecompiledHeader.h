@@ -2,6 +2,7 @@
 
 #ifdef PLATFORM_WINDOWS
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 #include <Xinput.h>
 #endif // PLATFORM_WINDOWS
@@ -11,3 +12,4 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <algorithm>

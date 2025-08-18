@@ -41,17 +41,32 @@ namespace
 			if (CurrentButtonState != 0)
 			{
 				// Button pressed
-				CONSOLE_PRINTF("Gamepad A pressed. Was repeat: %d\n", PreviousButtonState == CurrentButtonState);
-				// TODO: Send custom WM_USER+X win32 message to be processed during platform dispatch system message. How to send param data like pressed/released/repeat/float axis value
+				CONSOLE_PRINTF("Gamepad connection %d button pressed. Was repeat: %d\n", GamepadConnectionIndex, PreviousButtonState == CurrentButtonState);
+				//PostMessage(GetFocus(), my message, params..., params...)
+				// TODO: Win32 message. Data: Connection index, pressed/released, was repeat
 			}
 			else
 			{
 				if (PreviousButtonState != CurrentButtonState)
 				{
 					// Button released
-					CONSOLE_PRINTF("Gamepad A released\n");
+					CONSOLE_PRINTF("Gamepad connection %d button released\n", GamepadConnectionIndex);
+					// TODO: Win32 message. Data: Connection index, button, pressed/released, was repeat
 				}
 			}
+		}
+
+		float NormalizeThumbstickAxisValue(const SHORT Value)
+		{
+			static constexpr uint16_t MaxAnalogStickValue = 32767;
+			return (std::max(-1.0f, Value / static_cast<float>(MaxAnalogStickValue)));
+		}
+
+		void PollThumbstick_Analog(const uint8_t GamepadConnectionIndex)
+		{
+			static constexpr uint16_t MaxAnalogStickValue = 32767;
+			const float NormalizedAxisValue = (std::max(-1.0f, 
+				XInputGamepadInternals::CurrentStates[GamepadConnectionIndex].Gamepad.sThumbLX / static_cast<float>(MaxAnalogStickValue)));
 		}
 	}
 }
@@ -164,6 +179,11 @@ void Core::Gamepad::PollConnectedGamepads()
 
 			XInputGamepadInternals::PollGamepadButton(i, XINPUT_GAMEPAD_A);
 			// TODO: Do above for each gamepad button
+
+			// Analog gamepad thumbstick inputs
+			const float NormalizedLeftThumbstickXAxisValue = XInputGamepadInternals::NormalizeThumbstickAxisValue(XInputGamepadInternals::CurrentStates[i].Gamepad.sThumbLX);
+			// TODO: win32 message. Data: Connection index, thumbstick/axis, float axis value
+			//TODO: Above for each analog thumbstick axis 
 
 
 

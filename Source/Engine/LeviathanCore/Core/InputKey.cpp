@@ -61,21 +61,21 @@ bool Core::InputKey::IsKeyboardKey() const
 		Key == Core::Keys::X ||
 		Key == Core::Keys::Y ||
 		Key == Core::Keys::Z ||
-		Key == Core::Keys::Numpad0 ||
-		Key == Core::Keys::Numpad1 ||
-		Key == Core::Keys::Numpad2 ||
-		Key == Core::Keys::Numpad3 ||
-		Key == Core::Keys::Numpad4 ||
-		Key == Core::Keys::Numpad5 ||
-		Key == Core::Keys::Numpad6 ||
-		Key == Core::Keys::Numpad7 ||
-		Key == Core::Keys::Numpad8 ||
-		Key == Core::Keys::Numpad9 ||
-		Key == Core::Keys::NumpadMultiply ||
-		Key == Core::Keys::NumpadPlus ||
-		Key == Core::Keys::NumpadMinus ||
-		Key == Core::Keys::NumpadDecimal ||
-		Key == Core::Keys::NumpadDivide ||
+		Key == Core::Keys::Numpad_0 ||
+		Key == Core::Keys::Numpad_1 ||
+		Key == Core::Keys::Numpad_2 ||
+		Key == Core::Keys::Numpad_3 ||
+		Key == Core::Keys::Numpad_4 ||
+		Key == Core::Keys::Numpad_5 ||
+		Key == Core::Keys::Numpad_6 ||
+		Key == Core::Keys::Numpad_7 ||
+		Key == Core::Keys::Numpad_8 ||
+		Key == Core::Keys::Numpad_9 ||
+		Key == Core::Keys::Numpad_Multiply ||
+		Key == Core::Keys::Numpad_Plus ||
+		Key == Core::Keys::Numpad_Minus ||
+		Key == Core::Keys::Numpad_Decimal ||
+		Key == Core::Keys::Numpad_Divide ||
 		Key == Core::Keys::F1 ||
 		Key == Core::Keys::F2 ||
 		Key == Core::Keys::F3 ||
@@ -116,43 +116,43 @@ bool Core::InputKey::IsMouseKey() const
 		Key == Core::Keys::RightMouseButton ||
 		Key == Core::Keys::MiddleMouseButton ||
 		Key == Core::Keys::MouseWheelAxis ||
-		Key == Core::Keys::MouseXAxis ||
-		Key == Core::Keys::MouseYAxis;
+		Key == Core::Keys::Mouse_X_Axis ||
+		Key == Core::Keys::Mouse_Y_Axis;
 }
 
 bool Core::InputKey::IsGamepadKey() const
 {
 	return
-		Key == Core::Keys::GamepadFaceButtonBottom ||
-		Key == Core::Keys::GamepadFaceButtonRight ||
-		Key == Core::Keys::GamepadFaceButtonLeft ||
-		Key == Core::Keys::GamepadFaceButtonTop ||
-		Key == Core::Keys::GamepadDPadUp ||
-		Key == Core::Keys::GamepadDPadDown ||
-		Key == Core::Keys::GamepadDPadLeft ||
-		Key == Core::Keys::GamepadDPadRight ||
-		Key == Core::Keys::GamepadLeftThumbstickButton ||
-		Key == Core::Keys::GamepadRightThumbstickButton ||
-		Key == Core::Keys::GamepadSpecialLeft ||
-		Key == Core::Keys::GamepadSpecialRight ||
-		Key == Core::Keys::GamepadLeftShoulder ||
-		Key == Core::Keys::GamepadRightShoulder ||
-		Key == Core::Keys::GamepadLeftThumbstickXAxis ||
-		Key == Core::Keys::GamepadLeftThumbstickYAxis ||
-		Key == Core::Keys::GamepadRightThumbstickXAxis ||
-		Key == Core::Keys::GamepadRightThumbstickYAxis ||
-		Key == Core::Keys::GamepadLeftThumbstickUp ||
-		Key == Core::Keys::GamepadLeftThumbstickDown ||
-		Key == Core::Keys::GamepadLeftThumbstickLeft ||
-		Key == Core::Keys::GamepadLeftThumbstickRight ||
-		Key == Core::Keys::GamepadRightThumbstickUp ||
-		Key == Core::Keys::GamepadRightThumbstickDown ||
-		Key == Core::Keys::GamepadRightThumbstickLeft ||
-		Key == Core::Keys::GamepadRightThumbstickRight ||
-		Key == Core::Keys::GamepadLeftTrigger ||
-		Key == Core::Keys::GamepadRightTrigger ||
-		Key == Core::Keys::GamepadLeftTriggerAxis ||
-		Key == Core::Keys::GamepadRightTriggerAxis;
+		Key == Core::Keys::Gamepad_FaceButton_Bottom ||
+		Key == Core::Keys::Gamepad_FaceButton_Right ||
+		Key == Core::Keys::Gamepad_FaceButton_Left ||
+		Key == Core::Keys::Gamepad_FaceButton_Top ||
+		Key == Core::Keys::Gamepad_DPad_Up ||
+		Key == Core::Keys::Gamepad_DPad_Down ||
+		Key == Core::Keys::Gamepad_DPad_Left ||
+		Key == Core::Keys::Gamepad_DPad_Right ||
+		Key == Core::Keys::Gamepad_Left_Thumbstick_Button ||
+		Key == Core::Keys::Gamepad_Right_Thumbstick_Button ||
+		Key == Core::Keys::Gamepad_Special_Left ||
+		Key == Core::Keys::Gamepad_Special_Right ||
+		Key == Core::Keys::Gamepad_Left_Shoulder ||
+		Key == Core::Keys::Gamepad_Right_Shoulder ||
+		Key == Core::Keys::Gamepad_Left_Thumbstick_X_Axis ||
+		Key == Core::Keys::Gamepad_Left_Thumbstick_Y_Axis ||
+		Key == Core::Keys::Gamepad_Right_Thumbstick_X_Axis ||
+		Key == Core::Keys::Gamepad_Right_Thumbstick_Y_Axis ||
+		Key == Core::Keys::Gamepad_Left_Thumbstick_Up ||
+		Key == Core::Keys::Gamepad_Left_Thumbstick_Down ||
+		Key == Core::Keys::Gamepad_Left_Thumbstick_Left ||
+		Key == Core::Keys::Gamepad_Left_Thumbstick_Right ||
+		Key == Core::Keys::Gamepad_Right_Thumbstick_Up ||
+		Key == Core::Keys::Gamepad_Right_Thumbstick_Down ||
+		Key == Core::Keys::Gamepad_Right_Thumbstick_Left ||
+		Key == Core::Keys::Gamepad_Right_Thumbstick_Right ||
+		Key == Core::Keys::Gamepad_Left_Trigger ||
+		Key == Core::Keys::Gamepad_Right_Trigger ||
+		Key == Core::Keys::Gamepad_Left_Trigger_Axis ||
+		Key == Core::Keys::Gamepad_Right_Trigger_Axis;
 }
 
 std::string Core::InputKey::ToString() const
@@ -212,21 +212,21 @@ std::string Core::InputKey::ToString() const
 	case Core::Keys::X: return "X";
 	case Core::Keys::Y: return "Y";
 	case Core::Keys::Z: return "Z";
-	case Core::Keys::Numpad0: return "Numpad 0";
-	case Core::Keys::Numpad1: return "Numpad 1";
-	case Core::Keys::Numpad2: return "Numpad 2";
-	case Core::Keys::Numpad3: return "Numpad 3";
-	case Core::Keys::Numpad4: return "Numpad 4";
-	case Core::Keys::Numpad5: return "Numpad 5";
-	case Core::Keys::Numpad6: return "Numpad 6";
-	case Core::Keys::Numpad7: return "Numpad 7";
-	case Core::Keys::Numpad8: return "Numpad 8";
-	case Core::Keys::Numpad9: return "Numpad 9";
-	case Core::Keys::NumpadMultiply: return "Numpad *";
-	case Core::Keys::NumpadPlus: return "Numpad +";
-	case Core::Keys::NumpadMinus: return "Numpad -";
-	case Core::Keys::NumpadDecimal: return "Numpad .";
-	case Core::Keys::NumpadDivide: return "Numpad /";
+	case Core::Keys::Numpad_0: return "Numpad 0";
+	case Core::Keys::Numpad_1: return "Numpad 1";
+	case Core::Keys::Numpad_2: return "Numpad 2";
+	case Core::Keys::Numpad_3: return "Numpad 3";
+	case Core::Keys::Numpad_4: return "Numpad 4";
+	case Core::Keys::Numpad_5: return "Numpad 5";
+	case Core::Keys::Numpad_6: return "Numpad 6";
+	case Core::Keys::Numpad_7: return "Numpad 7";
+	case Core::Keys::Numpad_8: return "Numpad 8";
+	case Core::Keys::Numpad_9: return "Numpad 9";
+	case Core::Keys::Numpad_Multiply: return "Numpad *";
+	case Core::Keys::Numpad_Plus: return "Numpad +";
+	case Core::Keys::Numpad_Minus: return "Numpad -";
+	case Core::Keys::Numpad_Decimal: return "Numpad .";
+	case Core::Keys::Numpad_Divide: return "Numpad /";
 	case Core::Keys::F1: return "F1";
 	case Core::Keys::F2: return "F2";
 	case Core::Keys::F3: return "F3";
@@ -266,39 +266,39 @@ std::string Core::InputKey::ToString() const
 	case Core::Keys::RightMouseButton: return "Right mouse button";
 	case Core::Keys::MiddleMouseButton: return "Middle mouse button";
 	case Core::Keys::MouseWheelAxis: return "Mouse wheel axis";
-	case Core::Keys::MouseXAxis: return "Mouse X axis";
-	case Core::Keys::MouseYAxis: return "Mouse Y axis";
+	case Core::Keys::Mouse_X_Axis: return "Mouse X axis";
+	case Core::Keys::Mouse_Y_Axis: return "Mouse Y axis";
 
-	case Core::Keys::GamepadFaceButtonBottom: return "Gamepad face button bottom";
-	case Core::Keys::GamepadFaceButtonRight: return "Gamepad face button right";
-	case Core::Keys::GamepadFaceButtonLeft: return "Gamepad face button left";
-	case Core::Keys::GamepadFaceButtonTop: return "Gamepad face button top";
-	case Core::Keys::GamepadDPadUp: return "Gamepad DPad up";
-	case Core::Keys::GamepadDPadDown: return "Gamepad DPad down";
-	case Core::Keys::GamepadDPadLeft: return "Gamepad DPad left";
-	case Core::Keys::GamepadDPadRight: return "Gamepad DPad right";
-	case Core::Keys::GamepadLeftThumbstickButton: return "Gamepad left thumbstick button";
-	case Core::Keys::GamepadRightThumbstickButton: return "Gamepad right thumbstick button";
-	case Core::Keys::GamepadSpecialLeft: return "Gamepad special left";
-	case Core::Keys::GamepadSpecialRight: return "Gamepad special right";
-	case Core::Keys::GamepadLeftShoulder: return "Gamepad left shoulder";
-	case Core::Keys::GamepadRightShoulder: return "Gamepad right shoulder";
-	case Core::Keys::GamepadLeftThumbstickXAxis: return "Gamepad left thumbstick X axis";
-	case Core::Keys::GamepadLeftThumbstickYAxis: return "Gamepad left thumbstick Y axis";
-	case Core::Keys::GamepadRightThumbstickXAxis: return "Gamepad right thumbstick X axis";
-	case Core::Keys::GamepadRightThumbstickYAxis: return "Gamepad right thumbstick Y axis";
-	case Core::Keys::GamepadLeftThumbstickUp: return "Gamepad left thumbstick up";
-	case Core::Keys::GamepadLeftThumbstickDown: return "Gamepad left thumbstick down";
-	case Core::Keys::GamepadLeftThumbstickLeft: return "Gamepad left thumbstick left";
-	case Core::Keys::GamepadLeftThumbstickRight: return "Gamepad left thumbstick right";
-	case Core::Keys::GamepadRightThumbstickUp: return "Gamepad right thumbstick up";
-	case Core::Keys::GamepadRightThumbstickDown: return "Gamepad right thumbstick down";
-	case Core::Keys::GamepadRightThumbstickLeft: return "Gamepad right thumbstick left";
-	case Core::Keys::GamepadRightThumbstickRight: return "Gamepad right thumbstick right";
-	case Core::Keys::GamepadLeftTrigger: return "Gamepad left trigger";
-	case Core::Keys::GamepadRightTrigger: return "Gamepad right trigger";
-	case Core::Keys::GamepadLeftTriggerAxis: return "Gamepad left trigger axis";
-	case Core::Keys::GamepadRightTriggerAxis: return "Gamepad right trigger axis";
+	case Core::Keys::Gamepad_FaceButton_Bottom: return "Gamepad face button bottom";
+	case Core::Keys::Gamepad_FaceButton_Right: return "Gamepad face button right";
+	case Core::Keys::Gamepad_FaceButton_Left: return "Gamepad face button left";
+	case Core::Keys::Gamepad_FaceButton_Top: return "Gamepad face button top";
+	case Core::Keys::Gamepad_DPad_Up: return "Gamepad DPad up";
+	case Core::Keys::Gamepad_DPad_Down: return "Gamepad DPad down";
+	case Core::Keys::Gamepad_DPad_Left: return "Gamepad DPad left";
+	case Core::Keys::Gamepad_DPad_Right: return "Gamepad DPad right";
+	case Core::Keys::Gamepad_Left_Thumbstick_Button: return "Gamepad left thumbstick button";
+	case Core::Keys::Gamepad_Right_Thumbstick_Button: return "Gamepad right thumbstick button";
+	case Core::Keys::Gamepad_Special_Left: return "Gamepad special left";
+	case Core::Keys::Gamepad_Special_Right: return "Gamepad special right";
+	case Core::Keys::Gamepad_Left_Shoulder: return "Gamepad left shoulder";
+	case Core::Keys::Gamepad_Right_Shoulder: return "Gamepad right shoulder";
+	case Core::Keys::Gamepad_Left_Thumbstick_X_Axis: return "Gamepad left thumbstick X axis";
+	case Core::Keys::Gamepad_Left_Thumbstick_Y_Axis: return "Gamepad left thumbstick Y axis";
+	case Core::Keys::Gamepad_Right_Thumbstick_X_Axis: return "Gamepad right thumbstick X axis";
+	case Core::Keys::Gamepad_Right_Thumbstick_Y_Axis: return "Gamepad right thumbstick Y axis";
+	case Core::Keys::Gamepad_Left_Thumbstick_Up: return "Gamepad left thumbstick up";
+	case Core::Keys::Gamepad_Left_Thumbstick_Down: return "Gamepad left thumbstick down";
+	case Core::Keys::Gamepad_Left_Thumbstick_Left: return "Gamepad left thumbstick left";
+	case Core::Keys::Gamepad_Left_Thumbstick_Right: return "Gamepad left thumbstick right";
+	case Core::Keys::Gamepad_Right_Thumbstick_Up: return "Gamepad right thumbstick up";
+	case Core::Keys::Gamepad_Right_Thumbstick_Down: return "Gamepad right thumbstick down";
+	case Core::Keys::Gamepad_Right_Thumbstick_Left: return "Gamepad right thumbstick left";
+	case Core::Keys::Gamepad_Right_Thumbstick_Right: return "Gamepad right thumbstick right";
+	case Core::Keys::Gamepad_Left_Trigger: return "Gamepad left trigger";
+	case Core::Keys::Gamepad_Right_Trigger: return "Gamepad right trigger";
+	case Core::Keys::Gamepad_Left_Trigger_Axis: return "Gamepad left trigger axis";
+	case Core::Keys::Gamepad_Right_Trigger_Axis: return "Gamepad right trigger axis";
 
 	case Core::Keys::Unknown: return "Unknown key";
 
