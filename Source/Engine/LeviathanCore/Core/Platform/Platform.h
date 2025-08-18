@@ -13,6 +13,7 @@ namespace Core
 	namespace Platform
 	{
 		bool Initialize(Core::NotificationManager* pNotificationManager);
+		void UpdateMessageQueue();
 		void PerFrameUpdate();
 		double GetFrameMicroseconds();
 		bool CreateConsole();

@@ -777,11 +777,14 @@ bool Core::Platform::Initialize(Core::NotificationManager* pNotificationManager)
 	return true;
 }
 
+void Core::Platform::UpdateMessageQueue()
+{
+	WindowsPlatformInternals::DispatchSystemMessages();
+}
+
 void Core::Platform::PerFrameUpdate()
 {
 	WindowsPlatformInternals::UpdatePerformanceCounter();
-	// TODO: Split into separate function to handle gamepad user messages
-	WindowsPlatformInternals::DispatchSystemMessages();
 }
 
 double Core::Platform::GetFrameMicroseconds()

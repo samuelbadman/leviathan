@@ -171,11 +171,14 @@ void Core::Engine::Quit(bool RestartEngine)
 
 void Core::Engine::BeginApplicationMainLoop()
 {
+	Platform::UpdateMessageQueue();
+
 	ApplicationInstance->Begin();
 
 	while (RunningApplicationInstance)
 	{
 		Platform::PerFrameUpdate();
+		Platform::UpdateMessageQueue();
 
 		const double FrameDeltaSeconds = Platform::GetFrameMicroseconds() * 1e-6;
 

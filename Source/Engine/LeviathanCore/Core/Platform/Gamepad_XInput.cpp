@@ -248,3 +248,17 @@ void Core::Gamepad::PollConnectedGamepads()
 
 
 }
+
+bool Core::Gamepad::SetForceFeedback(const uint8_t GamepadConnectionIndex, const uint16_t LeftSpeed, const uint16_t RightSpeed)
+{
+	// Check the connection index is valid and a gamepad is connected at the connection index
+	if (GamepadConnectionIndex >= XUSER_MAX_COUNT || !CHECK_BIT(XInputGamepadInternals::ConnectedGamepadBitflag, GamepadConnectionIndex))
+	{
+		return false;
+	}
+
+	XINPUT_VIBRATION Vibration = {};
+	Vibration.wLeftMotorSpeed = LeftSpeed;
+	Vibration.wRightMotorSpeed = RightSpeed;
+	return XInputSetState(static_cast<DWORD>(GamepadConnectionIndex), &Vibration) == ERROR_SUCCESS;
+}
