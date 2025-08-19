@@ -55,8 +55,9 @@ add_library("LeviathanCore" STATIC
 # Add source files to be compiled and libraries to link against only for specific platform builds
 if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
 target_sources("LeviathanCore" PRIVATE
-"Source/Engine/LeviathanCore/Core/Platform/Platform_Windows.cpp"
-"Source/Engine/LeviathanCore/Core/Platform/Gamepad_XInput.cpp"
+"Source/Engine/LeviathanCore/Core/Platform/Windows/Platform_Windows.cpp"
+"Source/Engine/LeviathanCore/Core/Platform/Windows/Gamepad_XInput.cpp"
+"Source/Engine/LeviathanCore/Core/Platform/Windows/Definitions_Windows.h"
 )
 
 target_link_libraries("LeviathanCore" 

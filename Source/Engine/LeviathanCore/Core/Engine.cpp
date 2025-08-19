@@ -178,7 +178,6 @@ void Core::Engine::BeginApplicationMainLoop()
 	while (RunningApplicationInstance)
 	{
 		Platform::PerFrameUpdate();
-		Platform::UpdateMessageQueue();
 
 		const double FrameDeltaSeconds = Platform::GetFrameMicroseconds() * 1e-6;
 
@@ -187,6 +186,8 @@ void Core::Engine::BeginApplicationMainLoop()
 		//const uint32_t AverageFPSWhole = static_cast<uint32_t>(AverageFPS);
 
 		Gamepad::PollConnectedGamepads();
+		Platform::UpdateMessageQueue();
+		Gamepad::EndGamepadPolling();
 
 		FixedTickApplication(FrameDeltaSeconds);
 		TickApplication(FrameDeltaSeconds);
