@@ -3,8 +3,6 @@
 #include "Core/Window.h"
 #include "Definitions_Windows.h"
 
-#include "Core/ConsoleOutput.h"
-
 namespace
 {
 	namespace WindowsPlatformInternals
@@ -478,7 +476,7 @@ namespace
 				const int32_t GamepadConnectionIndex = wParam & 0xffff;
 				const int32_t Input = (wParam >> 16) & 0xffff;
 
-				const std::pair<XINPUT_STATE, XINPUT_STATE>* const ConnectionStates = reinterpret_cast<const std::pair<XINPUT_STATE, XINPUT_STATE>*>(lParam);
+				const std::pair<XINPUT_STATE, XINPUT_STATE>& ConnectionStates = *reinterpret_cast<const std::pair<XINPUT_STATE, XINPUT_STATE>*>(lParam);
 
 				switch (Input)
 				{
@@ -497,24 +495,30 @@ namespace
 				case XINPUT_GAMEPAD_LEFT_SHOULDER:
 				case XINPUT_GAMEPAD_RIGHT_SHOULDER:
 				{
-					const int32_t PreviousButtonState = ConnectionStates->first.Gamepad.wButtons & static_cast<WORD>(Input);
-					const int32_t CurrentButtonState = ConnectionStates->second.Gamepad.wButtons & static_cast<WORD>(Input);
+					const int32_t PreviousButtonState = ConnectionStates.first.Gamepad.wButtons & static_cast<WORD>(Input);
+					const int32_t CurrentButtonState = ConnectionStates.second.Gamepad.wButtons & static_cast<WORD>(Input);
 
 					if (CurrentButtonState != 0)
 					{
 						// Button pressed
-						CONSOLE_PRINTF("Gamepad connection %d %s pressed. Was repeat: %d\n", GamepadConnectionIndex,
-							WindowsPlatformInternals::TranslateXInputGamepadInput(Input).ToString().c_str(),
-							PreviousButtonState == CurrentButtonState);
+						Core::InputEventArgs EventArgs = {};
+						EventArgs.Key = WindowsPlatformInternals::TranslateXInputGamepadInput(Input);
+						EventArgs.Event = (PreviousButtonState == CurrentButtonState) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
+						EventArgs.Data = 1.0f;
 
+						WindowInstance->OnInputKey(EventArgs);
 					}
 					else
 					{
 						if (PreviousButtonState != CurrentButtonState)
 						{
 							// Button released
-							CONSOLE_PRINTF("Gamepad connection %d %s released\n", GamepadConnectionIndex,
-								WindowsPlatformInternals::TranslateXInputGamepadInput(Input).ToString().c_str());
+							Core::InputEventArgs EventArgs = {};
+							EventArgs.Key = WindowsPlatformInternals::TranslateXInputGamepadInput(Input);
+							EventArgs.Event = Core::InputEvent::Released;
+							EventArgs.Data = 0.0f;
+
+							WindowInstance->OnInputKey(EventArgs);
 						}
 					}
 
@@ -525,35 +529,55 @@ namespace
 				{
 					// X axis
 					{
-						const int16_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates->first.Gamepad.sThumbLX);
-						const int16_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates->second.Gamepad.sThumbLX);
+						const int16_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates.first.Gamepad.sThumbLX);
+						const int16_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates.second.Gamepad.sThumbLX);
 
 						if (CurrentDigitalValue > 0)
 						{
 							// Pushed right
-							CONSOLE_PRINTF("Left Stick pushed right, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+							Core::InputEventArgs EventArgs = {};
+							EventArgs.Key = Core::Keys::Gamepad_Left_Thumbstick_Right;
+							EventArgs.Event = (PreviousDigitalValue == CurrentDigitalValue) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+
+							WindowInstance->OnInputKey(EventArgs);
 						}
 						else if (CurrentDigitalValue < 0)
 						{
 							// Pushed left
-							CONSOLE_PRINTF("Left Stick pushed left, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+							Core::InputEventArgs EventArgs = {};
+							EventArgs.Key = Core::Keys::Gamepad_Left_Thumbstick_Left;
+							EventArgs.Event = (PreviousDigitalValue == CurrentDigitalValue) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+
+							WindowInstance->OnInputKey(EventArgs);
 						}
 					}
 
 					// Y axis
 					{
-						const int16_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates->first.Gamepad.sThumbLY);
-						const int16_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates->second.Gamepad.sThumbLY);
+						const int16_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates.first.Gamepad.sThumbLY);
+						const int16_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates.second.Gamepad.sThumbLY);
 
 						if (CurrentDigitalValue > 0)
 						{
 							// Pushed up
-							CONSOLE_PRINTF("Left Stick pushed up, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+							Core::InputEventArgs EventArgs = {};
+							EventArgs.Key = Core::Keys::Gamepad_Left_Thumbstick_Up;
+							EventArgs.Event = (PreviousDigitalValue == CurrentDigitalValue) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+
+							WindowInstance->OnInputKey(EventArgs);
 						}
 						else if (CurrentDigitalValue < 0)
 						{
 							// Pushed down
-							CONSOLE_PRINTF("Left Stick pushed down, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+							Core::InputEventArgs EventArgs = {};
+							EventArgs.Key = Core::Keys::Gamepad_Left_Thumbstick_Down;
+							EventArgs.Event = (PreviousDigitalValue == CurrentDigitalValue) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+
+							WindowInstance->OnInputKey(EventArgs);
 						}
 					}
 
@@ -564,35 +588,55 @@ namespace
 				{
 					// X axis
 					{
-						const int16_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates->first.Gamepad.sThumbRX);
-						const int16_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates->second.Gamepad.sThumbRX);
+						const int16_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates.first.Gamepad.sThumbRX);
+						const int16_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates.second.Gamepad.sThumbRX);
 
 						if (CurrentDigitalValue > 0)
 						{
 							// Pushed right
-							CONSOLE_PRINTF("Right Stick pushed right, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+							Core::InputEventArgs EventArgs = {};
+							EventArgs.Key = Core::Keys::Gamepad_Right_Thumbstick_Right;
+							EventArgs.Event = (PreviousDigitalValue == CurrentDigitalValue) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+
+							WindowInstance->OnInputKey(EventArgs);
 						}
 						else if (CurrentDigitalValue < 0)
 						{
 							// Pushed left
-							CONSOLE_PRINTF("Right Stick pushed left, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+							Core::InputEventArgs EventArgs = {};
+							EventArgs.Key = Core::Keys::Gamepad_Right_Thumbstick_Left;
+							EventArgs.Event = (PreviousDigitalValue == CurrentDigitalValue) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+
+							WindowInstance->OnInputKey(EventArgs);
 						}
 					}
 
 					// Y axis
 					{
-						const int16_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates->first.Gamepad.sThumbRY);
-						const int16_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates->second.Gamepad.sThumbRY);
+						const int16_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates.first.Gamepad.sThumbRY);
+						const int16_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadThumbstickDigitalValue(ConnectionStates.second.Gamepad.sThumbRY);
 
 						if (CurrentDigitalValue > 0)
 						{
 							// Pushed up
-							CONSOLE_PRINTF("Right Stick pushed up, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+							Core::InputEventArgs EventArgs = {};
+							EventArgs.Key = Core::Keys::Gamepad_Right_Thumbstick_Up;
+							EventArgs.Event = (PreviousDigitalValue == CurrentDigitalValue) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+
+							WindowInstance->OnInputKey(EventArgs);
 						}
 						else if (CurrentDigitalValue < 0)
 						{
 							// Pushed down
-							CONSOLE_PRINTF("Right Stick pushed down, was repeat: %d\n", PreviousDigitalValue == CurrentDigitalValue);
+							Core::InputEventArgs EventArgs = {};
+							EventArgs.Key = Core::Keys::Gamepad_Right_Thumbstick_Down;
+							EventArgs.Event = (PreviousDigitalValue == CurrentDigitalValue) ? Core::InputEvent::Repeat : Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+
+							WindowInstance->OnInputKey(EventArgs);
 						}
 					}
 
@@ -601,19 +645,38 @@ namespace
 
 				case XINPUT_APP_LEFT_TRIGGER_DIGITIAL:
 				{
-					const uint8_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadTriggerDigitalValue(ConnectionStates->first.Gamepad.bLeftTrigger);
-					const uint8_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadTriggerDigitalValue(ConnectionStates->second.Gamepad.bLeftTrigger);
+					const uint8_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadTriggerDigitalValue(ConnectionStates.first.Gamepad.bLeftTrigger);
+					const uint8_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadTriggerDigitalValue(ConnectionStates.second.Gamepad.bLeftTrigger);
 
 					if (PreviousDigitalValue != CurrentDigitalValue)
 					{
 						// Pressed/released
-						CONSOLE_PRINTF("Left trigger pressed/released: %d, was repeat %d\n", CurrentDigitalValue, 0);
+						Core::InputEventArgs EventArgs = {};
+						EventArgs.Key = Core::Keys::Gamepad_Left_Trigger;
+
+						if (CurrentDigitalValue)
+						{
+							EventArgs.Event = Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+						}
+						else
+						{
+							EventArgs.Event = Core::InputEvent::Released;
+							EventArgs.Data = 0.0f;
+						}
+
+						WindowInstance->OnInputKey(EventArgs);
 					}
 
 					if (CurrentDigitalValue == 1)
 					{
 						// Repeat
-						CONSOLE_PRINTF("Left trigger pressed/released: %d, was repeat %d\n", CurrentDigitalValue, 1);
+						Core::InputEventArgs EventArgs = {};
+						EventArgs.Key = Core::Keys::Gamepad_Left_Trigger;
+						EventArgs.Event = Core::InputEvent::Repeat;
+						EventArgs.Data = 1.0f;
+
+						WindowInstance->OnInputKey(EventArgs);
 					}
 
 					return 0;
@@ -621,19 +684,38 @@ namespace
 
 				case XINPUT_APP_RIGHT_TRIGGER_DIGITIAL:
 				{
-					const uint8_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadTriggerDigitalValue(ConnectionStates->first.Gamepad.bRightTrigger);
-					const uint8_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadTriggerDigitalValue(ConnectionStates->second.Gamepad.bRightTrigger);
+					const uint8_t PreviousDigitalValue = WindowsPlatformInternals::CalcGamepadTriggerDigitalValue(ConnectionStates.first.Gamepad.bRightTrigger);
+					const uint8_t CurrentDigitalValue = WindowsPlatformInternals::CalcGamepadTriggerDigitalValue(ConnectionStates.second.Gamepad.bRightTrigger);
 
 					if (PreviousDigitalValue != CurrentDigitalValue)
 					{
 						// Pressed/released
-						CONSOLE_PRINTF("Right trigger pressed/released: %d, was repeat %d\n", CurrentDigitalValue, 0);
+						Core::InputEventArgs EventArgs = {};
+						EventArgs.Key = Core::Keys::Gamepad_Right_Trigger;
+
+						if (CurrentDigitalValue)
+						{
+							EventArgs.Event = Core::InputEvent::Pressed;
+							EventArgs.Data = 1.0f;
+						}
+						else
+						{
+							EventArgs.Event = Core::InputEvent::Released;
+							EventArgs.Data = 0.0f;
+						}
+
+						WindowInstance->OnInputKey(EventArgs);
 					}
 
 					if (CurrentDigitalValue == 1)
 					{
 						// Repeat
-						CONSOLE_PRINTF("Right trigger pressed/released: %d, was repeat %d\n", CurrentDigitalValue, 1);
+						Core::InputEventArgs EventArgs = {};
+						EventArgs.Key = Core::Keys::Gamepad_Right_Trigger;
+						EventArgs.Event = Core::InputEvent::Repeat;
+						EventArgs.Data = 1.0f;
+
+						WindowInstance->OnInputKey(EventArgs);
 					}
 
 					return 0;
@@ -641,27 +723,73 @@ namespace
 
 				case XINPUT_APP_LEFT_THUMB_ANALOG:
 				{
-					const float ThumbstickXAxisValue = WindowsPlatformInternals::CalcGamepadThumbstickAnalogValue(ConnectionStates->second.Gamepad.sThumbLX);
-					const float ThumbstickYAxisValue = WindowsPlatformInternals::CalcGamepadThumbstickAnalogValue(ConnectionStates->second.Gamepad.sThumbLY);
+					// X axis
+					{
+						Core::InputEventArgs EventArgs = {};
+						EventArgs.Key = Core::Keys::Gamepad_Left_Thumbstick_X_Axis;
+						EventArgs.Event = Core::InputEvent::Axis;
+						EventArgs.Data = WindowsPlatformInternals::CalcGamepadThumbstickAnalogValue(ConnectionStates.second.Gamepad.sThumbLX);
+
+						WindowInstance->OnInputAxis(EventArgs);
+					}
+
+					// Y axis
+					{
+						Core::InputEventArgs EventArgs = {};
+						EventArgs.Key = Core::Keys::Gamepad_Left_Thumbstick_Y_Axis;
+						EventArgs.Event = Core::InputEvent::Axis;
+						EventArgs.Data = WindowsPlatformInternals::CalcGamepadThumbstickAnalogValue(ConnectionStates.second.Gamepad.sThumbLY);
+
+						WindowInstance->OnInputAxis(EventArgs);
+					}
+
 					return 0;
 				}
 
 				case XINPUT_APP_RIGHT_THUMB_ANALOG:
 				{
-					const float ThumbstickXAxisValue = WindowsPlatformInternals::CalcGamepadThumbstickAnalogValue(ConnectionStates->second.Gamepad.sThumbRX);
-					const float ThumbstickYAxisValue = WindowsPlatformInternals::CalcGamepadThumbstickAnalogValue(ConnectionStates->second.Gamepad.sThumbRY);
+					// X axis
+					{
+						Core::InputEventArgs EventArgs = {};
+						EventArgs.Key = Core::Keys::Gamepad_Right_Thumbstick_X_Axis;
+						EventArgs.Event = Core::InputEvent::Axis;
+						EventArgs.Data = WindowsPlatformInternals::CalcGamepadThumbstickAnalogValue(ConnectionStates.second.Gamepad.sThumbRX);
+
+						WindowInstance->OnInputAxis(EventArgs);
+					}
+
+					// Y axis
+					{
+						Core::InputEventArgs EventArgs = {};
+						EventArgs.Key = Core::Keys::Gamepad_Right_Thumbstick_Y_Axis;
+						EventArgs.Event = Core::InputEvent::Axis;
+						EventArgs.Data = WindowsPlatformInternals::CalcGamepadThumbstickAnalogValue(ConnectionStates.second.Gamepad.sThumbRY);
+
+						WindowInstance->OnInputAxis(EventArgs);
+					}
+
 					return 0;
 				}
 
 				case XINPUT_APP_LEFT_TRIGGER_ANALOG:
 				{
-					const float TriggerAnalogValue = WindowsPlatformInternals::CalcGamepadTriggerAnalogValue(ConnectionStates->second.Gamepad.bLeftTrigger);
+					Core::InputEventArgs EventArgs = {};
+					EventArgs.Key = Core::Keys::Gamepad_Left_Trigger_Axis;
+					EventArgs.Event = Core::InputEvent::Axis;
+					EventArgs.Data = WindowsPlatformInternals::CalcGamepadTriggerAnalogValue(ConnectionStates.second.Gamepad.bLeftTrigger);
+
+					WindowInstance->OnInputAxis(EventArgs);
 					return 0;
 				}
 
 				case XINPUT_APP_RIGHT_TRIGGER_ANALOG:
 				{
-					const float TriggerAnalogValue = WindowsPlatformInternals::CalcGamepadTriggerAnalogValue(ConnectionStates->second.Gamepad.bRightTrigger);
+					Core::InputEventArgs EventArgs = {};
+					EventArgs.Key = Core::Keys::Gamepad_Right_Trigger_Axis;
+					EventArgs.Event = Core::InputEvent::Axis;
+					EventArgs.Data = WindowsPlatformInternals::CalcGamepadTriggerAnalogValue(ConnectionStates.second.Gamepad.bRightTrigger);
+
+					WindowInstance->OnInputAxis(EventArgs);
 					return 0;
 				}
 
