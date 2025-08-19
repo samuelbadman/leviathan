@@ -1,5 +1,5 @@
 #include "Core/Platform/Platform.h"
-#include "Core/NotificationManager.h"
+#include "Core/Engine.h"
 #include "Core/Window.h"
 #include "Definitions_Windows.h"
 
@@ -12,7 +12,7 @@ namespace
 		constexpr uint16_t MaxGamepadThumbstickValue = 32767;
 		constexpr uint8_t MaxGamepadTriggerValue = 255;
 
-		Core::NotificationManager* pEngineNotificationManager = nullptr;
+		Core::Engine* pEngine = nullptr;
 
 		LARGE_INTEGER TicksPerSecond = {};
 		LARGE_INTEGER LastTickCount = {};
@@ -116,31 +116,12 @@ namespace
 			case WM_INPUT_DEVICE_CHANGE:
 			{
 				// WM_INPUT_DEVICE_CHANGE message is only received by the window passed to RegisterRawInputDevices
-				if (wParam == GIDC_ARRIVAL)
+				if (wParam == GIDC_ARRIVAL || wParam == GIDC_REMOVAL)
 				{
-					// TODO: Notify the engine instance with a direct hard coded function that a raw game controller connection event has happened here instead of using the notification
-					// manager
-
-					// Game controller connected.
-					if (WindowsPlatformInternals::pEngineNotificationManager)
+					// Game controller connected or disconnected.
+					if (WindowsPlatformInternals::pEngine)
 					{
-						Core::NotificationData GameControllerConnectedNotificationData = {};
-						GameControllerConnectedNotificationData.Type = Core::NotificationType::RawGamepadConnected;
-						GameControllerConnectedNotificationData.Payload.RawGamepadConnectedPayload = {};
-
-						WindowsPlatformInternals::pEngineNotificationManager->SendNotification(GameControllerConnectedNotificationData);
-					}
-				}
-				else if (wParam == GIDC_REMOVAL)
-				{
-					// Game controller disconnected.
-					if (WindowsPlatformInternals::pEngineNotificationManager)
-					{
-						Core::NotificationData GameControllerDisconnectedNotificationData = {};
-						GameControllerDisconnectedNotificationData.Type = Core::NotificationType::RawGamepadDisconnected;
-						GameControllerDisconnectedNotificationData.Payload.RawGamepadDisconnectedPayload = {};
-
-						WindowsPlatformInternals::pEngineNotificationManager->SendNotification(GameControllerDisconnectedNotificationData);
+						WindowsPlatformInternals::pEngine->PlatformGamepadConnectionEventDetected();
 					}
 				}
 
@@ -1004,11 +985,11 @@ namespace
 	}
 }
 
-bool Core::Platform::Initialize(Core::NotificationManager* pNotificationManager)
+bool Core::Platform::Initialize(Core::Engine& EngineInstance)
 {
 	WindowsPlatformInternals::InitializePerformanceCounter();
 
-	WindowsPlatformInternals::pEngineNotificationManager = pNotificationManager;
+	WindowsPlatformInternals::pEngine = &EngineInstance;
 
 	// Create an invisible window that is used to listen for gamepad connected/disconnected messages
 	if (!WindowsPlatformInternals::CreateWindowAndReturnHandle(WindowsPlatformInternals::InvisibleWindowHandle, &WindowsPlatformInternals::InvisibleWindowWndProc,

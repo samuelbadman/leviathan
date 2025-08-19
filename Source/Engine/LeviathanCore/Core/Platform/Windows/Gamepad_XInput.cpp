@@ -3,9 +3,6 @@
 #include "Definitions_Windows.h"
 #include "Core/NotificationManager.h"
 
-// TODO: Debug. To be removed
-#include "Core/ConsoleOutput.h"
-
 namespace
 {
 	namespace XInputGamepadInternals
@@ -40,10 +37,8 @@ void Core::Gamepad::Initialize(Core::NotificationManager* pNotificationManager)
 	XInputGamepadInternals::States = {};
 }
 
-void Core::Gamepad::OnRawGamepadConnectionEvent()
+void Core::Gamepad::OnPlatformGamepadConnectionEvent()
 {
-	CONSOLE_PRINTF("Gamepad connection event handled inside gamepad implementation\n");
-
 	XINPUT_STATE DummyState;
 
 	// For each potential gamepad connection
@@ -88,19 +83,6 @@ void Core::Gamepad::OnRawGamepadConnectionEvent()
 
 		default:
 			break;
-		}
-	}
-
-	// TODO: Debug. To be removed
-	for (uint8_t i = 0; i < XUSER_MAX_COUNT; ++i)
-	{
-		if (CHECK_BIT(XInputGamepadInternals::ConnectedGamepadBitflag, i))
-		{
-			CONSOLE_PRINTF("gamepad at connection %d is connected\n", i);
-		}
-		else
-		{
-			CONSOLE_PRINTF("gamepad at connection %d is disconnected\n", i);
 		}
 	}
 }

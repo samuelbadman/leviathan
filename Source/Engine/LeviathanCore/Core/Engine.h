@@ -105,10 +105,12 @@ namespace Core
 		// Returns true if the target window's mode was succesfully changed otherwise, returns false
 		bool ChangeWindowModeOnPlatform(const Core::WindowMode NewMode, Core::Window& TargetWindow) const;
 
+		void Quit(bool RestartEngine = false);
+
 		void SetShowMouseCursor(bool Show) const;
+		void PlatformGamepadConnectionEventDetected() const;
 
 		Core::NotificationManager& GetNotificationManager() const;
-		void Quit(bool RestartEngine = false);
 
 	private:
 		void BeginApplicationMainLoop();
@@ -117,7 +119,5 @@ namespace Core
 
 		// This function is used to hide the platform implementation include inside the translation unit for Engine stopping it being exposed to all code that uses the engine class
 		bool CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters) const;
-
-		void NotificationListener(const Core::NotificationData& Notification);
 	};
 }

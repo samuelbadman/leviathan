@@ -44,14 +44,6 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 {
 	switch (Notification.Type)
 	{
-	case Core::NotificationType::RawGamepadConnected:
-		CONSOLE_PRINTF("raw gamepad connected notification\n");
-		break;
-
-	case Core::NotificationType::RawGamepadDisconnected:
-		CONSOLE_PRINTF("raw gamepad disconnected notification\n");
-		break;
-
 	case Core::NotificationType::GamepadConnected:
 		CONSOLE_PRINTF("gamepad connected at connection %d\n", Notification.Payload.GamepadConnectedPayload.ConnectionIndex);
 		break;

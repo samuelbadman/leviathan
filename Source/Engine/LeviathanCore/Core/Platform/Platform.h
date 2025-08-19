@@ -4,7 +4,7 @@ namespace Core
 {
 	enum class WindowMode : uint8_t;
 
-	class NotificationManager;
+	class Engine;
 	class Window;
 
 	struct WindowCreateParameters;
@@ -12,7 +12,7 @@ namespace Core
 
 	namespace Platform
 	{
-		bool Initialize(Core::NotificationManager* pNotificationManager);
+		bool Initialize(Core::Engine& EngineInstance);
 		void UpdateMessageQueue();
 		void PerFrameUpdate();
 		double GetFrameMicroseconds();

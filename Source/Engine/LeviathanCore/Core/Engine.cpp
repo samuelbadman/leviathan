@@ -8,9 +8,8 @@
 Core::Engine::Engine()
 {
 	NotificationManagerInstance = std::make_unique<NotificationManager>();
-	NotificationManagerInstance->AddNotificationListenerMethod<Engine, &Core::Engine::NotificationListener>(this);
 
-	if (!Platform::Initialize(NotificationManagerInstance.get()))
+	if (!Platform::Initialize(*this))
 	{
 		return;
 	}
@@ -158,6 +157,11 @@ void Core::Engine::SetShowMouseCursor(bool Show) const
 	Platform::ShowMouseCursor(Show);
 }
 
+void Core::Engine::PlatformGamepadConnectionEventDetected() const
+{
+	Gamepad::OnPlatformGamepadConnectionEvent();
+}
+
 Core::NotificationManager& Core::Engine::GetNotificationManager() const
 {
 	return *NotificationManagerInstance;
@@ -215,19 +219,4 @@ void Core::Engine::TickApplication(double FrameDeltaSeconds)
 bool Core::Engine::CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters) const
 {
 	return Platform::CreatePlatformWindow(Temp, Parameters);
-}
-
-void Core::Engine::NotificationListener(const Core::NotificationData& Notification)
-{
-	switch (Notification.Type)
-	{
-		// Notify the gamepad implementation a gamepad connection event has occurred so that it can be handled by the gamepad implementation
-	case NotificationType::RawGamepadConnected:
-	case NotificationType::RawGamepadDisconnected:
-		Gamepad::OnRawGamepadConnectionEvent();
-		break;
-
-	default:
-		break;
-	}
 }
