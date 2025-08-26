@@ -128,8 +128,10 @@ namespace Core
 
 	private:
 		void BeginApplicationMainLoop();
-		void FixedTickApplication(double FrameDeltaSeconds);
-		void TickApplication(double FrameDeltaSeconds);
+		void EngineBegin();
+		void EngineFixedTick(double FrameDeltaSeconds);
+		void EngineTick(double FrameDeltaSeconds);
+		void EngineEnd();
 
 		// This function is used to hide the platform implementation include inside the translation unit for Engine stopping it being exposed to all code that uses the engine class
 		bool CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters) const;

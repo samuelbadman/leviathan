@@ -178,7 +178,7 @@ void Core::Engine::BeginApplicationMainLoop()
 {
 	Platform::UpdateMessageQueue();
 
-	ApplicationInstance->Begin();
+	EngineBegin();
 
 	while (RunningApplicationInstance)
 	{
@@ -191,30 +191,75 @@ void Core::Engine::BeginApplicationMainLoop()
 		//const uint32_t AverageFPSWhole = static_cast<uint32_t>(AverageFPS);
 
 		Gamepad::PollConnectedGamepads();
+
 		Platform::UpdateMessageQueue();
+
 		Gamepad::EndGamepadPolling();
 
-		FixedTickApplication(FrameDeltaSeconds);
-		TickApplication(FrameDeltaSeconds);
+		EngineFixedTick(FrameDeltaSeconds);
+		EngineTick(FrameDeltaSeconds);
 	}
 
-	ApplicationInstance->End();
+	EngineEnd();
 }
 
-void Core::Engine::FixedTickApplication(double FrameDeltaSeconds)
+void Core::Engine::EngineBegin()
+{
+	ApplicationInstance->Begin();
+
+	for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
+	{
+		if (Module)
+		{
+			Module->Begin();
+		}
+	}
+}
+
+void Core::Engine::EngineFixedTick(double FrameDeltaSeconds)
 {
 	FixedTimeAccumulationSeconds += FrameDeltaSeconds;
 
 	while (FixedTimeAccumulationSeconds > TimeElapsedBetweenFixedTicksSeconds)
 	{
 		ApplicationInstance->FixedTick(FixedTimestep);
+
+		for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
+		{
+			if (Module)
+			{
+				Module->FixedTick(FixedTimestep);
+			}
+		}
+
 		FixedTimeAccumulationSeconds -= TimeElapsedBetweenFixedTicksSeconds;
 	}
 }
 
-void Core::Engine::TickApplication(double FrameDeltaSeconds)
+void Core::Engine::EngineTick(double FrameDeltaSeconds)
 {
 	ApplicationInstance->Tick(FrameDeltaSeconds);
+
+	for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
+	{
+		if (Module)
+		{
+			Module->Tick(FrameDeltaSeconds);
+		}
+	}
+}
+
+void Core::Engine::EngineEnd()
+{
+	ApplicationInstance->End();
+
+	for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
+	{
+		if (Module)
+		{
+			Module->End();
+		}
+	}
 }
 
 bool Core::Engine::CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters) const
