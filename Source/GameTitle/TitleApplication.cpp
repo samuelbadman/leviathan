@@ -2,6 +2,7 @@
 #include "Core/ConsoleOutput.h"
 #include "Core/NotificationManager.h"
 #include "TitleApplicationWindow.h"
+#include "Renderer/RendererModule.h"
 
 IMPLEMENT(TitleApplication)
 
@@ -10,28 +11,23 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 {
 	// Create console output window
 	GetEngine().CreateConsoleWindowOnPlatform();
-	CONSOLE_PRINTF("hello title application\n");
+	CONSOLE_PRINTF("Hello title application.\n");
 
 	// Add title application notification listener
 	GetEngine().GetNotificationManager().AddNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
 
-	// Initialize engine modules used by title application
-
+	// Create engine modules used by title application
+	RendererModuleInstance = GetEngine().CreateModule<Renderer::RendererModule>();
 
 	// Create a window for the title application
 	Core::WindowCreateParameters AppWindowCreateParameters = {};
-	AppWindowCreateParameters.UniqueWindowName = "AppWindow";
+	AppWindowCreateParameters.UniqueWindowName = "TitleAppWindow";
 	AppWindowCreateParameters.WindowName = "Title application";
 	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
 	AppWindowCreateParameters.Width = 640 * 2;
 	AppWindowCreateParameters.Height = 360 * 2;
 
 	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
-
-	if (AppWindow)
-	{
-		CONSOLE_PRINTF("successfully created title application window\n");
-	}
 }
 
 TitleApplication::~TitleApplication()
@@ -48,17 +44,17 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 	switch (Notification.Type)
 	{
 	case Core::NotificationType::GamepadConnected:
-		CONSOLE_PRINTF("gamepad connected at connection %d\n", Notification.Payload.GamepadConnectedPayload.ConnectionIndex);
+		CONSOLE_PRINTF("Gamepad connected at connection %d\n", Notification.Payload.GamepadConnectedPayload.ConnectionIndex);
 		break;
 
 	case Core::NotificationType::GamepadDisconnected:
-		CONSOLE_PRINTF("gamepad disconnected at connection %d\n", Notification.Payload.GamepadDisconnectedPayload.ConnectionIndex);
+		CONSOLE_PRINTF("Gamepad disconnected at connection %d\n", Notification.Payload.GamepadDisconnectedPayload.ConnectionIndex);
 		break;
 
 	case Core::NotificationType::WindowDestroyed:
 		if (Notification.Payload.WindowDestroyedPayload.DestroyedWindow == AppWindow.get())
 		{
-			CONSOLE_PRINTF("title application window has been destroyed\n");
+			CONSOLE_PRINTF("Title application window has been destroyed\n");
 			GetEngine().Quit();
 		}
 		break;

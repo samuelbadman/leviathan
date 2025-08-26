@@ -117,10 +117,13 @@ namespace Core
 		// Creates and initializes an instance of the specified engine module that is owned and managed by the engine instance. Returns a non-owning raw pointer to the 
 		// module instance
 		template<class T>
-		Core::Module* InitializeEngineModule()
+		T* CreateModule()
 		{
-			ModuleInstances.emplace_back(std::make_unique<T>());
-			return ModuleInstances.back().get();
+			// Create instance of module
+			std::unique_ptr<T> Temp = std::make_unique<T>();
+			T* TempResult = Temp.get();
+			ModuleInstances.emplace_back(std::move(Temp));
+			return TempResult;
 		}
 
 	private:

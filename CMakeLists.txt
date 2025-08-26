@@ -30,6 +30,15 @@ if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
 set(BUILD_EXECUTABLE_TARGET WIN32)
 endif()
 
+#################################################################################################
+# Modules
+#################################################################################################
+
+#------------------------------------------------------------------------------------------------
+# Core module
+#------------------------------------------------------------------------------------------------
+
+# Every title must include core as a target module
 # Begin core module static library module target setup
 # Add core static library module target with source files to be compiled for all platforms
 add_library("LeviathanCore" STATIC 
@@ -79,6 +88,51 @@ target_include_directories("LeviathanCore" PRIVATE
 )
 # End core module static library module target setup
 
+#------------------------------------------------------------------------------------------------
+# Renderer module
+#------------------------------------------------------------------------------------------------
+
+# Begin renderer module static library module target setup
+# Add renderer static library module target with source files to be compiled for all platforms
+add_library("LeviathanRenderer" STATIC 
+"Source/Engine/LeviathanRenderer/Renderer/RendererModule.h"
+"Source/Engine/LeviathanRenderer/Renderer/RendererModule.cpp"
+)
+
+# Add source files to be compiled and libraries to link against only for specific platform builds
+if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
+target_sources("LeviathanRenderer" PRIVATE
+""
+)
+
+target_link_libraries("LeviathanRenderer" 
+""
+)
+endif()
+
+# Add target headers to precompile for renderer static library module
+# Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
+target_precompile_headers("LeviathanRenderer" PUBLIC 
+# Modules need to use the core module precompiled header
+"Source/Engine/LeviathanCore/Core/CorePrecompiledHeader.h" 
+"Source/Engine/LeviathanRenderer/Renderer/RendererPrecompiledHeader.h"
+)
+
+# Add static library module include directories
+target_include_directories("LeviathanRenderer" PRIVATE 
+"Source/Engine/LeviathanCore/"
+"Source/Engine/LeviathanRenderer/"
+)
+# End renderer module static library module target setup
+
+#################################################################################################
+# Titles
+#################################################################################################
+
+#------------------------------------------------------------------------------------------------
+# Game title
+#------------------------------------------------------------------------------------------------
+
 # Begin game title executable target setup
 # Add game title executable target with source files compiled for all platform builds
 add_executable("GameTitle" "${BUILD_EXECUTABLE_TARGET}" 
@@ -91,13 +145,18 @@ add_executable("GameTitle" "${BUILD_EXECUTABLE_TARGET}"
 # Link engine static library modules used by game title executable
 target_link_libraries("GameTitle" 
 "LeviathanCore"
+"LeviathanRenderer"
 )
 
 # Add engine static library module source directories as include directories for game title executable
 target_include_directories("GameTitle" PRIVATE 
 "Source/Engine/LeviathanCore/"
+"Source/Engine/LeviathanRenderer/"
 )
 # End game title executable target setup
+
+#################################################################################################
+#################################################################################################
 
 # Set Visual Studio startup project. Select game title being built here
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "GameTitle")

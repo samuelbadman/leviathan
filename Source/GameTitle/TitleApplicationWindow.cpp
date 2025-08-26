@@ -1,9 +1,11 @@
 #include "TitleApplicationWindow.h"
 #include "Core/Engine.h"
+#include "Core/ConsoleOutput.h"
 
 TitleApplicationWindow::TitleApplicationWindow(Core::Engine& Engine, const char* InUniqueName)
 	: Super(Engine, InUniqueName)
 {
+	CONSOLE_PRINTF("Hello title application window.\n");
 }
 
 void TitleApplicationWindow::OnInputKey(const Core::InputEventArgs& EventArgs)
