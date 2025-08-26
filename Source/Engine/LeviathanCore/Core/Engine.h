@@ -7,6 +7,7 @@ namespace Core
 	class Application;
 	class NotificationManager;
 	class Window;
+	class Module;
 
 	struct WindowCreateParameters;
 	struct Rectangle;
@@ -29,6 +30,7 @@ namespace Core
 	private:
 		std::unique_ptr<Core::NotificationManager> NotificationManagerInstance = nullptr;
 		std::unique_ptr<Core::Application> ApplicationInstance = nullptr;
+		std::vector<std::unique_ptr<Core::Module>> ModuleInstances = {};
 		bool SignalRestart = false;
 		bool RunningApplicationInstance = false;
 		double FixedTimeAccumulationSeconds = 0.0;
@@ -111,6 +113,15 @@ namespace Core
 		void PlatformGamepadConnectionEventDetected() const;
 
 		Core::NotificationManager& GetNotificationManager() const;
+
+		// Creates and initializes an instance of the specified engine module that is owned and managed by the engine instance. Returns a non-owning raw pointer to the 
+		// module instance
+		template<class T>
+		Core::Module* InitializeEngineModule()
+		{
+			ModuleInstances.emplace_back(std::make_unique<T>());
+			return ModuleInstances.back().get();
+		}
 
 	private:
 		void BeginApplicationMainLoop();

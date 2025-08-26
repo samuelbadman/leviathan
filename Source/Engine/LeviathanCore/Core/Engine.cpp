@@ -4,6 +4,7 @@
 #include "Platform/Gamepad.h"
 #include "NotificationManager.h"
 #include "Window.h"
+#include "Module.h"
 
 Core::Engine::Engine()
 {

@@ -15,6 +15,9 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	// Add title application notification listener
 	GetEngine().GetNotificationManager().AddNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
 
+	// Initialize engine modules used by title application
+
+
 	// Create a window for the title application
 	Core::WindowCreateParameters AppWindowCreateParameters = {};
 	AppWindowCreateParameters.UniqueWindowName = "AppWindow";
