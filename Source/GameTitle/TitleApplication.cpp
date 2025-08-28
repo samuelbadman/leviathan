@@ -22,7 +22,7 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	// Create a window for the title application
 	Core::WindowCreateParameters AppWindowCreateParameters = {};
 	AppWindowCreateParameters.UniqueWindowName = "TitleAppWindow";
-	AppWindowCreateParameters.WindowName = "Title application";
+	AppWindowCreateParameters.WindowName = "DevTitle";
 	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
 	AppWindowCreateParameters.Width = 640 * 2;
 	AppWindowCreateParameters.Height = 360 * 2;

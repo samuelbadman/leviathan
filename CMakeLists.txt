@@ -97,6 +97,8 @@ target_include_directories("LeviathanCore" PRIVATE
 add_library("LeviathanRenderer" STATIC 
 "Source/Engine/LeviathanRenderer/Renderer/RendererModule.h"
 "Source/Engine/LeviathanRenderer/Renderer/RendererModule.cpp"
+# TODO: Add switch to specify which rendering API to compile the engine with
+"Source/Engine/LeviathanRenderer/Vendor/glad/glad.cpp"
 )
 
 # Add source files to be compiled and libraries to link against only for specific platform builds
@@ -122,6 +124,8 @@ target_precompile_headers("LeviathanRenderer" PUBLIC
 target_include_directories("LeviathanRenderer" PRIVATE 
 "Source/Engine/LeviathanCore/"
 "Source/Engine/LeviathanRenderer/"
+# TODO: Add switch to specify which rendering API to compile the engine with
+"Source/Engine/LeviathanRenderer/Vendor/glad/"
 )
 # End renderer module static library module target setup
 
