@@ -108,7 +108,8 @@ target_sources("LeviathanRenderer" PRIVATE
 )
 
 target_link_libraries("LeviathanRenderer" 
-""
+# TODO: Add switch for which rendering api libraries to link against
+"Opengl32.lib"
 )
 endif()
 
