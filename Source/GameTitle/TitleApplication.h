@@ -17,9 +17,10 @@ class TitleApplicationWindow;
 class TitleApplication : public Core::Application
 {
 private:
-	std::unique_ptr<TitleApplicationWindow> AppWindow = nullptr;
-
 	Renderer::RendererModule* RendererModuleInstance = nullptr;
+
+	std::unique_ptr<TitleApplicationWindow> AppWindow = nullptr;
+	void* AppWindowRenderingContext = nullptr;
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);
@@ -27,4 +28,9 @@ public:
 
 private:
 	void NotificationListener(const Core::NotificationData& Notification);
+	void OnAppWindowDestroyed();
+	bool CreateAppWindow();
+	bool CreateAppWindowRenderingContext();
+	bool MakeAppWindowRenderingContextCurrent();
+	bool DeleteAppWindowRenderingContext();
 };

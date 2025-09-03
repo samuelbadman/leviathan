@@ -8,5 +8,10 @@ namespace Renderer
 	{
 	public:
 		RendererModule();
+
+		void* CreateContext(void* WindowPlatformHandle);
+		bool MakeContextCurrent(void* WindowPlatformHandle, void* Context);
+		bool DeleteContext(void* WindowPlatformHandle, void* Context);
+		bool LoadAPI();
 	};
 }

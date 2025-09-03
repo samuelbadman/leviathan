@@ -19,15 +19,29 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	// Create engine modules used by title application
 	RendererModuleInstance = GetEngine().CreateModule<Renderer::RendererModule>();
 
-	// Create a window for the title application
-	Core::WindowCreateParameters AppWindowCreateParameters = {};
-	AppWindowCreateParameters.UniqueWindowName = "TitleAppWindow";
-	AppWindowCreateParameters.WindowName = "DevTitle";
-	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
-	AppWindowCreateParameters.Width = 640 * 2;
-	AppWindowCreateParameters.Height = 360 * 2;
+	// Create a main window for the title application
+	if (!CreateAppWindow())
+	{
+		CONSOLE_PRINTF("Failed to create title application window.\n");
+	}
 
-	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
+	// Create a rendering context for the title application window
+	if (!CreateAppWindowRenderingContext())
+	{
+		CONSOLE_PRINTF("Failed to create rendering context for title application window.\n");
+	}
+
+	// Make the title application window rendering context the current rendering context
+	if (!MakeAppWindowRenderingContextCurrent())
+	{
+		CONSOLE_PRINTF("Failed to make title application window's rendering context the current context.\n");
+	}
+
+	// Load the renderer api functions. This only needs to be done once during startup but needs a valid rendering context to be made current
+	if (!RendererModuleInstance->LoadAPI())
+	{
+		CONSOLE_PRINTF("Failed to create load rendering API functions.\n");
+	}
 }
 
 TitleApplication::~TitleApplication()
@@ -54,11 +68,82 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 	case Core::NotificationType::WindowDestroyed:
 		if (Notification.Payload.WindowDestroyedPayload.DestroyedWindow == AppWindow.get())
 		{
-			CONSOLE_PRINTF("Title application window has been destroyed\n");
-			GetEngine().Quit();
+			OnAppWindowDestroyed();
 		}
 		break;
 
 	default: break;
 	}
+}
+
+void TitleApplication::OnAppWindowDestroyed()
+{
+	// Delete app window rendering context
+	if (!DeleteAppWindowRenderingContext())
+	{
+
+		CONSOLE_PRINTF("Failed to delete title application window's rendering context.\n");
+	}
+
+	// Tell the engine to quit
+	GetEngine().Quit();
+}
+
+bool TitleApplication::CreateAppWindow()
+{
+	Core::WindowCreateParameters AppWindowCreateParameters = {};
+	AppWindowCreateParameters.UniqueWindowName = "TitleAppWindow";
+	AppWindowCreateParameters.WindowName = "Title application";
+	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
+	AppWindowCreateParameters.Width = 960;
+	AppWindowCreateParameters.Height = 540;
+
+	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
+	return AppWindow != nullptr;
+}
+
+bool TitleApplication::CreateAppWindowRenderingContext()
+{
+	if (!RendererModuleInstance)
+	{
+		return false;
+	}
+
+	if (!AppWindow)
+	{
+		return false;
+	}
+
+	AppWindowRenderingContext = RendererModuleInstance->CreateContext(AppWindow->GetPlatformHandle());
+	return AppWindowRenderingContext != nullptr;
+}
+
+bool TitleApplication::MakeAppWindowRenderingContextCurrent()
+{
+	if (!RendererModuleInstance)
+	{
+		return false;
+	}
+
+	if (!AppWindow)
+	{
+		return false;
+	}
+
+	return RendererModuleInstance->MakeContextCurrent(AppWindow->GetPlatformHandle(), AppWindowRenderingContext);
+}
+
+bool TitleApplication::DeleteAppWindowRenderingContext()
+{
+	if (!RendererModuleInstance)
+	{
+		return false;
+	}
+
+	if (!AppWindow)
+	{
+		return false;
+	}
+
+	return RendererModuleInstance->DeleteContext(AppWindow->GetPlatformHandle(), AppWindowRenderingContext);
 }

@@ -133,7 +133,8 @@ namespace Core
 		void EngineTick(double FrameDeltaSeconds);
 		void EngineEnd();
 
-		// This function is used to hide the platform implementation include inside the translation unit for Engine stopping it being exposed to all code that uses the engine class
+		// This function is used to hide the platform implementation include inside the translation unit for Engine, stopping the platform implementation header from
+		// being exposed to all code that uses the engine class
 		bool CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters) const;
 	};
 }
