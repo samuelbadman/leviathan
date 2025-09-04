@@ -20,27 +20,37 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	RendererModuleInstance = GetEngine().CreateModule<Renderer::RendererModule>();
 
 	// Create a main window for the title application
-	if (!CreateAppWindow())
-	{
-		CONSOLE_PRINTF("Failed to create title application window.\n");
-	}
+	Core::WindowCreateParameters AppWindowCreateParameters = {};
+	AppWindowCreateParameters.UniqueWindowName = "TitleAppWindow";
+	AppWindowCreateParameters.WindowName = "Title application";
+	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
+	AppWindowCreateParameters.Width = 960;
+	AppWindowCreateParameters.Height = 540;
 
-	// Create a rendering context for the title application window
-	if (!CreateAppWindowRenderingContext())
-	{
-		CONSOLE_PRINTF("Failed to create rendering context for title application window.\n");
-	}
+	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
 
-	// Make the title application window rendering context the current rendering context
-	if (!MakeAppWindowRenderingContextCurrent())
+	if (RendererModuleInstance && AppWindow)
 	{
-		CONSOLE_PRINTF("Failed to make title application window's rendering context the current context.\n");
-	}
+		// Create a rendering context for the title application window
+		AppWindowRenderingContext = RendererModuleInstance->CreateContext(AppWindow->GetPlatformHandle());
+		if (!AppWindowRenderingContext)
+		{
+			CONSOLE_PRINTF("Failed to create rendering context for title application window.\n");
+		}
 
-	// Load the renderer api functions. This only needs to be done once during startup but needs a valid rendering context to be made current
-	if (!RendererModuleInstance->LoadAPI())
-	{
-		CONSOLE_PRINTF("Failed to create load rendering API functions.\n");
+		// Make the title application window rendering context the current rendering context
+		if (!RendererModuleInstance->MakeContextCurrent(AppWindow->GetPlatformHandle(), AppWindowRenderingContext))
+		{
+			CONSOLE_PRINTF("Failed to make title application window rendering context current.\n");
+		}
+
+		// Load the renderer api functions. This only needs to be done once during startup but needs a valid rendering context to be made current
+		if (!RendererModuleInstance->LoadAPI())
+		{
+			CONSOLE_PRINTF("Failed to load rendering API functions.\n");
+		}
+
+		RendererModuleInstance->PrintVersion();
 	}
 }
 
@@ -79,71 +89,11 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 void TitleApplication::OnAppWindowDestroyed()
 {
 	// Delete app window rendering context
-	if (!DeleteAppWindowRenderingContext())
+	if (!RendererModuleInstance->DeleteContext(AppWindow->GetPlatformHandle(), AppWindowRenderingContext))
 	{
-
 		CONSOLE_PRINTF("Failed to delete title application window's rendering context.\n");
 	}
 
 	// Tell the engine to quit
 	GetEngine().Quit();
-}
-
-bool TitleApplication::CreateAppWindow()
-{
-	Core::WindowCreateParameters AppWindowCreateParameters = {};
-	AppWindowCreateParameters.UniqueWindowName = "TitleAppWindow";
-	AppWindowCreateParameters.WindowName = "Title application";
-	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
-	AppWindowCreateParameters.Width = 960;
-	AppWindowCreateParameters.Height = 540;
-
-	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
-	return AppWindow != nullptr;
-}
-
-bool TitleApplication::CreateAppWindowRenderingContext()
-{
-	if (!RendererModuleInstance)
-	{
-		return false;
-	}
-
-	if (!AppWindow)
-	{
-		return false;
-	}
-
-	AppWindowRenderingContext = RendererModuleInstance->CreateContext(AppWindow->GetPlatformHandle());
-	return AppWindowRenderingContext != nullptr;
-}
-
-bool TitleApplication::MakeAppWindowRenderingContextCurrent()
-{
-	if (!RendererModuleInstance)
-	{
-		return false;
-	}
-
-	if (!AppWindow)
-	{
-		return false;
-	}
-
-	return RendererModuleInstance->MakeContextCurrent(AppWindow->GetPlatformHandle(), AppWindowRenderingContext);
-}
-
-bool TitleApplication::DeleteAppWindowRenderingContext()
-{
-	if (!RendererModuleInstance)
-	{
-		return false;
-	}
-
-	if (!AppWindow)
-	{
-		return false;
-	}
-
-	return RendererModuleInstance->DeleteContext(AppWindow->GetPlatformHandle(), AppWindowRenderingContext);
 }

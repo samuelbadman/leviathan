@@ -13,5 +13,8 @@ namespace Renderer
 		bool MakeContextCurrent(void* WindowPlatformHandle, void* Context);
 		bool DeleteContext(void* WindowPlatformHandle, void* Context);
 		bool LoadAPI();
+		void PrintVersion();
+
+
 	};
 }

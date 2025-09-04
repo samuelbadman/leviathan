@@ -29,8 +29,4 @@ public:
 private:
 	void NotificationListener(const Core::NotificationData& Notification);
 	void OnAppWindowDestroyed();
-	bool CreateAppWindow();
-	bool CreateAppWindowRenderingContext();
-	bool MakeAppWindowRenderingContextCurrent();
-	bool DeleteAppWindowRenderingContext();
 };

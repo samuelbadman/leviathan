@@ -77,3 +77,8 @@ bool Renderer::RendererModule::LoadAPI()
 {
 	return gladLoadGL() != 0;
 }
+
+void Renderer::RendererModule::PrintVersion()
+{
+	CONSOLE_PRINTF("%s\n", glGetString(GL_VERSION));
+}
