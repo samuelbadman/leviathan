@@ -87,3 +87,21 @@ void Renderer::RendererModule::Viewport(int32_t LowerLeftX, int32_t LowerLeftY, 
 {
 	glViewport(LowerLeftX, LowerLeftY, WidthPixels, HeightPixels);
 }
+
+void Renderer::RendererModule::ClearColor(float R, float G, float B, float A)
+{
+	glClearColor(R, G, B, A);
+}
+
+void Renderer::RendererModule::Clear()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+bool Renderer::RendererModule::SwapWindowBuffers(void* WindowPlatformHandle)
+{
+#ifdef PLATFORM_WINDOWS
+	return SwapBuffers(GetDC(static_cast<HWND>(WindowPlatformHandle))) == TRUE;
+#else
+#endif // PLATFORM_WINDOWS
+}

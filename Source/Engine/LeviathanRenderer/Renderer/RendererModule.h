@@ -16,5 +16,8 @@ namespace Renderer
 		void PrintVersion();
 
 		void Viewport(int32_t LowerLeftX, int32_t LowerLeftY, int32_t WidthPixels, int32_t HeightPixels);
+		void ClearColor(float R, float G, float B, float A);
+		void Clear();
+		bool SwapWindowBuffers(void* WindowPlatformHandle);
 	};
 }

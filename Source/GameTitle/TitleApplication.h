@@ -29,6 +29,8 @@ public:
 	~TitleApplication();
 
 private:
+	virtual void Tick(double DeltaSeconds) override;
+
 	void NotificationListener(const Core::NotificationData& Notification);
 	void OnAppWindowDestroyed();
 	void OnAppWindowResized(const TitleApplicationWindowResizedDelegateParameters& Params);

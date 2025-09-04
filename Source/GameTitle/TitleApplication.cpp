@@ -71,6 +71,23 @@ TitleApplication::~TitleApplication()
 	GetEngine().GetNotificationManager().RemoveNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
 }
 
+void TitleApplication::Tick(double DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// Render
+	if (RendererModuleInstance && AppWindow)
+	{
+		RendererModuleInstance->ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		RendererModuleInstance->Clear();
+
+		if (!RendererModuleInstance->SwapWindowBuffers(AppWindow->GetPlatformHandle()))
+		{
+			CONSOLE_PRINTF("Failed to swap title application window buffers.\n");
+		}
+	}
+}
+
 void TitleApplication::NotificationListener(const Core::NotificationData& Notification)
 {
 	switch (Notification.Type)
