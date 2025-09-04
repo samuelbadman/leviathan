@@ -2,6 +2,23 @@
 #include "Core/ConsoleOutput.h"
 #include "glad/glad.h"
 
+namespace
+{
+	namespace RendererInternals
+	{
+		GLenum TranslateBufferUsage(const Renderer::BufferUsage Usage)
+		{
+			switch (Usage)
+			{
+			case Renderer::BufferUsage::Stream: return GL_STREAM_DRAW;
+			case Renderer::BufferUsage::Static: return GL_STATIC_DRAW;
+			case Renderer::BufferUsage::Dynamic: return GL_DYNAMIC_DRAW;
+			default: return GL_INVALID_ENUM;
+			}
+		}
+	}
+}
+
 Renderer::RendererModule::RendererModule()
 {
 	CONSOLE_PRINTF("Hello renderer module.\n");
@@ -83,6 +100,14 @@ void Renderer::RendererModule::PrintVersion()
 	CONSOLE_PRINTF("OpenGL version and driver version: %s\n", glGetString(GL_VERSION));
 }
 
+bool Renderer::RendererModule::SwapWindowBuffers(void* WindowPlatformHandle)
+{
+#ifdef PLATFORM_WINDOWS
+	return SwapBuffers(GetDC(static_cast<HWND>(WindowPlatformHandle))) == TRUE;
+#else
+#endif // PLATFORM_WINDOWS
+}
+
 void Renderer::RendererModule::Viewport(int32_t LowerLeftX, int32_t LowerLeftY, int32_t WidthPixels, int32_t HeightPixels)
 {
 	glViewport(LowerLeftX, LowerLeftY, WidthPixels, HeightPixels);
@@ -98,10 +123,17 @@ void Renderer::RendererModule::Clear()
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-bool Renderer::RendererModule::SwapWindowBuffers(void* WindowPlatformHandle)
+void Renderer::RendererModule::GenBuffers(size_t NumBuffers, uint32_t* OutBufferIDsStart)
 {
-#ifdef PLATFORM_WINDOWS
-	return SwapBuffers(GetDC(static_cast<HWND>(WindowPlatformHandle))) == TRUE;
-#else
-#endif // PLATFORM_WINDOWS
+	glGenBuffers(NumBuffers, OutBufferIDsStart);
+}
+
+void Renderer::RendererModule::BindVertexBuffer(uint32_t BufferID)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, BufferID);
+}
+
+void Renderer::RendererModule::CopyDataToVertexBuffer(uint32_t BufferID, size_t DataSize, const void* Data, BufferUsage Usage)
+{
+	glBufferData(GL_ARRAY_BUFFER, DataSize, Data, RendererInternals::TranslateBufferUsage(Usage));
 }

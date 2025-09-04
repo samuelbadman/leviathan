@@ -55,9 +55,28 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 				CONSOLE_PRINTF("Failed to load rendering API functions.\n");
 			}
 
+			// Debug print renderer API version
 			RendererModuleInstance->PrintVersion();
 
+			// Set initial viewport
 			RendererModuleInstance->Viewport(0, 0, AppWindowCreateParameters.Width, AppWindowCreateParameters.Height);
+
+			// Define triangle vertex data
+			static std::array<float, 3 * 3> Vertices =
+			{
+				-0.5f, -0.5f, 0.0f,
+				0.5f, -0.5f, 0.0f,
+				0.0f, 0.5f, 0.0f
+			};
+
+			// Generate vertex buffer on GPU
+			RendererModuleInstance->GenBuffers(1, &TriangleVertexBufferID);
+
+			// Bind vertex buffer
+			RendererModuleInstance->BindVertexBuffer(TriangleVertexBufferID);
+
+			// Copy triangle vertex data to buffer
+			RendererModuleInstance->CopyDataToVertexBuffer(TriangleVertexBufferID, sizeof(Vertices), Vertices.data(), Renderer::BufferUsage::Static);
 		}
 	}
 }
@@ -80,6 +99,11 @@ void TitleApplication::Tick(double DeltaSeconds)
 	{
 		RendererModuleInstance->ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		RendererModuleInstance->Clear();
+
+
+
+
+
 
 		if (!RendererModuleInstance->SwapWindowBuffers(AppWindow->GetPlatformHandle()))
 		{

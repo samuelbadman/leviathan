@@ -24,6 +24,8 @@ private:
 	std::unique_ptr<TitleApplicationWindow> AppWindow = nullptr;
 	void* AppWindowRenderingContext = nullptr;
 
+	uint32_t TriangleVertexBufferID = 0;
+
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);
 	~TitleApplication();
