@@ -15,6 +15,6 @@ namespace Renderer
 		bool LoadAPI();
 		void PrintVersion();
 
-
+		void Viewport(int32_t LowerLeftX, int32_t LowerLeftY, int32_t WidthPixels, int32_t HeightPixels);
 	};
 }

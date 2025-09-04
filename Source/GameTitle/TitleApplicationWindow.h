@@ -1,11 +1,28 @@
 #pragma once
 
 #include "Core/Window.h"
+#include "Core/ProgrammingTools/Delegate.h"
+
+class TitleApplicationWindow;
+
+struct TitleApplicationWindowResizedDelegateParameters
+{
+	TitleApplicationWindow* pWindow = nullptr;
+	uint32_t NewWidth = 0;
+	uint32_t NewHeight = 0;
+};
+
+DECLARE_SINGLE_DELEGATE_OneParam(TitleApplicationWindowResizedSignature, const TitleApplicationWindowResizedDelegateParameters& /* Parameters */);
 
 class TitleApplicationWindow : public Core::Window
 {
+private:
+	TitleApplicationWindowResizedSignature ResizedDelegate = {};
+
 public:
 	TitleApplicationWindow(Core::Engine& Engine, const char* InUniqueName);
+
+	inline TitleApplicationWindowResizedSignature& GetResizedDelegate() { return ResizedDelegate; }
 
 private:
 	// Begin window interface

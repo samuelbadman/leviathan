@@ -80,5 +80,10 @@ bool Renderer::RendererModule::LoadAPI()
 
 void Renderer::RendererModule::PrintVersion()
 {
-	CONSOLE_PRINTF("%s\n", glGetString(GL_VERSION));
+	CONSOLE_PRINTF("OpenGL version and driver version: %s\n", glGetString(GL_VERSION));
+}
+
+void Renderer::RendererModule::Viewport(int32_t LowerLeftX, int32_t LowerLeftY, int32_t WidthPixels, int32_t HeightPixels)
+{
+	glViewport(LowerLeftX, LowerLeftY, WidthPixels, HeightPixels);
 }

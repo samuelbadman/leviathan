@@ -29,28 +29,36 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 
 	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
 
-	if (RendererModuleInstance && AppWindow)
+	if (AppWindow)
 	{
-		// Create a rendering context for the title application window
-		AppWindowRenderingContext = RendererModuleInstance->CreateContext(AppWindow->GetPlatformHandle());
-		if (!AppWindowRenderingContext)
-		{
-			CONSOLE_PRINTF("Failed to create rendering context for title application window.\n");
-		}
+		// Subscribe to app window resized delegate
+		AppWindow->GetResizedDelegate().BindMethod<TitleApplication, &TitleApplication::OnAppWindowResized>(this);
 
-		// Make the title application window rendering context the current rendering context
-		if (!RendererModuleInstance->MakeContextCurrent(AppWindow->GetPlatformHandle(), AppWindowRenderingContext))
+		if (RendererModuleInstance)
 		{
-			CONSOLE_PRINTF("Failed to make title application window rendering context current.\n");
-		}
+			// Create a rendering context for the title application window
+			AppWindowRenderingContext = RendererModuleInstance->CreateContext(AppWindow->GetPlatformHandle());
+			if (!AppWindowRenderingContext)
+			{
+				CONSOLE_PRINTF("Failed to create rendering context for title application window.\n");
+			}
 
-		// Load the renderer api functions. This only needs to be done once during startup but needs a valid rendering context to be made current
-		if (!RendererModuleInstance->LoadAPI())
-		{
-			CONSOLE_PRINTF("Failed to load rendering API functions.\n");
-		}
+			// Make the title application window rendering context the current rendering context
+			if (!RendererModuleInstance->MakeContextCurrent(AppWindow->GetPlatformHandle(), AppWindowRenderingContext))
+			{
+				CONSOLE_PRINTF("Failed to make title application window rendering context current.\n");
+			}
 
-		RendererModuleInstance->PrintVersion();
+			// Load the renderer api functions. This only needs to be done once during startup but needs a valid rendering context to be made current
+			if (!RendererModuleInstance->LoadAPI())
+			{
+				CONSOLE_PRINTF("Failed to load rendering API functions.\n");
+			}
+
+			RendererModuleInstance->PrintVersion();
+
+			RendererModuleInstance->Viewport(0, 0, AppWindowCreateParameters.Width, AppWindowCreateParameters.Height);
+		}
 	}
 }
 
@@ -96,4 +104,13 @@ void TitleApplication::OnAppWindowDestroyed()
 
 	// Tell the engine to quit
 	GetEngine().Quit();
+}
+
+void TitleApplication::OnAppWindowResized(const TitleApplicationWindowResizedDelegateParameters& Params)
+{
+	CONSOLE_PRINTF("Title application window resized. NewWidth: %d, NewHeight: %d.\n", Params.NewWidth, Params.NewHeight);
+	if (RendererModuleInstance)
+	{
+		RendererModuleInstance->Viewport(0, 0, Params.NewWidth, Params.NewHeight);
+	}
 }

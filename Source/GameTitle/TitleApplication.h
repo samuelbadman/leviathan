@@ -14,6 +14,8 @@ namespace Renderer
 
 class TitleApplicationWindow;
 
+struct TitleApplicationWindowResizedDelegateParameters;
+
 class TitleApplication : public Core::Application
 {
 private:
@@ -29,4 +31,5 @@ public:
 private:
 	void NotificationListener(const Core::NotificationData& Notification);
 	void OnAppWindowDestroyed();
+	void OnAppWindowResized(const TitleApplicationWindowResizedDelegateParameters& Params);
 };
