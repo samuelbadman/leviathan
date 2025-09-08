@@ -16,8 +16,5 @@ namespace Renderer
 
 		void PrintVersion();
 		bool SwapWindowBuffers(void* WindowPlatformHandle);
-
-	private:
-
 	};
 }

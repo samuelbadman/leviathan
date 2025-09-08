@@ -32,7 +32,7 @@ bool Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)
 	ApplicationInstance = std::move(pApplication);
 	RunningApplicationInstance = true;
 
-	BeginApplicationMainLoop();
+	EngineMainLoop();
 
 	return SignalRestart;
 }
@@ -174,7 +174,7 @@ void Core::Engine::Quit(bool RestartEngine)
 	SignalRestart = RestartEngine;
 }
 
-void Core::Engine::BeginApplicationMainLoop()
+void Core::Engine::EngineMainLoop()
 {
 	Platform::UpdateMessageQueue();
 
@@ -205,69 +205,28 @@ void Core::Engine::BeginApplicationMainLoop()
 
 void Core::Engine::EngineBegin()
 {
-	// Begin application instance
 	ApplicationInstance->Begin();
-
-	// Begin modules
-	for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
-	{
-		if (Module)
-		{
-			Module->Begin();
-		}
-	}
 }
 
-void Core::Engine::EngineFixedTick(double FrameDeltaSeconds)
+void Core::Engine::EngineFixedTick(float DeltaSeconds)
 {
-	FixedTimeAccumulationSeconds += FrameDeltaSeconds;
+	FixedTimeAccumulationSeconds += DeltaSeconds;
 
 	while (FixedTimeAccumulationSeconds > TimeElapsedBetweenFixedTicksSeconds)
 	{
-		// Fixed tick application
 		ApplicationInstance->FixedTick(FixedTimestep);
-
-		// Fixed tick modules
-		for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
-		{
-			if (Module)
-			{
-				Module->FixedTick(FixedTimestep);
-			}
-		}
-
 		FixedTimeAccumulationSeconds -= TimeElapsedBetweenFixedTicksSeconds;
 	}
 }
 
-void Core::Engine::EngineTick(double FrameDeltaSeconds)
+void Core::Engine::EngineTick(float DeltaSeconds)
 {
-	// Tick application
-	ApplicationInstance->Tick(FrameDeltaSeconds);
-
-	// Tick modules
-	for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
-	{
-		if (Module)
-		{
-			Module->Tick(FrameDeltaSeconds);
-		}
-	}
+	ApplicationInstance->Tick(DeltaSeconds);
 }
 
 void Core::Engine::EngineEnd()
 {
-	// End application
 	ApplicationInstance->End();
-
-	// End modules
-	for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
-	{
-		if (Module)
-		{
-			Module->End();
-		}
-	}
 }
 
 bool Core::Engine::CallPlatformCreateWindowImplementation(Core::Window& Temp, const Core::WindowCreateParameters& Parameters) const

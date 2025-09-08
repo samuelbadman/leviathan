@@ -19,10 +19,10 @@ struct TitleApplicationWindowResizedParameters;
 class TitleApplication : public Core::Application
 {
 private:
-	Renderer::RendererModule* RendererModuleInstance = nullptr;
-
 	std::unique_ptr<TitleApplicationWindow> MainAppWindow = nullptr;
 	void* AppWindowRenderingContext = nullptr;
+
+	Renderer::RendererModule* RendererModuleInstance = nullptr;
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);

@@ -30,7 +30,9 @@ namespace Core
 	private:
 		std::unique_ptr<Core::NotificationManager> NotificationManagerInstance = nullptr;
 		std::unique_ptr<Core::Application> ApplicationInstance = nullptr;
-		std::vector<std::unique_ptr<Core::Module>> ModuleInstances = {};
+
+		std::vector<std::unique_ptr<Core::Module>> Modules = {};
+
 		bool SignalRestart = false;
 		bool RunningApplicationInstance = false;
 		double FixedTimeAccumulationSeconds = 0.0;
@@ -38,6 +40,18 @@ namespace Core
 	public:
 		Engine();
 		~Engine();
+
+		// Creates and initializes an instance of the specified engine module that is owned and managed by the engine instance. Returns a non-owning raw pointer to the 
+		// module instance
+		template<class T>
+		T* CreateModule()
+		{
+			// Create instance of module
+			std::unique_ptr<T> Temp = std::make_unique<T>();
+			T* TempResult = Temp.get();
+			Modules.emplace_back(std::move(Temp));
+			return TempResult;
+		}
 
 		// Returns true if the engine should restart after BeginApplication() returns otherwise, returns false if the process should exit
 		bool BeginApplication(std::unique_ptr<Core::Application> pApplication);
@@ -114,23 +128,11 @@ namespace Core
 
 		Core::NotificationManager& GetNotificationManager() const;
 
-		// Creates and initializes an instance of the specified engine module that is owned and managed by the engine instance. Returns a non-owning raw pointer to the 
-		// module instance
-		template<class T>
-		T* CreateModule()
-		{
-			// Create instance of module
-			std::unique_ptr<T> Temp = std::make_unique<T>();
-			T* TempResult = Temp.get();
-			ModuleInstances.emplace_back(std::move(Temp));
-			return TempResult;
-		}
-
 	private:
-		void BeginApplicationMainLoop();
+		void EngineMainLoop();
 		void EngineBegin();
-		void EngineFixedTick(double FrameDeltaSeconds);
-		void EngineTick(double FrameDeltaSeconds);
+		void EngineFixedTick(float DeltaSeconds);
+		void EngineTick(float DeltaSeconds);
 		void EngineEnd();
 
 		// This function is used to hide the platform implementation include inside the translation unit for Engine, stopping the platform implementation header from
