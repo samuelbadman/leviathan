@@ -2,28 +2,6 @@
 #include "Core/ConsoleOutput.h"
 #include "glad/glad.h"
 
-namespace
-{
-	namespace RendererInternals
-	{
-		GLenum TranslateBufferUsage(const Renderer::BufferUsage Usage)
-		{
-			switch (Usage)
-			{
-			case Renderer::BufferUsage::Stream: return GL_STREAM_DRAW;
-			case Renderer::BufferUsage::Static: return GL_STATIC_DRAW;
-			case Renderer::BufferUsage::Dynamic: return GL_DYNAMIC_DRAW;
-			default: return GL_INVALID_ENUM;
-			}
-		}
-	}
-}
-
-Renderer::RendererModule::RendererModule()
-{
-	CONSOLE_PRINTF("Hello renderer module.\n");
-}
-
 void* Renderer::RendererModule::CreateContext(void* WindowPlatformHandle)
 {
 #ifdef PLATFORM_WINDOWS
@@ -106,34 +84,4 @@ bool Renderer::RendererModule::SwapWindowBuffers(void* WindowPlatformHandle)
 	return SwapBuffers(GetDC(static_cast<HWND>(WindowPlatformHandle))) == TRUE;
 #else
 #endif // PLATFORM_WINDOWS
-}
-
-void Renderer::RendererModule::Viewport(int32_t LowerLeftX, int32_t LowerLeftY, int32_t WidthPixels, int32_t HeightPixels)
-{
-	glViewport(LowerLeftX, LowerLeftY, WidthPixels, HeightPixels);
-}
-
-void Renderer::RendererModule::ClearColor(float R, float G, float B, float A)
-{
-	glClearColor(R, G, B, A);
-}
-
-void Renderer::RendererModule::Clear()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-
-void Renderer::RendererModule::GenBuffers(size_t NumBuffers, uint32_t* OutBufferIDsStart)
-{
-	glGenBuffers(NumBuffers, OutBufferIDsStart);
-}
-
-void Renderer::RendererModule::BindVertexBuffer(uint32_t BufferID)
-{
-	glBindBuffer(GL_ARRAY_BUFFER, BufferID);
-}
-
-void Renderer::RendererModule::CopyDataToVertexBuffer(uint32_t BufferID, size_t DataSize, const void* Data, BufferUsage Usage)
-{
-	glBufferData(GL_ARRAY_BUFFER, DataSize, Data, RendererInternals::TranslateBufferUsage(Usage));
 }

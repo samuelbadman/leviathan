@@ -11,7 +11,6 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 {
 	// Create console output window
 	GetEngine().CreateConsoleWindowOnPlatform();
-	CONSOLE_PRINTF("Hello title application.\n");
 
 	// Add title application notification listener
 	GetEngine().GetNotificationManager().AddNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
@@ -57,26 +56,6 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 
 			// Debug print renderer API version
 			RendererModuleInstance->PrintVersion();
-
-			// Set initial viewport
-			RendererModuleInstance->Viewport(0, 0, AppWindowCreateParameters.Width, AppWindowCreateParameters.Height);
-
-			// Define triangle vertex data
-			static std::array<float, 3 * 3> Vertices =
-			{
-				-0.5f, -0.5f, 0.0f,
-				0.5f, -0.5f, 0.0f,
-				0.0f, 0.5f, 0.0f
-			};
-
-			// Generate vertex buffer on GPU
-			RendererModuleInstance->GenBuffers(1, &TriangleVertexBufferID);
-
-			// Bind vertex buffer
-			RendererModuleInstance->BindVertexBuffer(TriangleVertexBufferID);
-
-			// Copy triangle vertex data to buffer
-			RendererModuleInstance->CopyDataToVertexBuffer(TriangleVertexBufferID, sizeof(Vertices), Vertices.data(), Renderer::BufferUsage::Static);
 		}
 	}
 }
@@ -97,12 +76,6 @@ void TitleApplication::Tick(double DeltaSeconds)
 	// Render
 	if (RendererModuleInstance && AppWindow)
 	{
-		RendererModuleInstance->ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		RendererModuleInstance->Clear();
-
-
-
-
 
 
 		if (!RendererModuleInstance->SwapWindowBuffers(AppWindow->GetPlatformHandle()))
@@ -147,11 +120,11 @@ void TitleApplication::OnAppWindowDestroyed()
 	GetEngine().Quit();
 }
 
-void TitleApplication::OnAppWindowResized(const TitleApplicationWindowResizedDelegateParameters& Params)
+void TitleApplication::OnAppWindowResized(const TitleApplicationWindowResizedParameters& Params)
 {
 	CONSOLE_PRINTF("Title application window resized. NewWidth: %d, NewHeight: %d.\n", Params.NewWidth, Params.NewHeight);
 	if (RendererModuleInstance)
 	{
-		RendererModuleInstance->Viewport(0, 0, Params.NewWidth, Params.NewHeight);
+
 	}
 }

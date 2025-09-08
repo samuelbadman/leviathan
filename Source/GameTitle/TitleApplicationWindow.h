@@ -5,14 +5,14 @@
 
 class TitleApplicationWindow;
 
-struct TitleApplicationWindowResizedDelegateParameters
+struct TitleApplicationWindowResizedParameters
 {
 	TitleApplicationWindow* pWindow = nullptr;
 	uint32_t NewWidth = 0;
 	uint32_t NewHeight = 0;
 };
 
-DECLARE_SINGLE_DELEGATE_OneParam(TitleApplicationWindowResizedSignature, const TitleApplicationWindowResizedDelegateParameters& /* Parameters */);
+DECLARE_SINGLE_DELEGATE_OneParam(TitleApplicationWindowResizedSignature, const TitleApplicationWindowResizedParameters& /* Parameters */);
 
 class TitleApplicationWindow : public Core::Window
 {

@@ -14,7 +14,7 @@ namespace Renderer
 
 class TitleApplicationWindow;
 
-struct TitleApplicationWindowResizedDelegateParameters;
+struct TitleApplicationWindowResizedParameters;
 
 class TitleApplication : public Core::Application
 {
@@ -23,8 +23,6 @@ private:
 
 	std::unique_ptr<TitleApplicationWindow> AppWindow = nullptr;
 	void* AppWindowRenderingContext = nullptr;
-
-	uint32_t TriangleVertexBufferID = 0;
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);
@@ -35,5 +33,5 @@ private:
 
 	void NotificationListener(const Core::NotificationData& Notification);
 	void OnAppWindowDestroyed();
-	void OnAppWindowResized(const TitleApplicationWindowResizedDelegateParameters& Params);
+	void OnAppWindowResized(const TitleApplicationWindowResizedParameters& Params);
 };
