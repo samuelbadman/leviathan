@@ -5,7 +5,6 @@
 #include "NotificationManager.h"
 #include "Window.h"
 #include "Module.h"
-#include "ConsoleOutput.h"
 
 Core::Engine::Engine()
 {
@@ -185,12 +184,11 @@ void Core::Engine::BeginApplicationMainLoop()
 	{
 		Platform::Update();
 
-		const double DeltaMilliseconds = Platform::GetUpdateMicroseconds() * 1e-3;
 		const double DeltaSeconds = Platform::GetUpdateMicroseconds() * 1e-6;
 
-		const double AverageFPS = 1.0 / DeltaSeconds;
-		const double AverageMilliseconds = 1.0 / AverageFPS;
-		const uint32_t AverageFPSWhole = static_cast<uint32_t>(AverageFPS);
+		//const double AverageFPS = 1.0 / DeltaSeconds;
+		//const double AverageMilliseconds = 1.0 / AverageFPS;
+		//const uint32_t AverageFPSWhole = static_cast<uint32_t>(AverageFPS);
 
 		Gamepad::PollConnectedGamepads();
 
@@ -200,8 +198,6 @@ void Core::Engine::BeginApplicationMainLoop()
 
 		EngineFixedTick(DeltaSeconds);
 		EngineTick(DeltaSeconds);
-
-		CONSOLE_PRINTF("Ms: %f\n", AverageMilliseconds);
 	}
 
 	EngineEnd();
