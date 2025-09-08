@@ -14,7 +14,7 @@ namespace
 
 		LARGE_INTEGER TicksPerSecond = {};
 		LARGE_INTEGER LastTickCount = {};
-		uint64_t FrameMicroseconds = 0;
+		uint64_t UpdateMicroseconds = 0;
 
 		HWND InvisibleWindowHandle = NULL;
 
@@ -31,7 +31,7 @@ namespace
 
 			const uint64_t ElapsedTicks = CurrentTickCount.QuadPart - WindowsPlatformInternals::LastTickCount.QuadPart;
 			// Convert elapsed ticks to microseconds to not lose precision by dividing a small number by a large one.
-			WindowsPlatformInternals::FrameMicroseconds = (ElapsedTicks * static_cast<uint64_t>(1e6)) / WindowsPlatformInternals::TicksPerSecond.QuadPart;
+			WindowsPlatformInternals::UpdateMicroseconds = (ElapsedTicks * static_cast<uint64_t>(1e6)) / WindowsPlatformInternals::TicksPerSecond.QuadPart;
 
 			WindowsPlatformInternals::LastTickCount = CurrentTickCount;
 		}
@@ -1140,14 +1140,14 @@ void Core::Platform::UpdateMessageQueue()
 	WindowsPlatformInternals::DispatchSystemMessages();
 }
 
-void Core::Platform::PerFrameUpdate()
+void Core::Platform::Update()
 {
 	WindowsPlatformInternals::UpdatePerformanceCounter();
 }
 
-double Core::Platform::GetFrameMicroseconds()
+double Core::Platform::GetUpdateMicroseconds()
 {
-	return static_cast<double>(WindowsPlatformInternals::FrameMicroseconds);
+	return static_cast<double>(WindowsPlatformInternals::UpdateMicroseconds);
 }
 
 bool Core::Platform::CreateConsole()

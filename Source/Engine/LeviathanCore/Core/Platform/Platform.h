@@ -14,8 +14,8 @@ namespace Core
 	{
 		bool Initialize(Core::Engine& EngineInstance);
 		void UpdateMessageQueue();
-		void PerFrameUpdate();
-		double GetFrameMicroseconds();
+		void Update();
+		double GetUpdateMicroseconds();
 		bool CreateConsole();
 		bool RemoveConsole();
 

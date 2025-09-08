@@ -182,9 +182,9 @@ void Core::Engine::BeginApplicationMainLoop()
 
 	while (RunningApplicationInstance)
 	{
-		Platform::PerFrameUpdate();
+		Platform::Update();
 
-		const double FrameDeltaSeconds = Platform::GetFrameMicroseconds() * 1e-6;
+		const double FrameDeltaSeconds = Platform::GetUpdateMicroseconds() * 1e-6;
 
 		//const double AverageFPS = 1.0 / FrameDeltaSeconds;
 		//const double AverageMilliseconds = 1.0 / AverageFPS;
@@ -205,8 +205,10 @@ void Core::Engine::BeginApplicationMainLoop()
 
 void Core::Engine::EngineBegin()
 {
+	// Begin application instance
 	ApplicationInstance->Begin();
 
+	// Begin modules
 	for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
 	{
 		if (Module)
@@ -222,8 +224,10 @@ void Core::Engine::EngineFixedTick(double FrameDeltaSeconds)
 
 	while (FixedTimeAccumulationSeconds > TimeElapsedBetweenFixedTicksSeconds)
 	{
+		// Fixed tick application
 		ApplicationInstance->FixedTick(FixedTimestep);
 
+		// Fixed tick modules
 		for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
 		{
 			if (Module)
@@ -238,8 +242,10 @@ void Core::Engine::EngineFixedTick(double FrameDeltaSeconds)
 
 void Core::Engine::EngineTick(double FrameDeltaSeconds)
 {
+	// Tick application
 	ApplicationInstance->Tick(FrameDeltaSeconds);
 
+	// Tick modules
 	for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
 	{
 		if (Module)
@@ -251,8 +257,10 @@ void Core::Engine::EngineTick(double FrameDeltaSeconds)
 
 void Core::Engine::EngineEnd()
 {
+	// End application
 	ApplicationInstance->End();
 
+	// End modules
 	for (const std::unique_ptr<Core::Module>& Module : ModuleInstances)
 	{
 		if (Module)
