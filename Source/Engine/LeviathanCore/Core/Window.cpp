@@ -64,16 +64,6 @@ void Core::Window::OnCloseSignal()
 	EngineInstance.DestroyWindowOnPlatform(*this);
 }
 
-void Core::Window::OnDestroyed()
-{
-	Core::NotificationData WindowDestroyedNotificationData = {};
-	WindowDestroyedNotificationData.Type = Core::NotificationType::WindowDestroyed;
-	WindowDestroyedNotificationData.Payload.WindowDestroyedPayload = {};
-	WindowDestroyedNotificationData.Payload.WindowDestroyedPayload.DestroyedWindow = this;
-
-	EngineInstance.GetNotificationManager().SendNotification(WindowDestroyedNotificationData);
-}
-
 void Core::Window::Close()
 {
 	OnCloseSignal();

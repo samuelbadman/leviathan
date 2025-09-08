@@ -29,7 +29,7 @@ namespace Core
 	struct WindowCreateParameters
 	{
 		const char* UniqueWindowName = nullptr;
-		const char* WindowName = nullptr;
+		const char* WindowTitle = nullptr;
 		Core::WindowMode Mode = WindowMode::MAX;
 		int32_t HorizontalPosition = 0;
 		int32_t VerticalPosition = 0;
@@ -104,7 +104,7 @@ namespace Core
 		virtual void OnReceivedFocus() {};
 		virtual void OnLostFocus() {};
 		virtual void OnCloseSignal();
-		virtual void OnDestroyed();
+		virtual void OnDestroyed() {};
 		// End Window interface
 
 		void Close();

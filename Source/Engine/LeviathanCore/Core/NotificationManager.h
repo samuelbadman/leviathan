@@ -20,17 +20,11 @@ namespace Core
 		int8_t ConnectionIndex = -1;
 	};
 
-	struct NotificationPayload_WindowDestroyed
-	{
-		Core::Window* DestroyedWindow = nullptr;
-	};
-
 	// NOTE: Add an entry to the enum for each notification type
 	enum class NotificationType : uint8_t
 	{
 		GamepadConnected,
 		GamepadDisconnected,
-		WindowDestroyed,
 		MAX
 	};
 
@@ -43,7 +37,6 @@ namespace Core
 		{
 			NotificationPayload_GamepadConnected GamepadConnectedPayload;
 			NotificationPayload_GamepadDisconnected GamepadDisconnectedPayload;
-			NotificationPayload_WindowDestroyed WindowDestroyedPayload;
 		}Payload;
 	};
 

@@ -21,7 +21,7 @@ class TitleApplication : public Core::Application
 private:
 	Renderer::RendererModule* RendererModuleInstance = nullptr;
 
-	std::unique_ptr<TitleApplicationWindow> AppWindow = nullptr;
+	std::unique_ptr<TitleApplicationWindow> MainAppWindow = nullptr;
 	void* AppWindowRenderingContext = nullptr;
 
 public:
@@ -29,9 +29,9 @@ public:
 	~TitleApplication();
 
 private:
-	virtual void Tick(double DeltaSeconds) override;
-
 	void NotificationListener(const Core::NotificationData& Notification);
-	void OnAppWindowDestroyed();
-	void OnAppWindowResized(const TitleApplicationWindowResizedParameters& Params);
+	void OnMainAppWindowDestroyed();
+	void OnMainAppWindowResized(const TitleApplicationWindowResizedParameters& Params);
+	bool InitializeMainAppWindow();
+	bool InitializeRendering();
 };

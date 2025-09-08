@@ -1180,7 +1180,7 @@ bool Core::Platform::CreatePlatformWindow(Core::Window& Temp, const Core::Window
 		&WindowsPlatformInternals::WindowInitWndProc,
 		Parameters.UniqueWindowName,
 		CS_DBLCLKS | CS_OWNDC,
-		Parameters.WindowName,
+		Parameters.WindowTitle,
 		WindowsPlatformInternals::TranslateWindowMode(Parameters.Mode),
 		Parameters.HorizontalPosition,
 		Parameters.VerticalPosition,

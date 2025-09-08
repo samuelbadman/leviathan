@@ -15,49 +15,11 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 	// Add title application notification listener
 	GetEngine().GetNotificationManager().AddNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
 
-	// Create engine modules used by title application
-	RendererModuleInstance = GetEngine().CreateModule<Renderer::RendererModule>();
-
 	// Create a main window for the title application
-	Core::WindowCreateParameters AppWindowCreateParameters = {};
-	AppWindowCreateParameters.UniqueWindowName = "TitleAppWindow";
-	AppWindowCreateParameters.WindowName = "Title application";
-	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
-	AppWindowCreateParameters.Width = 960;
-	AppWindowCreateParameters.Height = 540;
+	InitializeMainAppWindow();
 
-	AppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
-
-	if (AppWindow)
-	{
-		// Subscribe to app window resized delegate
-		AppWindow->GetResizedDelegate().BindMethod<TitleApplication, &TitleApplication::OnAppWindowResized>(this);
-
-		if (RendererModuleInstance)
-		{
-			// Create a rendering context for the title application window
-			AppWindowRenderingContext = RendererModuleInstance->CreateContext(AppWindow->GetPlatformHandle());
-			if (!AppWindowRenderingContext)
-			{
-				CONSOLE_PRINTF("Failed to create rendering context for title application window.\n");
-			}
-
-			// Make the title application window rendering context the current rendering context
-			if (!RendererModuleInstance->MakeContextCurrent(AppWindow->GetPlatformHandle(), AppWindowRenderingContext))
-			{
-				CONSOLE_PRINTF("Failed to make title application window rendering context current.\n");
-			}
-
-			// Load the renderer api functions. This only needs to be done once during startup but needs a valid rendering context to be made current
-			if (!RendererModuleInstance->LoadAPI())
-			{
-				CONSOLE_PRINTF("Failed to load rendering API functions.\n");
-			}
-
-			// Debug print renderer API version
-			RendererModuleInstance->PrintVersion();
-		}
-	}
+	// Initialize rendering for the application
+	InitializeRendering();
 }
 
 TitleApplication::~TitleApplication()
@@ -67,22 +29,6 @@ TitleApplication::~TitleApplication()
 
 	// Remove title application notification listener
 	GetEngine().GetNotificationManager().RemoveNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
-}
-
-void TitleApplication::Tick(double DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	// Render
-	if (RendererModuleInstance && AppWindow)
-	{
-
-
-		if (!RendererModuleInstance->SwapWindowBuffers(AppWindow->GetPlatformHandle()))
-		{
-			CONSOLE_PRINTF("Failed to swap title application window buffers.\n");
-		}
-	}
 }
 
 void TitleApplication::NotificationListener(const Core::NotificationData& Notification)
@@ -97,34 +43,82 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 		CONSOLE_PRINTF("Gamepad disconnected at connection %d\n", Notification.Payload.GamepadDisconnectedPayload.ConnectionIndex);
 		break;
 
-	case Core::NotificationType::WindowDestroyed:
-		if (Notification.Payload.WindowDestroyedPayload.DestroyedWindow == AppWindow.get())
-		{
-			OnAppWindowDestroyed();
-		}
-		break;
-
 	default: break;
 	}
 }
 
-void TitleApplication::OnAppWindowDestroyed()
+void TitleApplication::OnMainAppWindowDestroyed()
 {
 	// Delete app window rendering context
-	if (!RendererModuleInstance->DeleteContext(AppWindow->GetPlatformHandle(), AppWindowRenderingContext))
+	if (RendererModuleInstance && MainAppWindow)
 	{
-		CONSOLE_PRINTF("Failed to delete title application window's rendering context.\n");
+		RendererModuleInstance->DeleteContext(MainAppWindow->GetPlatformHandle(), AppWindowRenderingContext);
 	}
 
 	// Tell the engine to quit
 	GetEngine().Quit();
 }
 
-void TitleApplication::OnAppWindowResized(const TitleApplicationWindowResizedParameters& Params)
+void TitleApplication::OnMainAppWindowResized(const TitleApplicationWindowResizedParameters& Params)
 {
-	CONSOLE_PRINTF("Title application window resized. NewWidth: %d, NewHeight: %d.\n", Params.NewWidth, Params.NewHeight);
-	if (RendererModuleInstance)
-	{
+}
 
+bool TitleApplication::InitializeMainAppWindow()
+{
+	Core::WindowCreateParameters AppWindowCreateParameters = {};
+	AppWindowCreateParameters.UniqueWindowName = "MainTitleAppWindow";
+	AppWindowCreateParameters.WindowTitle = "Main app window";
+	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
+	AppWindowCreateParameters.Width = 960;
+	AppWindowCreateParameters.Height = 540;
+
+	MainAppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
+
+	if (!MainAppWindow)
+	{
+		return false;
 	}
+
+	// Bind to main app window resized delegate
+	MainAppWindow->GetResizedDelegate().BindMethod<TitleApplication, &TitleApplication::OnMainAppWindowResized>(this);
+
+	// Bind to main app window destroyed delegate
+	MainAppWindow->GetDestroyedDelegate().BindMethod<TitleApplication, &TitleApplication::OnMainAppWindowDestroyed>(this);
+
+	return true;
+}
+
+bool TitleApplication::InitializeRendering()
+{
+	// Create rendering module
+	RendererModuleInstance = GetEngine().CreateModule<Renderer::RendererModule>();
+
+	if (!RendererModuleInstance)
+	{
+		return false;
+	}
+
+	// Create a rendering context for the main title application window
+	AppWindowRenderingContext = RendererModuleInstance->CreateContext(MainAppWindow->GetPlatformHandle());
+	if (!AppWindowRenderingContext)
+	{
+		return false;
+	}
+
+	// Make the main title application window rendering context the current rendering context
+	if (!RendererModuleInstance->MakeContextCurrent(MainAppWindow->GetPlatformHandle(), AppWindowRenderingContext))
+	{
+		return false;
+	}
+
+	// Load the renderer api functions. This only needs to be done once during startup but needs a valid rendering context to be made current
+	if (!RendererModuleInstance->LoadAPI())
+	{
+		return false;
+	}
+
+	// Debug print renderer API version
+	RendererModuleInstance->PrintVersion();
+
+	return true;
 }
