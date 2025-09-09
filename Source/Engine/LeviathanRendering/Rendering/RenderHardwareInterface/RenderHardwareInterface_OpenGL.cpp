@@ -4,14 +4,14 @@
 
 namespace
 {
-	namespace OpenGLRHIInternals
+	namespace OGLRHIInternals
 	{
 		// Mapping of platform window handles to opengl contexts
 		std::unordered_map<void*, void*> OutputWindowContexts = {};
 
 		bool DoesWindowContextExist(void* const WindowPlatformHandle)
 		{
-			return (OpenGLRHIInternals::OutputWindowContexts.find(WindowPlatformHandle) != OpenGLRHIInternals::OutputWindowContexts.end());
+			return (OGLRHIInternals::OutputWindowContexts.find(WindowPlatformHandle) != OGLRHIInternals::OutputWindowContexts.end());
 		}
 
 		void* GetWindowContext(void* const WindowPlatformHandle)
@@ -23,7 +23,7 @@ namespace
 		{
 			if (!DoesWindowContextExist(WindowPlatformHandle))
 			{
-				OpenGLRHIInternals::OutputWindowContexts.emplace(WindowPlatformHandle, Context);
+				OGLRHIInternals::OutputWindowContexts.emplace(WindowPlatformHandle, Context);
 				return true;
 			}
 			return false;
@@ -118,7 +118,7 @@ namespace
 bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlatformHandle)
 {
 	// Does a context already exist for the output window. If so, rendering has already been initialized for the output window
-	if (OpenGLRHIInternals::DoesWindowContextExist(OutputWindowPlatformHandle))
+	if (OGLRHIInternals::DoesWindowContextExist(OutputWindowPlatformHandle))
 	{
 		return false;
 	}
@@ -136,33 +136,33 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlat
 	}
 
 	// Load the api functions. This only needs to be done once during startup but needs a valid current context
-	if (!OpenGLRHIInternals::LoadOGLFunctions())
+	if (!OGLRHIInternals::LoadOGLFunctions())
 	{
 		return false;
 	}
 
 	// Debug print api version
-	OpenGLRHIInternals::PrintOGLVersion();
+	OGLRHIInternals::PrintOGLVersion();
 
 	// Remove current context meaning that there is no rendering context set after initialization
-	return OpenGLRHIInternals::MakeContextCurrent(OutputWindowPlatformHandle, nullptr);
+	return OGLRHIInternals::MakeContextCurrent(OutputWindowPlatformHandle, nullptr);
 }
 
 bool Rendering::RenderHardwareInterface::CreateOutputWindowResources(void* const OutputWindowPlatformHandle)
 {
 	// Create a context for the output window
-	if (void* const Context = OpenGLRHIInternals::CreateContext(OutputWindowPlatformHandle))
+	if (void* const Context = OGLRHIInternals::CreateContext(OutputWindowPlatformHandle))
 	{
-		return OpenGLRHIInternals::AddWindowContext(OutputWindowPlatformHandle, Context);
+		return OGLRHIInternals::AddWindowContext(OutputWindowPlatformHandle, Context);
 	}
 	return false;
 }
 
 bool Rendering::RenderHardwareInterface::DestroyOutputWindowResources(void* const OutputWindowPlatformHandle)
 {
-	if (OpenGLRHIInternals::DoesWindowContextExist(OutputWindowPlatformHandle))
+	if (OGLRHIInternals::DoesWindowContextExist(OutputWindowPlatformHandle))
 	{
-		return OpenGLRHIInternals::DeleteContext(OutputWindowPlatformHandle, OpenGLRHIInternals::GetWindowContext(OutputWindowPlatformHandle));
+		return OGLRHIInternals::DeleteContext(OutputWindowPlatformHandle, OGLRHIInternals::GetWindowContext(OutputWindowPlatformHandle));
 	}
 	return false;
 }
@@ -170,8 +170,8 @@ bool Rendering::RenderHardwareInterface::DestroyOutputWindowResources(void* cons
 bool Rendering::RenderHardwareInterface::SetOutputWindow(void* const OutputWindowPlatformHandle)
 {
 	// Remove rendering context if a null handle has been passed otherwise, make the output window context the current context
-	return OpenGLRHIInternals::MakeContextCurrent(OutputWindowPlatformHandle, 
-		(OutputWindowPlatformHandle) ? OpenGLRHIInternals::GetWindowContext(OutputWindowPlatformHandle) : nullptr);
+	return OGLRHIInternals::MakeContextCurrent(OutputWindowPlatformHandle, 
+		(OutputWindowPlatformHandle) ? OGLRHIInternals::GetWindowContext(OutputWindowPlatformHandle) : nullptr);
 }
 
 void Rendering::RenderHardwareInterface::SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height)
@@ -187,5 +187,5 @@ void Rendering::RenderHardwareInterface::ClearColorBuffer(const float R, const f
 
 bool Rendering::RenderHardwareInterface::SwapBuffers(void* const OutputWindowPlatformHandle)
 {
-	return OpenGLRHIInternals::SwapWindowBuffers(OutputWindowPlatformHandle);
+	return OGLRHIInternals::SwapWindowBuffers(OutputWindowPlatformHandle);
 }
