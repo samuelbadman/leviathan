@@ -1,6 +1,5 @@
 #include "Window.h"
 #include "Engine.h"
-#include "NotificationManager.h"
 
 Core::Window::Window(Core::Engine& Engine, const char* InUniqueName)
 	: EngineInstance(Engine), UniqueName(InUniqueName)
@@ -54,6 +53,16 @@ void Core::Window::SetDimensionsOnEnterFullscreen(const int32_t Width, const int
 	DimensionsOnEnterFullscreen[1] = Height;
 }
 
+void Core::Window::OnResized(uint32_t NewWidth, uint32_t NewHeight)
+{
+	WindowResizedDelegateParameters Params = {};
+	Params.pWindow = this;
+	Params.NewWidth = NewWidth;
+	Params.NewHeight = NewHeight;
+
+	ResizedDelegate.Execute(Params);
+}
+
 void Core::Window::OnForceClose()
 {
 	Close();
@@ -62,6 +71,11 @@ void Core::Window::OnForceClose()
 void Core::Window::OnCloseSignal()
 {
 	EngineInstance.DestroyWindowOnPlatform(*this);
+}
+
+void Core::Window::OnDestroyed()
+{
+	DestroyedDelegate.Execute();
 }
 
 void Core::Window::Close()

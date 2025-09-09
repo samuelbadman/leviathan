@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InputKey.h"
+#include "Core/ProgrammingTools/Delegate.h"
 
 namespace Core
 {
@@ -53,10 +54,23 @@ namespace Core
 		int32_t Right = 0;
 	};
 
+	struct WindowResizedDelegateParameters
+	{
+		Window* pWindow = nullptr;
+		uint32_t NewWidth = 0;
+		uint32_t NewHeight = 0;
+	};
+
+	DECLARE_MULTI_DELEGATE_OneParam(WindowResizedSignature, const WindowResizedDelegateParameters& /* Parameters */);
+	DECLARE_MULTI_DELEGATE(WindowDestroyedSignature);
+
 	class Window
 	{
 	private:
 		Core::Engine& EngineInstance;
+
+		WindowResizedSignature ResizedDelegate = {};
+		WindowDestroyedSignature DestroyedDelegate = {};
 
 		// Copy of the window's unique name
 		const char* UniqueName;
@@ -96,7 +110,7 @@ namespace Core
 		virtual void OnInputAxis(const Core::InputEventArgs& EventArgs) {};
 		virtual void OnMaximized() {};
 		virtual void OnMinimized() {};
-		virtual void OnResized(uint32_t NewWidth, uint32_t NewHeight) {};
+		virtual void OnResized(uint32_t NewWidth, uint32_t NewHeight);
 		virtual void OnEnterFullscreen() {};
 		virtual void OnExitFullscreen() {};
 		virtual void OnEnterSizeMove() {};
@@ -104,7 +118,7 @@ namespace Core
 		virtual void OnReceivedFocus() {};
 		virtual void OnLostFocus() {};
 		virtual void OnCloseSignal();
-		virtual void OnDestroyed() {};
+		virtual void OnDestroyed();
 		// End Window interface
 
 		void Close();
@@ -117,6 +131,9 @@ namespace Core
 		bool IsFocused() const;
 		bool IsMinimized() const;
 		bool ChangeMode(const Core::WindowMode NewMode);
+
+		inline WindowResizedSignature& GetResizedDelegate() { return ResizedDelegate; }
+		inline WindowDestroyedSignature& GetDestroyedDelegate() { return DestroyedDelegate; }
 
 	protected:
 		inline Core::Engine& GetEngine() const { return EngineInstance; }

@@ -31,6 +31,14 @@ TitleApplication::~TitleApplication()
 	GetEngine().GetNotificationManager().RemoveNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
 }
 
+void TitleApplication::Tick(double DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// Render
+	RenderApp();
+}
+
 void TitleApplication::NotificationListener(const Core::NotificationData& Notification)
 {
 	switch (Notification.Type)
@@ -52,15 +60,11 @@ void TitleApplication::OnMainAppWindowDestroyed()
 	// Delete app window rendering context
 	if (RenderingModuleInstance && MainAppWindow)
 	{
-		RenderingModuleInstance->ShutdownOutputWindow(MainAppWindow->GetPlatformHandle());
+		RenderingModuleInstance->DestroyRenderOutputWindowResources(MainAppWindow->GetPlatformHandle());
 	}
 
 	// Tell the engine to quit
 	GetEngine().Quit();
-}
-
-void TitleApplication::OnMainAppWindowResized(const TitleApplicationWindowResizedParameters& Params)
-{
 }
 
 bool TitleApplication::InitializeMainAppWindow()
@@ -79,11 +83,8 @@ bool TitleApplication::InitializeMainAppWindow()
 		return false;
 	}
 
-	// Bind to main app window resized delegate
-	MainAppWindow->GetResizedDelegate().BindMethod<TitleApplication, &TitleApplication::OnMainAppWindowResized>(this);
-
 	// Bind to main app window destroyed delegate
-	MainAppWindow->GetDestroyedDelegate().BindMethod<TitleApplication, &TitleApplication::OnMainAppWindowDestroyed>(this);
+	MainAppWindow->GetDestroyedDelegate().AddMethod<TitleApplication, &TitleApplication::OnMainAppWindowDestroyed>(this);
 
 	return true;
 }
@@ -99,5 +100,21 @@ bool TitleApplication::InitializeRendering()
 	}
 
 	// Initialize rendering module
-	return RenderingModuleInstance->Initialize(MainAppWindow->GetPlatformHandle());
+	if (!RenderingModuleInstance->Initialize(MainAppWindow->GetPlatformHandle()))
+	{
+		return false;
+	}
+
+	// Set main app window as the current rendering context
+	RenderingModuleInstance->SetRenderOutputWindow(MainAppWindow.get());
+
+	return true;
+}
+
+void TitleApplication::RenderApp()
+{
+	if (RenderingModuleInstance)
+	{
+		RenderingModuleInstance->Render();
+	}
 }

@@ -14,8 +14,6 @@ namespace Rendering
 
 class TitleApplicationWindow;
 
-struct TitleApplicationWindowResizedParameters;
-
 class TitleApplication : public Core::Application
 {
 private:
@@ -28,9 +26,13 @@ public:
 	~TitleApplication();
 
 private:
+	// Begin Application interface
+	virtual void Tick(double DeltaSeconds) override;
+	// End Application interface
+
 	void NotificationListener(const Core::NotificationData& Notification);
 	void OnMainAppWindowDestroyed();
-	void OnMainAppWindowResized(const TitleApplicationWindowResizedParameters& Params);
 	bool InitializeMainAppWindow();
 	bool InitializeRendering();
+	void RenderApp();
 };
