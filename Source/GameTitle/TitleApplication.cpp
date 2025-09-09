@@ -2,7 +2,7 @@
 #include "Core/ConsoleOutput.h"
 #include "Core/NotificationManager.h"
 #include "TitleApplicationWindow.h"
-#include "Renderer/RendererModule.h"
+#include "Rendering/RenderingModule.h"
 
 IMPLEMENT(TitleApplication)
 
@@ -50,9 +50,9 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 void TitleApplication::OnMainAppWindowDestroyed()
 {
 	// Delete app window rendering context
-	if (RendererModuleInstance && MainAppWindow)
+	if (RenderingModuleInstance && MainAppWindow)
 	{
-		RendererModuleInstance->DeleteContext(MainAppWindow->GetPlatformHandle(), AppWindowRenderingContext);
+		RenderingModuleInstance->ShutdownOutputWindow(MainAppWindow->GetPlatformHandle());
 	}
 
 	// Tell the engine to quit
@@ -91,34 +91,13 @@ bool TitleApplication::InitializeMainAppWindow()
 bool TitleApplication::InitializeRendering()
 {
 	// Create rendering module
-	RendererModuleInstance = GetEngine().CreateModule<Renderer::RendererModule>();
+	RenderingModuleInstance = GetEngine().CreateModule<Rendering::RenderingModule>();
 
-	if (!RendererModuleInstance)
+	if (!RenderingModuleInstance || !MainAppWindow)
 	{
 		return false;
 	}
 
-	// Create a rendering context for the main title application window
-	AppWindowRenderingContext = RendererModuleInstance->CreateContext(MainAppWindow->GetPlatformHandle());
-	if (!AppWindowRenderingContext)
-	{
-		return false;
-	}
-
-	// Make the main title application window rendering context the current rendering context
-	if (!RendererModuleInstance->MakeContextCurrent(MainAppWindow->GetPlatformHandle(), AppWindowRenderingContext))
-	{
-		return false;
-	}
-
-	// Load the renderer api functions. This only needs to be done once during startup but needs a valid rendering context to be made current
-	if (!RendererModuleInstance->LoadAPI())
-	{
-		return false;
-	}
-
-	// Debug print renderer API version
-	RendererModuleInstance->PrintVersion();
-
-	return true;
+	// Initialize rendering module
+	return RenderingModuleInstance->Initialize(MainAppWindow->GetPlatformHandle());
 }

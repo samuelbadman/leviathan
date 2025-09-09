@@ -7,9 +7,9 @@ namespace Core
 	struct NotificationData;
 }
 
-namespace Renderer
+namespace Rendering
 {
-	class RendererModule;
+	class RenderingModule;
 }
 
 class TitleApplicationWindow;
@@ -20,9 +20,8 @@ class TitleApplication : public Core::Application
 {
 private:
 	std::unique_ptr<TitleApplicationWindow> MainAppWindow = nullptr;
-	void* AppWindowRenderingContext = nullptr;
 
-	Renderer::RendererModule* RendererModuleInstance = nullptr;
+	Rendering::RenderingModule* RenderingModuleInstance = nullptr;
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);
