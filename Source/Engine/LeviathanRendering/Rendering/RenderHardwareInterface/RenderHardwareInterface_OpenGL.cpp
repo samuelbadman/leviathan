@@ -189,3 +189,11 @@ bool Rendering::RenderHardwareInterface::SwapBuffers(void* const OutputWindowPla
 {
 	return OGLRHIInternals::SwapWindowBuffers(OutputWindowPlatformHandle);
 }
+
+void Rendering::RenderHardwareInterface::Cleanup()
+{
+	for (const std::pair<void*, void*>& Pair : OGLRHIInternals::OutputWindowContexts)
+	{
+		OGLRHIInternals::DeleteContext(Pair.first, Pair.second);
+	}
+}

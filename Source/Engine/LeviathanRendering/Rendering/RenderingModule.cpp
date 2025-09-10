@@ -2,6 +2,11 @@
 #include "RenderHardwareInterface/RenderHardwareInterface.h"
 #include "Core/Window.h"
 
+Rendering::RenderingModule::~RenderingModule()
+{
+	RenderHardwareInterface::Cleanup();
+}
+
 bool Rendering::RenderingModule::Initialize(void* const OutputWindowPlatformHandle)
 {
 	return RenderHardwareInterface::Initialize(OutputWindowPlatformHandle);

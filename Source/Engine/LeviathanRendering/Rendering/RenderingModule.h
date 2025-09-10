@@ -17,6 +17,8 @@ namespace Rendering
 		Core::Window* RenderOutputWindow = nullptr;
 
 	public:
+		~RenderingModule();
+
 		bool Initialize(void* const OutputWindowPlatformHandle);
 		bool CreateRenderOutputWindowResources(void* const OutputWindowPlatformHandle);
 		bool DestroyRenderOutputWindowResources(void* const OutputWindowPlatformHandle);
