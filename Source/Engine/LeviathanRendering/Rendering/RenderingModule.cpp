@@ -25,11 +25,11 @@ bool Rendering::RenderingModule::DestroyRenderOutputWindowResources(void* const 
 void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindow)
 {
 	// If a render output window is already set remove the rendering module's binding to its resized event delegate and clear the render output window pointer
-	if (RenderOutputWindow)
+	if (CurrentRenderOutputWindow)
 	{
-		RenderOutputWindow->GetResizedDelegate().RemoveMethod<Rendering::RenderingModule, &Rendering::RenderingModule::OnRenderOutputWindowResized>(this);
+		CurrentRenderOutputWindow->GetResizedDelegate().RemoveMethod<Rendering::RenderingModule, &Rendering::RenderingModule::OnRenderOutputWindowResized>(this);
 
-		RenderOutputWindow = nullptr;
+		CurrentRenderOutputWindow = nullptr;
 	}
 
 	// Try to set the new render output window
@@ -39,34 +39,28 @@ void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindo
 		{
 			OutputWindow->GetResizedDelegate().AddMethod<Rendering::RenderingModule, &Rendering::RenderingModule::OnRenderOutputWindowResized>(this);
 
-			RenderOutputWindow = OutputWindow;
-
-			UpdateViewport(*OutputWindow);
+			CurrentRenderOutputWindow = OutputWindow;
 		}
 	}
 }
 
 void Rendering::RenderingModule::Render()
 {
-	if (RenderOutputWindow)
+	if (CurrentRenderOutputWindow)
 	{
+		const Core::Rectangle OutputWindowClientRegionRect = CurrentRenderOutputWindow->GetClientRegion();
+		RenderHardwareInterface::SetViewport(0,
+			0,
+			OutputWindowClientRegionRect.Right - OutputWindowClientRegionRect.Left,
+			OutputWindowClientRegionRect.Bottom - OutputWindowClientRegionRect.Top);
+
 		RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.3f, 1.0f);
 
-		RenderHardwareInterface::SwapBuffers(RenderOutputWindow->GetPlatformHandle());
+		RenderHardwareInterface::SwapBuffers(CurrentRenderOutputWindow->GetPlatformHandle());
 	}
 }
 
 void Rendering::RenderingModule::OnRenderOutputWindowResized(const Core::WindowResizedDelegateParameters& Parameters)
 {
-	UpdateViewport(*RenderOutputWindow);
 	Render();
-}
-
-void Rendering::RenderingModule::UpdateViewport(Core::Window& OutputWindow)
-{
-	const Core::Rectangle OutputWindowClientRegionRect = OutputWindow.GetClientRegion();
-	RenderHardwareInterface::SetViewport(0,
-		0,
-		OutputWindowClientRegionRect.Right - OutputWindowClientRegionRect.Left,
-		OutputWindowClientRegionRect.Bottom - OutputWindowClientRegionRect.Top);
 }

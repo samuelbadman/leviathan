@@ -14,7 +14,7 @@ namespace Rendering
 	class RenderingModule : public Core::Module
 	{
 	private:
-		Core::Window* RenderOutputWindow = nullptr;
+		Core::Window* CurrentRenderOutputWindow = nullptr;
 
 	public:
 		~RenderingModule();
@@ -29,6 +29,5 @@ namespace Rendering
 
 	private:
 		void OnRenderOutputWindowResized(const Core::WindowResizedDelegateParameters& Parameters);
-		void UpdateViewport(Core::Window& OutputWindow);
 	};
 }
