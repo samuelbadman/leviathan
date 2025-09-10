@@ -34,5 +34,6 @@ private:
 	void OnMainAppWindowDestroyed();
 	bool InitializeMainAppWindow();
 	bool InitializeRendering();
+	bool ShutdownRendering();
 	void RenderApp();
 };

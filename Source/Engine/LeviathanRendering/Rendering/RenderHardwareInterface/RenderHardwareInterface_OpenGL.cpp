@@ -6,26 +6,35 @@ namespace
 {
 	namespace OpenGLRHIInternals
 	{
-
-
-		// Mapping of platform window handles to opengl contexts
-		std::unordered_map<void*, void*> OutputWindowContexts = {};
-
-		bool DoesWindowContextExist(void* const WindowPlatformHandle)
+		struct OutputWindowResources
 		{
-			return (OpenGLRHIInternals::OutputWindowContexts.find(WindowPlatformHandle) != OpenGLRHIInternals::OutputWindowContexts.end());
+			void* OpenGLContext = nullptr;
+		};
+
+		// Mapping of platform window handles to output window resource structures. The window platform handle is being used as the handle/identifier to its rendering resources
+		std::unordered_map<void*, OutputWindowResources> OutputWindowResourceMap = {};
+
+		bool DoesOutputWindowResourcesExist(void* const WindowPlatformHandle)
+		{
+			return (OpenGLRHIInternals::OutputWindowResourceMap.find(WindowPlatformHandle) != OpenGLRHIInternals::OutputWindowResourceMap.end());
 		}
 
-		void* GetWindowContext(void* const WindowPlatformHandle)
+		bool GetOutputWindowResources(void* const WindowPlatformHandle, OpenGLRHIInternals::OutputWindowResources& Resources)
 		{
-			return (DoesWindowContextExist(WindowPlatformHandle)) ? OutputWindowContexts.at(WindowPlatformHandle) : nullptr;
-		}
-
-		bool AddWindowContext(void* const WindowPlatformHandle, void* const Context)
-		{
-			if (!DoesWindowContextExist(WindowPlatformHandle))
+			if (DoesOutputWindowResourcesExist(WindowPlatformHandle))
 			{
-				OpenGLRHIInternals::OutputWindowContexts.emplace(WindowPlatformHandle, Context);
+				Resources = OutputWindowResourceMap.at(WindowPlatformHandle);
+				return true;
+			}
+			Resources = {};
+			return false;
+		}
+
+		bool AddOutputWindowResources(void* const WindowPlatformHandle, const OpenGLRHIInternals::OutputWindowResources& Resources)
+		{
+			if (!DoesOutputWindowResourcesExist(WindowPlatformHandle))
+			{
+				OpenGLRHIInternals::OutputWindowResourceMap.emplace(WindowPlatformHandle, Resources);
 				return true;
 			}
 			return false;
@@ -114,13 +123,22 @@ namespace
 #else
 #endif // PLATFORM_WINDOWS
 		}
+
+		bool ClearCurrentContext()
+		{
+#ifdef PLATFORM_WINDOWS
+			return OpenGLRHIInternals::MakeContextCurrent(nullptr, nullptr);
+#else
+			return false;
+#endif // PLATFORM_WINDOWS
+		}
 	}
 }
 
 bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlatformHandle)
 {
 	// Does a context already exist for the output window. If so, rendering has already been initialized for the output window
-	if (OpenGLRHIInternals::DoesWindowContextExist(OutputWindowPlatformHandle))
+	if (OpenGLRHIInternals::DoesOutputWindowResourcesExist(OutputWindowPlatformHandle))
 	{
 		return false;
 	}
@@ -147,33 +165,58 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlat
 	OpenGLRHIInternals::PrintOGLVersion();
 
 	// Remove current context meaning that there is no rendering context set after initialization
-	return OpenGLRHIInternals::MakeContextCurrent(OutputWindowPlatformHandle, nullptr);
+	return OpenGLRHIInternals::ClearCurrentContext();
 }
 
 bool Rendering::RenderHardwareInterface::CreateOutputWindowResources(void* const OutputWindowPlatformHandle)
 {
+	OpenGLRHIInternals::OutputWindowResources Resources = {};
+
 	// Create a context for the output window
-	if (void* const Context = OpenGLRHIInternals::CreateContext(OutputWindowPlatformHandle))
+	Resources.OpenGLContext = OpenGLRHIInternals::CreateContext(OutputWindowPlatformHandle);
+	if (!Resources.OpenGLContext)
 	{
-		return OpenGLRHIInternals::AddWindowContext(OutputWindowPlatformHandle, Context);
+		return false;
 	}
-	return false;
+
+	// Add the resources structure to the output window resource map
+	return OpenGLRHIInternals::AddOutputWindowResources(OutputWindowPlatformHandle, Resources);
 }
 
 bool Rendering::RenderHardwareInterface::DestroyOutputWindowResources(void* const OutputWindowPlatformHandle)
 {
-	if (OpenGLRHIInternals::DoesWindowContextExist(OutputWindowPlatformHandle))
+	// Get resources for the output window
+	OpenGLRHIInternals::OutputWindowResources Resources;
+	if (!OpenGLRHIInternals::GetOutputWindowResources(OutputWindowPlatformHandle, Resources))
 	{
-		return OpenGLRHIInternals::DeleteContext(OutputWindowPlatformHandle, OpenGLRHIInternals::GetWindowContext(OutputWindowPlatformHandle));
+		return false;
 	}
-	return false;
+
+	// Delete rendering context for the output window
+	if (!OpenGLRHIInternals::DeleteContext(OutputWindowPlatformHandle, Resources.OpenGLContext))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 bool Rendering::RenderHardwareInterface::SetOutputWindow(void* const OutputWindowPlatformHandle)
 {
-	// Remove rendering context if a null handle has been passed otherwise, make the output window context the current context
-	return OpenGLRHIInternals::MakeContextCurrent(OutputWindowPlatformHandle, 
-		(OutputWindowPlatformHandle) ? OpenGLRHIInternals::GetWindowContext(OutputWindowPlatformHandle) : nullptr);
+	// If a null output window platform handle is passed, clear the opengl context
+	if (!OutputWindowPlatformHandle)
+	{
+		return OpenGLRHIInternals::ClearCurrentContext();
+	}
+
+	// Make the opengl context associated with the output window platform handle current
+	OpenGLRHIInternals::OutputWindowResources Resources;
+	if (!OpenGLRHIInternals::GetOutputWindowResources(OutputWindowPlatformHandle, Resources))
+	{
+		return false;
+	}
+
+	return OpenGLRHIInternals::MakeContextCurrent(OutputWindowPlatformHandle, Resources.OpenGLContext);
 }
 
 void Rendering::RenderHardwareInterface::SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height)
@@ -187,16 +230,17 @@ void Rendering::RenderHardwareInterface::ClearColorBuffer(const float R, const f
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-bool Rendering::RenderHardwareInterface::SwapBuffers(void* const OutputWindowPlatformHandle)
+bool Rendering::RenderHardwareInterface::SwapOutputWindowBuffers(void* const OutputWindowPlatformHandle)
 {
 	return OpenGLRHIInternals::SwapWindowBuffers(OutputWindowPlatformHandle);
 }
 
 void Rendering::RenderHardwareInterface::Cleanup()
 {
-	for (const std::pair<void*, void*>& Pair : OpenGLRHIInternals::OutputWindowContexts)
+	// Cleanup output window resources
+	for (const std::pair<void*, OpenGLRHIInternals::OutputWindowResources>& Pair : OpenGLRHIInternals::OutputWindowResourceMap)
 	{
-		OpenGLRHIInternals::DeleteContext(Pair.first, Pair.second);
+		DestroyOutputWindowResources(Pair.first);
 	}
-	OpenGLRHIInternals::OutputWindowContexts.clear();
+	OpenGLRHIInternals::OutputWindowResourceMap.clear();
 }

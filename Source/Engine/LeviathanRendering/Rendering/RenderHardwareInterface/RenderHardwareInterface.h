@@ -8,7 +8,7 @@ namespace Rendering
 		bool CreateOutputWindowResources(void* const OutputWindowPlatformHandle);
 		bool DestroyOutputWindowResources(void* const OutputWindowPlatformHandle);
 		bool SetOutputWindow(void* const OutputWindowPlatformHandle);
-		bool SwapBuffers(void* const OutputWindowPlatformHandle);
+		bool SwapOutputWindowBuffers(void* const OutputWindowPlatformHandle);
 		void Cleanup();
 
 		void SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height);

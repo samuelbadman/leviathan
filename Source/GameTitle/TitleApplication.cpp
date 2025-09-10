@@ -68,11 +68,8 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 
 void TitleApplication::OnMainAppWindowDestroyed()
 {
-	// Delete app window rendering context
-	if (RenderingModuleInstance && MainAppWindow)
-	{
-		RenderingModuleInstance->DestroyRenderOutputWindowResources(MainAppWindow->GetPlatformHandle());
-	}
+	// Shutdown rendering for the application
+	ShutdownRendering();
 
 	// Tell the engine to quit
 	GetEngine().Quit();
@@ -120,6 +117,17 @@ bool TitleApplication::InitializeRendering()
 	RenderingModuleInstance->SetRenderOutputWindow(MainAppWindow.get());
 
 	return true;
+}
+
+bool TitleApplication::ShutdownRendering()
+{
+	// Delete app window rendering context
+	if (RenderingModuleInstance && MainAppWindow)
+	{
+		RenderingModuleInstance->SetRenderOutputWindow(nullptr);
+		return RenderingModuleInstance->DestroyRenderOutputWindowResources(MainAppWindow->GetPlatformHandle());
+	}
+	return false;
 }
 
 void TitleApplication::RenderApp()

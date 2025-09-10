@@ -28,8 +28,8 @@ void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindo
 	if (CurrentRenderOutputWindow)
 	{
 		CurrentRenderOutputWindow->GetResizedDelegate().RemoveMethod<Rendering::RenderingModule, &Rendering::RenderingModule::OnRenderOutputWindowResized>(this);
-
 		CurrentRenderOutputWindow = nullptr;
+		RenderHardwareInterface::SetOutputWindow(nullptr);
 	}
 
 	// Try to set the new render output window
@@ -38,7 +38,6 @@ void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindo
 		if (RenderHardwareInterface::SetOutputWindow(OutputWindow->GetPlatformHandle()))
 		{
 			OutputWindow->GetResizedDelegate().AddMethod<Rendering::RenderingModule, &Rendering::RenderingModule::OnRenderOutputWindowResized>(this);
-
 			CurrentRenderOutputWindow = OutputWindow;
 		}
 	}
@@ -56,7 +55,7 @@ void Rendering::RenderingModule::Render()
 
 		RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.3f, 1.0f);
 
-		RenderHardwareInterface::SwapBuffers(CurrentRenderOutputWindow->GetPlatformHandle());
+		RenderHardwareInterface::SwapOutputWindowBuffers(CurrentRenderOutputWindow->GetPlatformHandle());
 	}
 }
 
