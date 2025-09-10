@@ -18,6 +18,7 @@ namespace Core
 		double GetUpdateMicroseconds();
 		bool CreateConsole();
 		bool RemoveConsole();
+		void Cleanup();
 
 		// Creates a new platform window instance with the in parameters. Returns true if succesful otherwise, returns false
 		bool CreatePlatformWindow(Core::Window& Temp, const Core::WindowCreateParameters& Parameters);

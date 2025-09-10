@@ -20,6 +20,7 @@ Core::Engine::Engine()
 
 Core::Engine::~Engine()
 {
+	Platform::Cleanup();
 }
 
 bool Core::Engine::BeginApplication(std::unique_ptr<Application> pApplication)

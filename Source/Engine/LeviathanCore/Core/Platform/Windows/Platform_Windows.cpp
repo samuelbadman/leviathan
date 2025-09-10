@@ -10,18 +10,22 @@ namespace
 		constexpr uint16_t MaxGamepadThumbstickValue = 32767;
 		constexpr uint8_t MaxGamepadTriggerValue = 255;
 
-		Core::Engine* pEngine = nullptr;
+		struct PlatformState
+		{
+			Core::Engine* pEngine = nullptr;
 
-		LARGE_INTEGER TicksPerSecond = {};
-		LARGE_INTEGER LastTickCount = {};
-		uint64_t UpdateMicroseconds = 0;
+			LARGE_INTEGER TicksPerSecond = {};
+			LARGE_INTEGER LastTickCount = {};
+			uint64_t UpdateMicroseconds = 0;
 
-		HWND InvisibleWindowHandle = NULL;
+			static constexpr LPCSTR InvisibleWindowClassName = "InvisibleWindowClass";
+			HWND InvisibleWindowHandle = NULL;
+		} State = {};
 
 		void InitializePerformanceCounter()
 		{
-			QueryPerformanceFrequency(&TicksPerSecond);
-			QueryPerformanceCounter(&LastTickCount);
+			QueryPerformanceFrequency(&WindowsPlatformInternals::State.TicksPerSecond);
+			QueryPerformanceCounter(&WindowsPlatformInternals::State.LastTickCount);
 		}
 
 		void UpdatePerformanceCounter()
@@ -29,11 +33,11 @@ namespace
 			LARGE_INTEGER CurrentTickCount;
 			QueryPerformanceCounter(&CurrentTickCount);
 
-			const uint64_t ElapsedTicks = CurrentTickCount.QuadPart - WindowsPlatformInternals::LastTickCount.QuadPart;
+			const uint64_t ElapsedTicks = CurrentTickCount.QuadPart - WindowsPlatformInternals::State.LastTickCount.QuadPart;
 			// Convert elapsed ticks to microseconds to not lose precision by dividing a small number by a large one.
-			WindowsPlatformInternals::UpdateMicroseconds = (ElapsedTicks * static_cast<uint64_t>(1e6)) / WindowsPlatformInternals::TicksPerSecond.QuadPart;
+			WindowsPlatformInternals::State.UpdateMicroseconds = (ElapsedTicks * static_cast<uint64_t>(1e6)) / WindowsPlatformInternals::State.TicksPerSecond.QuadPart;
 
-			WindowsPlatformInternals::LastTickCount = CurrentTickCount;
+			WindowsPlatformInternals::State.LastTickCount = CurrentTickCount;
 		}
 
 		// Returns false if the console could not be created otherwise, returns true
@@ -117,9 +121,9 @@ namespace
 				if (wParam == GIDC_ARRIVAL || wParam == GIDC_REMOVAL)
 				{
 					// Game controller connected or disconnected.
-					if (WindowsPlatformInternals::pEngine)
+					if (WindowsPlatformInternals::State.pEngine)
 					{
-						WindowsPlatformInternals::pEngine->PlatformGamepadConnectionEventDetected();
+						WindowsPlatformInternals::State.pEngine->PlatformGamepadConnectionEventDetected();
 					}
 				}
 
@@ -1117,17 +1121,17 @@ bool Core::Platform::Initialize(Core::Engine& EngineInstance)
 {
 	WindowsPlatformInternals::InitializePerformanceCounter();
 
-	WindowsPlatformInternals::pEngine = &EngineInstance;
+	WindowsPlatformInternals::State.pEngine = &EngineInstance;
 
 	// Create an invisible window that is used to listen for gamepad connected/disconnected messages
-	if (!WindowsPlatformInternals::CreateWindowAndReturnHandle(WindowsPlatformInternals::InvisibleWindowHandle, &WindowsPlatformInternals::InvisibleWindowWndProc,
-		"InvisibleWindowClass", 0, "", 0, 0, 0, 0, 0, NULL, NULL))
+	if (!WindowsPlatformInternals::CreateWindowAndReturnHandle(WindowsPlatformInternals::State.InvisibleWindowHandle, &WindowsPlatformInternals::InvisibleWindowWndProc,
+		WindowsPlatformInternals::PlatformState::InvisibleWindowClassName, 0, "", 0, 0, 0, 0, 0, NULL, NULL))
 	{
 		return false;
 	}
 
 	// Register raw input devices
-	if (!WindowsPlatformInternals::RegisterWindowsRawInputDevices(WindowsPlatformInternals::InvisibleWindowHandle))
+	if (!WindowsPlatformInternals::RegisterWindowsRawInputDevices(WindowsPlatformInternals::State.InvisibleWindowHandle))
 	{
 		return false;
 	}
@@ -1147,7 +1151,7 @@ void Core::Platform::Update()
 
 double Core::Platform::GetUpdateMicroseconds()
 {
-	return static_cast<double>(WindowsPlatformInternals::UpdateMicroseconds);
+	return static_cast<double>(WindowsPlatformInternals::State.UpdateMicroseconds);
 }
 
 bool Core::Platform::CreateConsole()
@@ -1169,6 +1173,16 @@ bool Core::Platform::CreateConsole()
 bool Core::Platform::RemoveConsole()
 {
 	return WindowsPlatformInternals::RemoveConsole();
+}
+
+void Core::Platform::Cleanup()
+{
+	// Destroy invisible window and unregister window class
+	DestroyWindow(static_cast<HWND>(WindowsPlatformInternals::State.InvisibleWindowHandle));
+	UnregisterClass(WindowsPlatformInternals::PlatformState::InvisibleWindowClassName, NULL);
+
+	// Reset platform state
+	WindowsPlatformInternals::State = {};
 }
 
 bool Core::Platform::CreatePlatformWindow(Core::Window& Temp, const Core::WindowCreateParameters& Parameters)

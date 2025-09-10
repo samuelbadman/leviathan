@@ -20,6 +20,17 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 
 	// Initialize rendering for the application
 	InitializeRendering();
+
+	// Define vertex data
+	const std::array<float, 3 * 3> Vertices =
+	{
+		// Bottom left
+		-0.5f, -0.5f, 0.0f, 
+		// Bottom right
+		0.5f, -0.5f, 0.0f, 
+		// Top
+		0.0f,  0.5f, 0.0f
+	};
 }
 
 TitleApplication::~TitleApplication()
