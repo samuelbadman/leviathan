@@ -61,6 +61,7 @@ add_library("LeviathanCore" STATIC
 "Source/Engine/LeviathanCore/Core/InputKey.cpp"
 "Source/Engine/LeviathanCore/Core/Module.h"
 "Source/Engine/LeviathanCore/Core/Module.cpp"
+"Source/Engine/LeviathanCore/Core/Platform/Uuid.h"
 )
 
 # Add source files to be compiled and libraries to link against only for specific platform builds
@@ -69,10 +70,12 @@ target_sources("LeviathanCore" PRIVATE
 "Source/Engine/LeviathanCore/Core/Platform/Windows/Platform_Windows.cpp"
 "Source/Engine/LeviathanCore/Core/Platform/Windows/Gamepad_XInput.cpp"
 "Source/Engine/LeviathanCore/Core/Platform/Windows/Definitions_Windows.h"
+"Source/Engine/LeviathanCore/Core/Platform/Windows/Uuid_Windows.cpp"
 )
 
 target_link_libraries("LeviathanCore" 
 "xinput.lib"
+"Rpcrt4.lib" # Uuids
 )
 endif()
 
@@ -104,7 +107,7 @@ add_library("LeviathanRendering" STATIC
 # TODO: Add switch to specify which rendering API to compile the engine with
 target_sources("LeviathanRendering" PRIVATE 
 "Source/Engine/LeviathanRendering/Vendor/glad/glad.cpp"
-"Source/Engine/LeviathanRendering/Rendering/RenderHardwareInterface/RenderHardwareInterface_OpenGL.cpp"
+"Source/Engine/LeviathanRendering/Rendering/RenderHardwareInterface/OpenGL/RenderHardwareInterface_OpenGL.cpp"
 )
 
 # Add source files to be compiled and libraries to link against only for specific platform builds

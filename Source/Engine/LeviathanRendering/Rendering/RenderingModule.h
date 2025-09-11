@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Module.h"
+#include "Core/Platform/Uuid.h"
 
 namespace Core
 {
@@ -24,7 +25,7 @@ namespace Rendering
 		bool DestroyRenderOutputWindowResources(void* const OutputWindowPlatformHandle);
 		void SetRenderOutputWindow(Core::Window* OutputWindow);
 
-
+		Core::Uuid CreateMeshRenderObject();
 
 		// Render into the currently set render output window. Does nothing if there is not a render output window set
 		void Render();

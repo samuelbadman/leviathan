@@ -43,6 +43,11 @@ void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindo
 	}
 }
 
+Core::Uuid Rendering::RenderingModule::CreateMeshRenderObject()
+{
+	return Core::Uuid();
+}
+
 void Rendering::RenderingModule::Render()
 {
 	if (CurrentRenderOutputWindow)

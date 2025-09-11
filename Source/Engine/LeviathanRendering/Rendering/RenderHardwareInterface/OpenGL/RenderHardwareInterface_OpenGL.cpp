@@ -1,4 +1,4 @@
-#include "RenderHardwareInterface.h"
+#include "Rendering/RenderHardwareInterface/RenderHardwareInterface.h"
 #include "glad/glad.h"
 #include "Core/ConsoleOutput.h"
 
@@ -6,20 +6,20 @@ namespace
 {
 	namespace OpenGLRHIInternals
 	{
-		struct OutputWindowResources
+		struct OpenGLOutputWindowResources
 		{
 			void* OpenGLContext = nullptr;
 		};
 
 		// Mapping of platform window handles to output window resource structures. The window platform handle is being used as the handle/identifier to its rendering resources
-		std::unordered_map<void*, OutputWindowResources> OutputWindowResourceMap = {};
+		std::unordered_map<void*, OpenGLOutputWindowResources> OutputWindowResourceMap = {};
 
 		bool DoesOutputWindowResourcesExist(void* const WindowPlatformHandle)
 		{
 			return (OpenGLRHIInternals::OutputWindowResourceMap.find(WindowPlatformHandle) != OpenGLRHIInternals::OutputWindowResourceMap.end());
 		}
 
-		bool GetOutputWindowResources(void* const WindowPlatformHandle, OpenGLRHIInternals::OutputWindowResources& Resources)
+		bool GetOutputWindowResources(void* const WindowPlatformHandle, OpenGLRHIInternals::OpenGLOutputWindowResources& Resources)
 		{
 			if (DoesOutputWindowResourcesExist(WindowPlatformHandle))
 			{
@@ -30,7 +30,7 @@ namespace
 			return false;
 		}
 
-		bool AddOutputWindowResources(void* const WindowPlatformHandle, const OpenGLRHIInternals::OutputWindowResources& Resources)
+		bool AddOutputWindowResources(void* const WindowPlatformHandle, const OpenGLRHIInternals::OpenGLOutputWindowResources& Resources)
 		{
 			if (!DoesOutputWindowResourcesExist(WindowPlatformHandle))
 			{
@@ -106,12 +106,12 @@ namespace
 #endif // PLATFORM_WINDOWS
 		}
 
-		bool LoadOGLFunctions()
+		bool LoadOpenGLFunctions()
 		{
 			return gladLoadGL() != 0;
 		}
 
-		void PrintOGLVersion()
+		void PrintOpenGLVersion()
 		{
 			CONSOLE_PRINTF("OpenGL version and driver version: %s\n", glGetString(GL_VERSION));
 		}
@@ -156,13 +156,13 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlat
 	}
 
 	// Load the api functions. This only needs to be done once during startup but needs a valid current context
-	if (!OpenGLRHIInternals::LoadOGLFunctions())
+	if (!OpenGLRHIInternals::LoadOpenGLFunctions())
 	{
 		return false;
 	}
 
 	// Debug print api version
-	OpenGLRHIInternals::PrintOGLVersion();
+	OpenGLRHIInternals::PrintOpenGLVersion();
 
 	// Remove current context meaning that there is no rendering context set after initialization
 	return OpenGLRHIInternals::ClearCurrentContext();
@@ -170,7 +170,7 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlat
 
 bool Rendering::RenderHardwareInterface::CreateOutputWindowResources(void* const OutputWindowPlatformHandle)
 {
-	OpenGLRHIInternals::OutputWindowResources Resources = {};
+	OpenGLRHIInternals::OpenGLOutputWindowResources Resources = {};
 
 	// Create a context for the output window
 	Resources.OpenGLContext = OpenGLRHIInternals::CreateContext(OutputWindowPlatformHandle);
@@ -186,7 +186,7 @@ bool Rendering::RenderHardwareInterface::CreateOutputWindowResources(void* const
 bool Rendering::RenderHardwareInterface::DestroyOutputWindowResources(void* const OutputWindowPlatformHandle)
 {
 	// Get resources for the output window
-	OpenGLRHIInternals::OutputWindowResources Resources;
+	OpenGLRHIInternals::OpenGLOutputWindowResources Resources;
 	if (!OpenGLRHIInternals::GetOutputWindowResources(OutputWindowPlatformHandle, Resources))
 	{
 		return false;
@@ -210,7 +210,7 @@ bool Rendering::RenderHardwareInterface::SetOutputWindow(void* const OutputWindo
 	}
 
 	// Make the opengl context associated with the output window platform handle current
-	OpenGLRHIInternals::OutputWindowResources Resources;
+	OpenGLRHIInternals::OpenGLOutputWindowResources Resources;
 	if (!OpenGLRHIInternals::GetOutputWindowResources(OutputWindowPlatformHandle, Resources))
 	{
 		return false;
@@ -241,7 +241,7 @@ void Rendering::RenderHardwareInterface::Cleanup()
 	OpenGLRHIInternals::ClearCurrentContext();
 
 	// Cleanup output window resources
-	for (const std::pair<void*, OpenGLRHIInternals::OutputWindowResources>& Pair : OpenGLRHIInternals::OutputWindowResourceMap)
+	for (const std::pair<void*, OpenGLRHIInternals::OpenGLOutputWindowResources>& Pair : OpenGLRHIInternals::OutputWindowResourceMap)
 	{
 		DestroyOutputWindowResources(Pair.first);
 	}

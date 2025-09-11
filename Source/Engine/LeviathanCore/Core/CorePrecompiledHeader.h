@@ -5,6 +5,7 @@
 #define NOMINMAX
 #include <Windows.h>
 #include <Xinput.h>
+#include <Rpc.h> // Uuids
 #endif // PLATFORM_WINDOWS
 
 #include <memory>
