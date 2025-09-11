@@ -27,7 +27,7 @@ void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindo
 	// If a render output window is already set remove the rendering module's binding to its resized event delegate and clear the render output window pointer
 	if (CurrentRenderOutputWindow)
 	{
-		CurrentRenderOutputWindow->GetResizedDelegate().RemoveMethod<Rendering::RenderingModule, &Rendering::RenderingModule::OnRenderOutputWindowResized>(this);
+		CurrentRenderOutputWindow->GetResizedDelegate().RemoveMethod<Rendering::RenderingModule, &Rendering::RenderingModule::OnCurrentRenderOutputWindowResized>(this);
 		CurrentRenderOutputWindow = nullptr;
 		RenderHardwareInterface::SetOutputWindow(nullptr);
 	}
@@ -37,7 +37,7 @@ void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindo
 	{
 		if (RenderHardwareInterface::SetOutputWindow(OutputWindow->GetPlatformHandle()))
 		{
-			OutputWindow->GetResizedDelegate().AddMethod<Rendering::RenderingModule, &Rendering::RenderingModule::OnRenderOutputWindowResized>(this);
+			OutputWindow->GetResizedDelegate().AddMethod<Rendering::RenderingModule, &Rendering::RenderingModule::OnCurrentRenderOutputWindowResized>(this);
 			CurrentRenderOutputWindow = OutputWindow;
 		}
 	}
@@ -59,7 +59,7 @@ void Rendering::RenderingModule::Render()
 	}
 }
 
-void Rendering::RenderingModule::OnRenderOutputWindowResized(const Core::WindowResizedDelegateParameters& Parameters)
+void Rendering::RenderingModule::OnCurrentRenderOutputWindowResized(const Core::WindowResizedDelegateParameters& Parameters)
 {
 	Render();
 }

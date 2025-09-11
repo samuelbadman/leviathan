@@ -24,10 +24,12 @@ namespace Rendering
 		bool DestroyRenderOutputWindowResources(void* const OutputWindowPlatformHandle);
 		void SetRenderOutputWindow(Core::Window* OutputWindow);
 
+
+
 		// Render into the currently set render output window. Does nothing if there is not a render output window set
 		void Render();
 
 	private:
-		void OnRenderOutputWindowResized(const Core::WindowResizedDelegateParameters& Parameters);
+		void OnCurrentRenderOutputWindowResized(const Core::WindowResizedDelegateParameters& Parameters);
 	};
 }
