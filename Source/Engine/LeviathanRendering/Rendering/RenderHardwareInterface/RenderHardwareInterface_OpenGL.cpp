@@ -237,6 +237,9 @@ bool Rendering::RenderHardwareInterface::SwapOutputWindowBuffers(void* const Out
 
 void Rendering::RenderHardwareInterface::Cleanup()
 {
+	// Clear current opengl context
+	OpenGLRHIInternals::ClearCurrentContext();
+
 	// Cleanup output window resources
 	for (const std::pair<void*, OpenGLRHIInternals::OutputWindowResources>& Pair : OpenGLRHIInternals::OutputWindowResourceMap)
 	{
