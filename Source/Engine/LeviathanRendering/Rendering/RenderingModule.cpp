@@ -43,9 +43,14 @@ void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindo
 	}
 }
 
-Core::Uuid Rendering::RenderingModule::CreateMeshRenderObject()
+Core::Uuid Rendering::RenderingModule::CreateRenderMeshObject(const size_t VertexDataSize, const void* VertexData)
 {
-	return Core::Uuid();
+	return RenderHardwareInterface::LoadRenderMesh(VertexDataSize, VertexData);
+}
+
+void Rendering::RenderingModule::DestroyRenderMeshObject(const Core::Uuid& RenderMeshObjectUuid)
+{
+	RenderHardwareInterface::FreeRenderMesh(RenderMeshObjectUuid);
 }
 
 void Rendering::RenderingModule::Render()

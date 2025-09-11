@@ -21,7 +21,12 @@ void Core::Uuid::Generate()
 	}
 }
 
-bool Core::Uuid::operator==(const Core::Uuid& Rhs)
+size_t Core::Uuid::Hash() const
+{
+	return Data1 + Data2 + Data3 + Data4[0] + Data4[1] + Data4[2] + Data4[3] + Data4[4] + Data4[5] + Data4[6] + Data4[7];
+}
+
+bool Core::Uuid::operator==(const Core::Uuid& Rhs) const
 {
 	return (Data1 == Rhs.Data1) &&
 		(Data2 == Rhs.Data2) &&

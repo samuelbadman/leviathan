@@ -11,8 +11,22 @@ namespace
 			void* OpenGLContext = nullptr;
 		};
 
+		struct OpenGLRenderMesh
+		{
+			uint32_t VertexBufferObjectID = 0;
+
+			OpenGLRenderMesh() = default;
+			OpenGLRenderMesh(const uint32_t InVertexBufferObjectID)
+				: VertexBufferObjectID(InVertexBufferObjectID)
+			{
+			}
+		};
+
 		// Mapping of platform window handles to output window resource structures. The window platform handle is being used as the handle/identifier to its rendering resources
 		std::unordered_map<void*, OpenGLOutputWindowResources> OutputWindowResourceMap = {};
+
+		// Mapping of uuid identifers to render mesh objects
+		std::unordered_map<Core::Uuid, OpenGLRenderMesh> RenderMeshMap = {};
 
 		bool DoesOutputWindowResourcesExist(void* const WindowPlatformHandle)
 		{
@@ -132,6 +146,21 @@ namespace
 			return false;
 #endif // PLATFORM_WINDOWS
 		}
+
+		bool FreeOutputWindowResources(void* const OutputWindowPlatformHandle, const OpenGLRHIInternals::OpenGLOutputWindowResources& Resources)
+		{
+			// Delete rendering context for the output window
+			if (!OpenGLRHIInternals::DeleteContext(OutputWindowPlatformHandle, Resources.OpenGLContext))
+			{
+				return false;
+			}
+			return true;
+		}
+
+		void FreeRenderMeshResources(const OpenGLRHIInternals::OpenGLRenderMesh& RenderMesh)
+		{
+			glDeleteBuffers(1, &RenderMesh.VertexBufferObjectID);
+		}
 	}
 }
 
@@ -192,11 +221,9 @@ bool Rendering::RenderHardwareInterface::DestroyOutputWindowResources(void* cons
 		return false;
 	}
 
-	// Delete rendering context for the output window
-	if (!OpenGLRHIInternals::DeleteContext(OutputWindowPlatformHandle, Resources.OpenGLContext))
-	{
-		return false;
-	}
+	OpenGLRHIInternals::FreeOutputWindowResources(OutputWindowPlatformHandle, Resources);
+
+	OpenGLRHIInternals::OutputWindowResourceMap.erase(OutputWindowPlatformHandle);
 
 	return true;
 }
@@ -243,7 +270,39 @@ void Rendering::RenderHardwareInterface::Cleanup()
 	// Cleanup output window resources
 	for (const std::pair<void*, OpenGLRHIInternals::OpenGLOutputWindowResources>& Pair : OpenGLRHIInternals::OutputWindowResourceMap)
 	{
-		DestroyOutputWindowResources(Pair.first);
+		OpenGLRHIInternals::FreeOutputWindowResources(Pair.first, Pair.second);
 	}
 	OpenGLRHIInternals::OutputWindowResourceMap.clear();
+
+	// Cleanup render mesh objects
+	for (const std::pair<Core::Uuid, OpenGLRHIInternals::OpenGLRenderMesh>& Pair : OpenGLRHIInternals::RenderMeshMap)
+	{
+		OpenGLRHIInternals::FreeRenderMeshResources(Pair.second);
+	}
+	OpenGLRHIInternals::RenderMeshMap.clear();
+}
+
+Core::Uuid Rendering::RenderHardwareInterface::LoadRenderMesh(const size_t VertexDataSize, const void* VertexData)
+{
+	// Generate identifier for render mesh object
+	Core::Uuid uuid = {};
+	uuid.Generate();
+
+	// Generate render mesh objects on GPU and upload data to the GPU (vertex buffer, vertex attribute buffer)
+	uint32_t VertexBuffer;
+	glGenBuffers(1, &VertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, VertexDataSize, VertexData, GL_STATIC_DRAW);
+
+	// Add render mesh to render mesh map with unique identifier key
+	OpenGLRHIInternals::RenderMeshMap.emplace(uuid, VertexBuffer);
+
+	// Return identifier
+	return uuid;
+}
+
+void Rendering::RenderHardwareInterface::FreeRenderMesh(const Core::Uuid& RenderMeshUuid)
+{
+	OpenGLRHIInternals::FreeRenderMeshResources(OpenGLRHIInternals::RenderMeshMap.at(RenderMeshUuid));
+	OpenGLRHIInternals::RenderMeshMap.erase(RenderMeshUuid);
 }

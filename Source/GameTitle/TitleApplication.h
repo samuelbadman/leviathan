@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Application.h"
+#include "Core/Platform/Uuid.h"
 
 namespace Core
 {
@@ -20,6 +21,8 @@ private:
 	std::unique_ptr<TitleApplicationWindow> MainAppWindow = nullptr;
 
 	Rendering::RenderingModule* RenderingModuleInstance = nullptr;
+
+	Core::Uuid TriangleRenderMeshID = {};
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);

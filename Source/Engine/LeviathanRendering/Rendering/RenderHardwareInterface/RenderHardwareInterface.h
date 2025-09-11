@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Platform/Uuid.h"
+
 namespace Rendering
 {
 	namespace RenderHardwareInterface
@@ -10,6 +12,9 @@ namespace Rendering
 		bool SetOutputWindow(void* const OutputWindowPlatformHandle);
 		bool SwapOutputWindowBuffers(void* const OutputWindowPlatformHandle);
 		void Cleanup();
+
+		Core::Uuid LoadRenderMesh(const size_t VertexDataSize, const void* VertexData);
+		void FreeRenderMesh(const Core::Uuid& RenderMeshUuid);
 
 		void SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height);
 		void ClearColorBuffer(const float R, const float G, const float B, const float A);

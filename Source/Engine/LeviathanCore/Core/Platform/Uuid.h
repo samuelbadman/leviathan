@@ -12,7 +12,20 @@ namespace Core
 
 	public:
 		void Generate();
+		size_t Hash() const;
 
-		bool operator==(const Core::Uuid& Rhs);
+		bool operator==(const Core::Uuid& Rhs) const;
+	};
+}
+
+namespace std
+{
+	template<>
+	struct hash<Core::Uuid>
+	{
+		size_t operator()(const Core::Uuid& Key) const
+		{
+			return hash<size_t>()(Key.Hash());
+		}
 	};
 }
