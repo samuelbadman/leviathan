@@ -105,7 +105,6 @@ bool TitleApplication::InitializeRendering()
 	// Set main app window as the current rendering context
 	RenderingModuleInstance->SetRenderOutputWindow(MainAppWindow.get());
 
-
 	// Test setup rendering scene
 	const std::array<float, 3 * 3> Vertices =
 	{
