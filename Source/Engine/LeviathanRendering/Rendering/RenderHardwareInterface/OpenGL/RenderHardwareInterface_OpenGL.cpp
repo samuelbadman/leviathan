@@ -33,11 +33,22 @@ namespace
 			}
 		};
 
+		struct RenderingPipelineUuids
+		{
+			Core::Uuid StaticMeshRenderingPipelineUuid = {};
+		};
+
+		// Rendering pipeline uuids
+		OpenGLRHIInternals::RenderingPipelineUuids PipelineUuids = {};
+
 		// Mapping of platform window handles to output window resource structures. The window platform handle is being used as the handle/identifier to its rendering resources
 		std::unordered_map<void*, OpenGLOutputWindowResources> OutputWindowResources = {};
 
 		// Mapping of uuid identifers to static render mesh objects
 		std::unordered_map<Core::Uuid, OpenGLStaticRenderMesh> AllocatedStaticRenderMeshes = {};
+
+		// Mapping of uuid identifers to rendering pipeline objects
+		std::unordered_map<Core::Uuid, OpenGLRenderingPipeline> RenderingPipelines = {};
 
 		bool DoesOutputWindowResourcesExist(void* const WindowPlatformHandle)
 		{
@@ -168,70 +179,79 @@ namespace
 			return true;
 		}
 
-		void ReleaseRenderMeshResources(const OpenGLRHIInternals::OpenGLStaticRenderMesh& RenderMesh)
+		void ReleaseStaticRenderMeshResources(const OpenGLRHIInternals::OpenGLStaticRenderMesh& RenderMesh)
 		{
 			glDeleteBuffers(1, &RenderMesh.VertexBufferObjectID);
 		}
 
-		enum class RenderingPipelines : uint8_t
+		bool ReadFileIntoString(const std::string& Filepath, std::string& OutString)
 		{
-			StaticMesh,
-			MAX
-		};
+			std::ifstream File(Filepath);
+			if (!File.is_open())
+			{
+				return false;
+			}
 
-		Core::Uuid CreatePipeline(const RenderingPipelines Pipeline)
+			OutString = {};
+			std::string Line;
+			while (std::getline(File, Line))
+			{
+				OutString += Line;
+				OutString += '\n';
+			}
+
+			File.close();
+
+			return true;
+		}
+
+		bool CompileShaderSource(const std::string& Source, uint32_t& OutShaderId, char* ErrorMessageBuffer = nullptr, size_t ErrorMessageBufferSizeBytes = 512)
 		{
-			// Get filepaths to pipeline api shader source code
-			std::string VertexShaderSourceFilePath;
-			switch (Pipeline)
-			{
-			case RenderingPipelines::StaticMesh:
-				VertexShaderSourceFilePath = "Shaders/StaticMeshVertexShader.glsl";
-				break;
+			OutShaderId = glCreateShader(GL_VERTEX_SHADER);
 
-			default:
-				return Core::Uuid();
-			}
-
-			// Read shader source file into string buffer
-			std::ifstream VertexShaderSourceFile(VertexShaderSourceFilePath);
-			if (!VertexShaderSourceFile.is_open())
-			{
-				return Core::Uuid();
-			}
-
-			std::string VertexShaderSourceString;
-			std::string SourceLine;
-			while (std::getline(VertexShaderSourceFile, SourceLine))
-			{
-				VertexShaderSourceString += SourceLine;
-				VertexShaderSourceString += '\n';
-			}
-
-			VertexShaderSourceFile.close();
-
-			CONSOLE_PRINTF("Vertex Shader Source String:\n%s", VertexShaderSourceString.c_str());
-
-			// Compile shaders
-			uint32_t VertexShader;
-			VertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-			const char* const C_VertexShaderSourceString = VertexShaderSourceString.c_str();
-			glShaderSource(VertexShader, 1, &C_VertexShaderSourceString, nullptr);
-			glCompileShader(VertexShader);
+			const char* const SourceCString = Source.c_str();
+			glShaderSource(OutShaderId, 1, &SourceCString, nullptr);
+			glCompileShader(OutShaderId);
 
 			int32_t Success;
-			glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &Success);
+			glGetShaderiv(OutShaderId, GL_COMPILE_STATUS, &Success);
 
 			if (!Success)
 			{
-				char CompilerMessage[512];
-				glGetShaderInfoLog(VertexShader, 512, nullptr, CompilerMessage);
-
-				CONSOLE_PRINTF("Compiler message: %s", CompilerMessage);
+				if (ErrorMessageBuffer)
+				{
+					glGetShaderInfoLog(OutShaderId, ErrorMessageBufferSizeBytes, nullptr, ErrorMessageBuffer);
+				}
+				return false;
 			}
 
-			return Core::Uuid();
+			return true;
+		}
+
+		bool CreatePipeline(const std::string& VertexShaderSourceFilepath, const std::string& FragmentShaderSourceFilepath, Core::Uuid& OutUuid)
+		{
+			// Read source code file into string buffer
+			std::string VertexShaderSourceCode;
+			if (!OpenGLRHIInternals::ReadFileIntoString(VertexShaderSourceFilepath, VertexShaderSourceCode))
+			{
+				return false;
+			}
+
+			// Compile shader source code
+			static constexpr size_t CompileErrorMessageBufferSizeBytes = 512;
+			std::array<char, CompileErrorMessageBufferSizeBytes> CompileErrorMessageBuffer;
+
+			uint32_t VertexShaderId;
+			if (!OpenGLRHIInternals::CompileShaderSource(VertexShaderSourceCode, VertexShaderId, CompileErrorMessageBuffer.data(), CompileErrorMessageBufferSizeBytes))
+			{
+				CONSOLE_PRINTF("Shader compilation error message: %s", CompileErrorMessageBuffer.data());
+				return false;
+			}
+
+			// TODO: Compile fragment shader code
+			// TODO: Create shader program
+
+			return true;
 		}
 
 		void ReleasePipeline(const Core::Uuid& PipelineUuid)
@@ -270,7 +290,10 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlat
 	OpenGLRHIInternals::PrintOpenGLVersion();
 
 	// Create rendering pipelines
-	OpenGLRHIInternals::CreatePipeline(OpenGLRHIInternals::RenderingPipelines::StaticMesh);
+	if (!OpenGLRHIInternals::CreatePipeline("Shaders/StaticMeshVertexShader.glsl", "", OpenGLRHIInternals::PipelineUuids.StaticMeshRenderingPipelineUuid))
+	{
+		return false;
+	}
 
 	// Remove current context meaning that there is no rendering context set after initialization
 	return OpenGLRHIInternals::ClearCurrentContext();
@@ -353,12 +376,16 @@ void Rendering::RenderHardwareInterface::Cleanup()
 	}
 	OpenGLRHIInternals::OutputWindowResources.clear();
 
-	// Cleanup render mesh objects
+	// Cleanup static render mesh objects
 	for (const std::pair<Core::Uuid, OpenGLRHIInternals::OpenGLStaticRenderMesh>& Pair : OpenGLRHIInternals::AllocatedStaticRenderMeshes)
 	{
-		OpenGLRHIInternals::ReleaseRenderMeshResources(Pair.second);
+		OpenGLRHIInternals::ReleaseStaticRenderMeshResources(Pair.second);
 	}
 	OpenGLRHIInternals::AllocatedStaticRenderMeshes.clear();
+
+	// Cleanup pipelines
+	// TODO: Release pipeline resources
+	OpenGLRHIInternals::PipelineUuids = {};
 }
 
 Core::Uuid Rendering::RenderHardwareInterface::AllocateStaticRenderMesh(const size_t VertexDataSize, const void* VertexData)
@@ -382,6 +409,6 @@ Core::Uuid Rendering::RenderHardwareInterface::AllocateStaticRenderMesh(const si
 
 void Rendering::RenderHardwareInterface::ReleaseStaticRenderMesh(const Core::Uuid& StaticRenderMeshUuid)
 {
-	OpenGLRHIInternals::ReleaseRenderMeshResources(OpenGLRHIInternals::AllocatedStaticRenderMeshes.at(StaticRenderMeshUuid));
+	OpenGLRHIInternals::ReleaseStaticRenderMeshResources(OpenGLRHIInternals::AllocatedStaticRenderMeshes.at(StaticRenderMeshUuid));
 	OpenGLRHIInternals::AllocatedStaticRenderMeshes.erase(StaticRenderMeshUuid);
 }
