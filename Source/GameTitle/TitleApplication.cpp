@@ -116,7 +116,7 @@ bool TitleApplication::InitializeRendering()
 		0.0f,  0.5f, 0.0f
 	};
 
-	TriangleRenderMeshID = RenderingModuleInstance->CreateRenderMeshObject(sizeof(Vertices), Vertices.data());
+	TriangleRenderMeshID = RenderingModuleInstance->AllocateStaticRenderMesh(sizeof(Vertices), Vertices.data());
 
 	return true;
 }
@@ -126,7 +126,7 @@ bool TitleApplication::ShutdownRendering()
 	// Test destroy rendering scene
 	if (RenderingModuleInstance)
 	{
-		RenderingModuleInstance->DestroyRenderMeshObject(TriangleRenderMeshID);
+		RenderingModuleInstance->ReleaseStaticRenderMesh(TriangleRenderMeshID);
 	}
 
 	// Delete app window rendering context

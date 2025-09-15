@@ -7,3 +7,4 @@
 #endif // PLATFORM_WINDOWS
 
 #include <unordered_map>
+#include <fstream>

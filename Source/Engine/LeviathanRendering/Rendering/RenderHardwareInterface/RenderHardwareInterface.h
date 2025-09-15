@@ -13,8 +13,8 @@ namespace Rendering
 		bool SwapOutputWindowBuffers(void* const OutputWindowPlatformHandle);
 		void Cleanup();
 
-		Core::Uuid LoadRenderMesh(const size_t VertexDataSize, const void* VertexData);
-		void FreeRenderMesh(const Core::Uuid& RenderMeshUuid);
+		Core::Uuid AllocateStaticRenderMesh(const size_t VertexDataSize, const void* VertexData);
+		void ReleaseStaticRenderMesh(const Core::Uuid& StaticRenderMeshUuid);
 
 		void SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height);
 		void ClearColorBuffer(const float R, const float G, const float B, const float A);

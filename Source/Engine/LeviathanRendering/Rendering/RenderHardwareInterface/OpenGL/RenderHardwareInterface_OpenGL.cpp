@@ -11,33 +11,44 @@ namespace
 			void* OpenGLContext = nullptr;
 		};
 
-		struct OpenGLRenderMesh
+		struct OpenGLRenderingPipeline
+		{
+			uint32_t ShaderProgramObject = 0;
+
+			OpenGLRenderingPipeline() = default;
+			OpenGLRenderingPipeline(const uint32_t InShaderProgramObjectID)
+				: ShaderProgramObject(InShaderProgramObjectID)
+			{
+			}
+		};
+
+		struct OpenGLStaticRenderMesh
 		{
 			uint32_t VertexBufferObjectID = 0;
 
-			OpenGLRenderMesh() = default;
-			OpenGLRenderMesh(const uint32_t InVertexBufferObjectID)
+			OpenGLStaticRenderMesh() = default;
+			OpenGLStaticRenderMesh(const uint32_t InVertexBufferObjectID)
 				: VertexBufferObjectID(InVertexBufferObjectID)
 			{
 			}
 		};
 
 		// Mapping of platform window handles to output window resource structures. The window platform handle is being used as the handle/identifier to its rendering resources
-		std::unordered_map<void*, OpenGLOutputWindowResources> OutputWindowResourceMap = {};
+		std::unordered_map<void*, OpenGLOutputWindowResources> OutputWindowResources = {};
 
-		// Mapping of uuid identifers to render mesh objects
-		std::unordered_map<Core::Uuid, OpenGLRenderMesh> RenderMeshMap = {};
+		// Mapping of uuid identifers to static render mesh objects
+		std::unordered_map<Core::Uuid, OpenGLStaticRenderMesh> AllocatedStaticRenderMeshes = {};
 
 		bool DoesOutputWindowResourcesExist(void* const WindowPlatformHandle)
 		{
-			return (OpenGLRHIInternals::OutputWindowResourceMap.find(WindowPlatformHandle) != OpenGLRHIInternals::OutputWindowResourceMap.end());
+			return (OpenGLRHIInternals::OutputWindowResources.find(WindowPlatformHandle) != OpenGLRHIInternals::OutputWindowResources.end());
 		}
 
 		bool GetOutputWindowResources(void* const WindowPlatformHandle, OpenGLRHIInternals::OpenGLOutputWindowResources& Resources)
 		{
 			if (DoesOutputWindowResourcesExist(WindowPlatformHandle))
 			{
-				Resources = OutputWindowResourceMap.at(WindowPlatformHandle);
+				Resources = OutputWindowResources.at(WindowPlatformHandle);
 				return true;
 			}
 			Resources = {};
@@ -48,7 +59,7 @@ namespace
 		{
 			if (!DoesOutputWindowResourcesExist(WindowPlatformHandle))
 			{
-				OpenGLRHIInternals::OutputWindowResourceMap.emplace(WindowPlatformHandle, Resources);
+				OpenGLRHIInternals::OutputWindowResources.emplace(WindowPlatformHandle, Resources);
 				return true;
 			}
 			return false;
@@ -157,9 +168,74 @@ namespace
 			return true;
 		}
 
-		void FreeRenderMeshResources(const OpenGLRHIInternals::OpenGLRenderMesh& RenderMesh)
+		void ReleaseRenderMeshResources(const OpenGLRHIInternals::OpenGLStaticRenderMesh& RenderMesh)
 		{
 			glDeleteBuffers(1, &RenderMesh.VertexBufferObjectID);
+		}
+
+		enum class RenderingPipelines : uint8_t
+		{
+			StaticMesh,
+			MAX
+		};
+
+		Core::Uuid CreatePipeline(const RenderingPipelines Pipeline)
+		{
+			// Get filepaths to pipeline api shader source code
+			std::string VertexShaderSourceFilePath;
+			switch (Pipeline)
+			{
+			case RenderingPipelines::StaticMesh:
+				VertexShaderSourceFilePath = "Shaders/StaticMeshVertexShader.glsl";
+				break;
+
+			default:
+				return Core::Uuid();
+			}
+
+			// Read shader source file into string buffer
+			std::ifstream VertexShaderSourceFile(VertexShaderSourceFilePath);
+			if (!VertexShaderSourceFile.is_open())
+			{
+				return Core::Uuid();
+			}
+
+			std::string VertexShaderSourceString;
+			std::string SourceLine;
+			while (std::getline(VertexShaderSourceFile, SourceLine))
+			{
+				VertexShaderSourceString += SourceLine;
+				VertexShaderSourceString += '\n';
+			}
+
+			VertexShaderSourceFile.close();
+
+			CONSOLE_PRINTF("Vertex Shader Source String:\n%s", VertexShaderSourceString.c_str());
+
+			// Compile shaders
+			uint32_t VertexShader;
+			VertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+			const char* const C_VertexShaderSourceString = VertexShaderSourceString.c_str();
+			glShaderSource(VertexShader, 1, &C_VertexShaderSourceString, nullptr);
+			glCompileShader(VertexShader);
+
+			int32_t Success;
+			glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &Success);
+
+			if (!Success)
+			{
+				char CompilerMessage[512];
+				glGetShaderInfoLog(VertexShader, 512, nullptr, CompilerMessage);
+
+				CONSOLE_PRINTF("Compiler message: %s", CompilerMessage);
+			}
+
+			return Core::Uuid();
+		}
+
+		void ReleasePipeline(const Core::Uuid& PipelineUuid)
+		{
 		}
 	}
 }
@@ -193,6 +269,9 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlat
 	// Debug print api version
 	OpenGLRHIInternals::PrintOpenGLVersion();
 
+	// Create rendering pipelines
+	OpenGLRHIInternals::CreatePipeline(OpenGLRHIInternals::RenderingPipelines::StaticMesh);
+
 	// Remove current context meaning that there is no rendering context set after initialization
 	return OpenGLRHIInternals::ClearCurrentContext();
 }
@@ -223,7 +302,7 @@ bool Rendering::RenderHardwareInterface::DestroyOutputWindowResources(void* cons
 
 	OpenGLRHIInternals::FreeOutputWindowResources(OutputWindowPlatformHandle, Resources);
 
-	OpenGLRHIInternals::OutputWindowResourceMap.erase(OutputWindowPlatformHandle);
+	OpenGLRHIInternals::OutputWindowResources.erase(OutputWindowPlatformHandle);
 
 	return true;
 }
@@ -268,41 +347,41 @@ void Rendering::RenderHardwareInterface::Cleanup()
 	OpenGLRHIInternals::ClearCurrentContext();
 
 	// Cleanup output window resources
-	for (const std::pair<void*, OpenGLRHIInternals::OpenGLOutputWindowResources>& Pair : OpenGLRHIInternals::OutputWindowResourceMap)
+	for (const std::pair<void*, OpenGLRHIInternals::OpenGLOutputWindowResources>& Pair : OpenGLRHIInternals::OutputWindowResources)
 	{
 		OpenGLRHIInternals::FreeOutputWindowResources(Pair.first, Pair.second);
 	}
-	OpenGLRHIInternals::OutputWindowResourceMap.clear();
+	OpenGLRHIInternals::OutputWindowResources.clear();
 
 	// Cleanup render mesh objects
-	for (const std::pair<Core::Uuid, OpenGLRHIInternals::OpenGLRenderMesh>& Pair : OpenGLRHIInternals::RenderMeshMap)
+	for (const std::pair<Core::Uuid, OpenGLRHIInternals::OpenGLStaticRenderMesh>& Pair : OpenGLRHIInternals::AllocatedStaticRenderMeshes)
 	{
-		OpenGLRHIInternals::FreeRenderMeshResources(Pair.second);
+		OpenGLRHIInternals::ReleaseRenderMeshResources(Pair.second);
 	}
-	OpenGLRHIInternals::RenderMeshMap.clear();
+	OpenGLRHIInternals::AllocatedStaticRenderMeshes.clear();
 }
 
-Core::Uuid Rendering::RenderHardwareInterface::LoadRenderMesh(const size_t VertexDataSize, const void* VertexData)
+Core::Uuid Rendering::RenderHardwareInterface::AllocateStaticRenderMesh(const size_t VertexDataSize, const void* VertexData)
 {
 	// Generate identifier for render mesh object
 	Core::Uuid uuid = {};
 	uuid.Generate();
 
-	// Generate render mesh objects on GPU and upload data to the GPU (vertex buffer, vertex attribute buffer)
+	// Generate vertex buffer on GPU and upload data to it
 	uint32_t VertexBuffer;
 	glGenBuffers(1, &VertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, VertexDataSize, VertexData, GL_STATIC_DRAW);
 
 	// Add render mesh to render mesh map with unique identifier key
-	OpenGLRHIInternals::RenderMeshMap.emplace(uuid, VertexBuffer);
+	OpenGLRHIInternals::AllocatedStaticRenderMeshes.emplace(uuid, VertexBuffer);
 
 	// Return identifier
 	return uuid;
 }
 
-void Rendering::RenderHardwareInterface::FreeRenderMesh(const Core::Uuid& RenderMeshUuid)
+void Rendering::RenderHardwareInterface::ReleaseStaticRenderMesh(const Core::Uuid& StaticRenderMeshUuid)
 {
-	OpenGLRHIInternals::FreeRenderMeshResources(OpenGLRHIInternals::RenderMeshMap.at(RenderMeshUuid));
-	OpenGLRHIInternals::RenderMeshMap.erase(RenderMeshUuid);
+	OpenGLRHIInternals::ReleaseRenderMeshResources(OpenGLRHIInternals::AllocatedStaticRenderMeshes.at(StaticRenderMeshUuid));
+	OpenGLRHIInternals::AllocatedStaticRenderMeshes.erase(StaticRenderMeshUuid);
 }

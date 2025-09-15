@@ -9,7 +9,12 @@ Rendering::RenderingModule::~RenderingModule()
 
 bool Rendering::RenderingModule::Initialize(void* const OutputWindowPlatformHandle)
 {
-	return RenderHardwareInterface::Initialize(OutputWindowPlatformHandle);
+	// Initialize the RHI
+	if (!RenderHardwareInterface::Initialize(OutputWindowPlatformHandle))
+	{
+		return false;
+	}
+	return true;
 }
 
 bool Rendering::RenderingModule::CreateRenderOutputWindowResources(void* const OutputWindowPlatformHandle)
@@ -43,14 +48,14 @@ void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindo
 	}
 }
 
-Core::Uuid Rendering::RenderingModule::CreateRenderMeshObject(const size_t VertexDataSize, const void* VertexData)
+Core::Uuid Rendering::RenderingModule::AllocateStaticRenderMesh(const size_t VertexDataSize, const void* VertexData)
 {
-	return RenderHardwareInterface::LoadRenderMesh(VertexDataSize, VertexData);
+	return RenderHardwareInterface::AllocateStaticRenderMesh(VertexDataSize, VertexData);
 }
 
-void Rendering::RenderingModule::DestroyRenderMeshObject(const Core::Uuid& RenderMeshObjectUuid)
+void Rendering::RenderingModule::ReleaseStaticRenderMesh(const Core::Uuid& StaticRenderMeshUuid)
 {
-	RenderHardwareInterface::FreeRenderMesh(RenderMeshObjectUuid);
+	RenderHardwareInterface::ReleaseStaticRenderMesh(StaticRenderMeshUuid);
 }
 
 void Rendering::RenderingModule::Render()

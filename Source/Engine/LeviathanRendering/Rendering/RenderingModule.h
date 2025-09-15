@@ -12,9 +12,14 @@ namespace Core
 
 namespace Rendering
 {
+	/*
+	* The rendering module is designed so that how objects are rendered is defined by the rendering module and what is rendered is defined by the client application.
+	*/
 	class RenderingModule : public Core::Module
 	{
 	private:
+		Core::Uuid StaticMeshRenderPipelineUuid = {};
+
 		Core::Window* CurrentRenderOutputWindow = nullptr;
 
 	public:
@@ -25,8 +30,8 @@ namespace Rendering
 		bool DestroyRenderOutputWindowResources(void* const OutputWindowPlatformHandle);
 		void SetRenderOutputWindow(Core::Window* OutputWindow);
 
-		Core::Uuid CreateRenderMeshObject(const size_t VertexDataSize, const void* VertexData);
-		void DestroyRenderMeshObject(const Core::Uuid& RenderMeshObjectUuid);
+		Core::Uuid AllocateStaticRenderMesh(const size_t VertexDataSize, const void* VertexData);
+		void ReleaseStaticRenderMesh(const Core::Uuid& StaticRenderMeshUuid);
 
 		// Render into the currently set render output window. Does nothing if there is not a render output window set
 		void Render();

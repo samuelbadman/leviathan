@@ -173,3 +173,13 @@ target_include_directories("GameTitle" PRIVATE
 
 # Set Visual Studio startup project. Select game title being built here
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "GameTitle")
+
+# Set working directory for game title being built to be the same as the game title target output directory
+set_property(TARGET "GameTitle" PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:GameTitle>")
+
+# Build commands
+# Copy rendering module shader source files to build target directory
+# TODO: Only do this if the rendering module is being built
+# TODO: Add switch for rendering api being used to only copy the shader source files for the api being used
+add_custom_command(TARGET "GameTitle" POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/Source/Engine/LeviathanRendering/Shaders/OpenGL" 
+"$<TARGET_FILE_DIR:GameTitle>/Shaders")
