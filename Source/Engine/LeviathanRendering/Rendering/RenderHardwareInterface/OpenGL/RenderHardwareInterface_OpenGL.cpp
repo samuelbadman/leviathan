@@ -205,22 +205,22 @@ namespace
 			return true;
 		}
 
-		bool CompileShaderSource(const std::string& Source, uint32_t& OutShaderId, char* ErrorMessageBuffer = nullptr, size_t ErrorMessageBufferSizeBytes = 512)
+		bool CompileShaderSource(GLenum ShaderStage, const std::string& Source, uint32_t& OutShader, char* ErrorMessageBuffer = nullptr, size_t ErrorMessageBufferSizeBytes = 512)
 		{
-			OutShaderId = glCreateShader(GL_VERTEX_SHADER);
+			OutShader = glCreateShader(ShaderStage);
 
 			const char* const SourceCString = Source.c_str();
-			glShaderSource(OutShaderId, 1, &SourceCString, nullptr);
-			glCompileShader(OutShaderId);
+			glShaderSource(OutShader, 1, &SourceCString, nullptr);
+			glCompileShader(OutShader);
 
 			int32_t Success;
-			glGetShaderiv(OutShaderId, GL_COMPILE_STATUS, &Success);
+			glGetShaderiv(OutShader, GL_COMPILE_STATUS, &Success);
 
 			if (!Success)
 			{
 				if (ErrorMessageBuffer)
 				{
-					glGetShaderInfoLog(OutShaderId, ErrorMessageBufferSizeBytes, nullptr, ErrorMessageBuffer);
+					glGetShaderInfoLog(OutShader, ErrorMessageBufferSizeBytes, nullptr, ErrorMessageBuffer);
 				}
 				return false;
 			}
@@ -237,25 +237,74 @@ namespace
 				return false;
 			}
 
+			std::string FragmentShaderSourceCode;
+			if (!OpenGLRHIInternals::ReadFileIntoString(FragmentShaderSourceFilepath, FragmentShaderSourceCode))
+			{
+				return false;
+			}
+
 			// Compile shader source code
 			static constexpr size_t CompileErrorMessageBufferSizeBytes = 512;
 			std::array<char, CompileErrorMessageBufferSizeBytes> CompileErrorMessageBuffer;
 
-			uint32_t VertexShaderId;
-			if (!OpenGLRHIInternals::CompileShaderSource(VertexShaderSourceCode, VertexShaderId, CompileErrorMessageBuffer.data(), CompileErrorMessageBufferSizeBytes))
+			uint32_t VertexShader;
+			if (!OpenGLRHIInternals::CompileShaderSource(
+				GL_VERTEX_SHADER,
+				VertexShaderSourceCode,
+				VertexShader,
+				CompileErrorMessageBuffer.data(),
+				CompileErrorMessageBufferSizeBytes
+			))
 			{
-				CONSOLE_PRINTF("Shader compilation error message: %s", CompileErrorMessageBuffer.data());
+				CONSOLE_PRINTF("Shader compilation error. File: %s. Message: %s\n", VertexShaderSourceFilepath.c_str(), CompileErrorMessageBuffer.data());
 				return false;
 			}
 
-			// TODO: Compile fragment shader code
-			// TODO: Create shader program
+			uint32_t FragmentShader;
+			if (!OpenGLRHIInternals::CompileShaderSource(
+				GL_FRAGMENT_SHADER,
+				FragmentShaderSourceCode,
+				FragmentShader,
+				CompileErrorMessageBuffer.data(),
+				CompileErrorMessageBufferSizeBytes
+			))
+			{
+				CONSOLE_PRINTF("Shader compilation error. File: %s. Message: %s\n", FragmentShaderSourceFilepath.c_str(), CompileErrorMessageBuffer.data());
+				return false;
+			}
+
+			// Create shader program
+			OpenGLRHIInternals::OpenGLRenderingPipeline Pipeline = {};
+
+			Pipeline.ShaderProgramObject = glCreateProgram();
+
+			glAttachShader(Pipeline.ShaderProgramObject, VertexShader);
+			glAttachShader(Pipeline.ShaderProgramObject, FragmentShader);
+			glLinkProgram(Pipeline.ShaderProgramObject);
+
+			int32_t Success;
+			glGetProgramiv(Pipeline.ShaderProgramObject, GL_LINK_STATUS, &Success);
+			if (!Success)
+			{
+				std::array<char, 512> ProgramInfoLog = {};
+				glGetProgramInfoLog(Pipeline.ShaderProgramObject, 512, nullptr, ProgramInfoLog.data());
+				CONSOLE_PRINTF("Shader program linking error. Info log: %s\n", ProgramInfoLog.data());
+			}
+
+			// Generate uuid and add the new pipeline to the pipeline contianer data structure
+			OutUuid.Generate();
+			OpenGLRHIInternals::RenderingPipelines.emplace(OutUuid, Pipeline);
+
+			// Delete shaders
+			glDeleteShader(VertexShader);
+			glDeleteShader(FragmentShader);
 
 			return true;
 		}
 
-		void ReleasePipeline(const Core::Uuid& PipelineUuid)
+		void ReleasePipeline(const OpenGLRHIInternals::OpenGLRenderingPipeline& Pipeline)
 		{
+			glDeleteProgram(Pipeline.ShaderProgramObject);
 		}
 	}
 }
@@ -290,7 +339,11 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlat
 	OpenGLRHIInternals::PrintOpenGLVersion();
 
 	// Create rendering pipelines
-	if (!OpenGLRHIInternals::CreatePipeline("Shaders/StaticMeshVertexShader.glsl", "", OpenGLRHIInternals::PipelineUuids.StaticMeshRenderingPipelineUuid))
+	if (!OpenGLRHIInternals::CreatePipeline(
+		"Shaders/StaticMeshVertexShader.glsl",
+		"Shaders/StaticMeshFragmentShader.glsl",
+		OpenGLRHIInternals::PipelineUuids.StaticMeshRenderingPipelineUuid
+	))
 	{
 		return false;
 	}
@@ -384,7 +437,11 @@ void Rendering::RenderHardwareInterface::Cleanup()
 	OpenGLRHIInternals::AllocatedStaticRenderMeshes.clear();
 
 	// Cleanup pipelines
-	// TODO: Release pipeline resources
+	for (const std::pair<Core::Uuid, OpenGLRHIInternals::OpenGLRenderingPipeline>& Pair : OpenGLRHIInternals::RenderingPipelines)
+	{
+		OpenGLRHIInternals::ReleasePipeline(Pair.second);
+	}
+	OpenGLRHIInternals::RenderingPipelines.clear();
 	OpenGLRHIInternals::PipelineUuids = {};
 }
 
