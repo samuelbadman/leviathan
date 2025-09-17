@@ -12,6 +12,7 @@ namespace Core
 
 	public:
 		void Generate();
+		void Reset();
 		size_t Hash() const;
 
 		bool operator==(const Core::Uuid& Rhs) const;

@@ -136,7 +136,12 @@ target_include_directories("LeviathanRendering" PRIVATE
 # TODO: Add switch to specify which rendering API to compile the engine with
 "Source/Engine/LeviathanRendering/Vendor/glad/"
 )
-# End renderer module static library module target setup
+
+# Copy rendering module shader source files to build target directory on rendering module post build
+# TODO: Add switch for rendering api being used to only copy the shader source files for the api being used
+add_custom_command(TARGET "LeviathanRendering" 
+POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/Source/Engine/LeviathanRendering/Shaders/Source/OpenGL" "$<TARGET_FILE_DIR:GameTitle>/Shaders")
+# End rendering module static library module target setup
 
 #################################################################################################
 # Titles
@@ -176,10 +181,3 @@ set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "GameTitle")
 
 # Set working directory for game title being built to be the same as the game title target output directory
 set_property(TARGET "GameTitle" PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:GameTitle>")
-
-# Build commands
-# Copy rendering module shader source files to build target directory
-# TODO: Only do this if the rendering module is being built
-# TODO: Add switch for rendering api being used to only copy the shader source files for the api being used
-add_custom_command(TARGET "GameTitle" POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/Source/Engine/LeviathanRendering/Shaders/OpenGL" 
-"$<TARGET_FILE_DIR:GameTitle>/Shaders")

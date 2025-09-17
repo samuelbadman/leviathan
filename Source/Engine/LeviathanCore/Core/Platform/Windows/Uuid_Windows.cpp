@@ -21,6 +21,21 @@ void Core::Uuid::Generate()
 	}
 }
 
+void Core::Uuid::Reset()
+{
+	Data1 = 0;
+	Data2 = 0;
+	Data3 = 0;
+	Data4[0] = 0;
+	Data4[1] = 0;
+	Data4[2] = 0;
+	Data4[3] = 0;
+	Data4[4] = 0;
+	Data4[5] = 0;
+	Data4[6] = 0;
+	Data4[7] = 0;
+}
+
 size_t Core::Uuid::Hash() const
 {
 	return Data1 + Data2 + Data3 + Data4[0] + Data4[1] + Data4[2] + Data4[3] + Data4[4] + Data4[5] + Data4[6] + Data4[7];

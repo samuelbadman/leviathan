@@ -6,56 +6,50 @@ namespace
 {
 	namespace OpenGLRHIInternals
 	{
-		struct OpenGLOutputWindowResources
+		struct OpenGL_OutputWindowResources
 		{
 			void* OpenGLContext = nullptr;
 		};
 
-		struct OpenGLRenderingPipeline
+		struct OpenGL_GraphicsPipeline
 		{
 			uint32_t ShaderProgramObject = 0;
 
-			OpenGLRenderingPipeline() = default;
-			OpenGLRenderingPipeline(const uint32_t InShaderProgramObjectID)
+			OpenGL_GraphicsPipeline() = default;
+			OpenGL_GraphicsPipeline(const uint32_t InShaderProgramObjectID)
 				: ShaderProgramObject(InShaderProgramObjectID)
 			{
 			}
 		};
 
-		struct OpenGLStaticRenderMesh
+		struct OpenGL_MeshRenderObject
 		{
 			uint32_t VertexBufferObjectID = 0;
 
-			OpenGLStaticRenderMesh() = default;
-			OpenGLStaticRenderMesh(const uint32_t InVertexBufferObjectID)
+			OpenGL_MeshRenderObject() = default;
+			OpenGL_MeshRenderObject(const uint32_t InVertexBufferObjectID)
 				: VertexBufferObjectID(InVertexBufferObjectID)
 			{
 			}
 		};
 
-		struct RenderingPipelineUuids
-		{
-			Core::Uuid StaticMeshRenderingPipelineUuid = {};
-		};
-
-		// Rendering pipeline uuids
-		OpenGLRHIInternals::RenderingPipelineUuids PipelineUuids = {};
-
 		// Mapping of platform window handles to output window resource structures. The window platform handle is being used as the handle/identifier to its rendering resources
-		std::unordered_map<void*, OpenGLOutputWindowResources> OutputWindowResources = {};
+		std::unordered_map<void*, OpenGL_OutputWindowResources> OutputWindowResources = {};
 
 		// Mapping of uuid identifers to static render mesh objects
-		std::unordered_map<Core::Uuid, OpenGLStaticRenderMesh> AllocatedStaticRenderMeshes = {};
+		std::unordered_map<Core::Uuid, OpenGL_MeshRenderObject> MeshRenderObjects = {};
 
 		// Mapping of uuid identifers to rendering pipeline objects
-		std::unordered_map<Core::Uuid, OpenGLRenderingPipeline> RenderingPipelines = {};
+		std::unordered_map<Core::Uuid, OpenGL_GraphicsPipeline> GraphicsPipelines = {};
+
+		Core::Uuid MeshGraphicsPipeline = {};
 
 		bool DoesOutputWindowResourcesExist(void* const WindowPlatformHandle)
 		{
 			return (OpenGLRHIInternals::OutputWindowResources.find(WindowPlatformHandle) != OpenGLRHIInternals::OutputWindowResources.end());
 		}
 
-		bool GetOutputWindowResources(void* const WindowPlatformHandle, OpenGLRHIInternals::OpenGLOutputWindowResources& Resources)
+		bool GetOutputWindowResources(void* const WindowPlatformHandle, OpenGLRHIInternals::OpenGL_OutputWindowResources& Resources)
 		{
 			if (DoesOutputWindowResourcesExist(WindowPlatformHandle))
 			{
@@ -66,7 +60,7 @@ namespace
 			return false;
 		}
 
-		bool AddOutputWindowResources(void* const WindowPlatformHandle, const OpenGLRHIInternals::OpenGLOutputWindowResources& Resources)
+		bool AddOutputWindowResources(void* const WindowPlatformHandle, const OpenGLRHIInternals::OpenGL_OutputWindowResources& Resources)
 		{
 			if (!DoesOutputWindowResourcesExist(WindowPlatformHandle))
 			{
@@ -169,7 +163,7 @@ namespace
 #endif // PLATFORM_WINDOWS
 		}
 
-		bool FreeOutputWindowResources(void* const OutputWindowPlatformHandle, const OpenGLRHIInternals::OpenGLOutputWindowResources& Resources)
+		bool FreeOutputWindowResources(void* const OutputWindowPlatformHandle, const OpenGLRHIInternals::OpenGL_OutputWindowResources& Resources)
 		{
 			// Delete rendering context for the output window
 			if (!OpenGLRHIInternals::DeleteContext(OutputWindowPlatformHandle, Resources.OpenGLContext))
@@ -179,7 +173,7 @@ namespace
 			return true;
 		}
 
-		void ReleaseStaticRenderMeshResources(const OpenGLRHIInternals::OpenGLStaticRenderMesh& RenderMesh)
+		void DestroyMeshRenderObjectResources(const OpenGLRHIInternals::OpenGL_MeshRenderObject& RenderMesh)
 		{
 			glDeleteBuffers(1, &RenderMesh.VertexBufferObjectID);
 		}
@@ -274,7 +268,7 @@ namespace
 			}
 
 			// Create shader program
-			OpenGLRHIInternals::OpenGLRenderingPipeline Pipeline = {};
+			OpenGLRHIInternals::OpenGL_GraphicsPipeline Pipeline = {};
 
 			Pipeline.ShaderProgramObject = glCreateProgram();
 
@@ -293,7 +287,7 @@ namespace
 
 			// Generate uuid and add the new pipeline to the pipeline contianer data structure
 			OutUuid.Generate();
-			OpenGLRHIInternals::RenderingPipelines.emplace(OutUuid, Pipeline);
+			OpenGLRHIInternals::GraphicsPipelines.emplace(OutUuid, Pipeline);
 
 			// Delete shaders
 			glDeleteShader(VertexShader);
@@ -302,7 +296,7 @@ namespace
 			return true;
 		}
 
-		void ReleasePipeline(const OpenGLRHIInternals::OpenGLRenderingPipeline& Pipeline)
+		void DestroyGraphicsPipelineResources(const OpenGLRHIInternals::OpenGL_GraphicsPipeline& Pipeline)
 		{
 			glDeleteProgram(Pipeline.ShaderProgramObject);
 		}
@@ -335,14 +329,14 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlat
 		return false;
 	}
 
-	// Debug print api version
+	// Print api version
 	OpenGLRHIInternals::PrintOpenGLVersion();
 
 	// Create rendering pipelines
 	if (!OpenGLRHIInternals::CreatePipeline(
-		"Shaders/StaticMeshVertexShader.glsl",
-		"Shaders/StaticMeshFragmentShader.glsl",
-		OpenGLRHIInternals::PipelineUuids.StaticMeshRenderingPipelineUuid
+		"Shaders/MeshVertexShader.glsl",
+		"Shaders/MeshFragmentShader.glsl",
+		OpenGLRHIInternals::MeshGraphicsPipeline
 	))
 	{
 		return false;
@@ -354,7 +348,7 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const OutputWindowPlat
 
 bool Rendering::RenderHardwareInterface::CreateOutputWindowResources(void* const OutputWindowPlatformHandle)
 {
-	OpenGLRHIInternals::OpenGLOutputWindowResources Resources = {};
+	OpenGLRHIInternals::OpenGL_OutputWindowResources Resources = {};
 
 	// Create a context for the output window
 	Resources.OpenGLContext = OpenGLRHIInternals::CreateContext(OutputWindowPlatformHandle);
@@ -370,7 +364,7 @@ bool Rendering::RenderHardwareInterface::CreateOutputWindowResources(void* const
 bool Rendering::RenderHardwareInterface::DestroyOutputWindowResources(void* const OutputWindowPlatformHandle)
 {
 	// Get resources for the output window
-	OpenGLRHIInternals::OpenGLOutputWindowResources Resources;
+	OpenGLRHIInternals::OpenGL_OutputWindowResources Resources;
 	if (!OpenGLRHIInternals::GetOutputWindowResources(OutputWindowPlatformHandle, Resources))
 	{
 		return false;
@@ -392,7 +386,7 @@ bool Rendering::RenderHardwareInterface::SetOutputWindow(void* const OutputWindo
 	}
 
 	// Make the opengl context associated with the output window platform handle current
-	OpenGLRHIInternals::OpenGLOutputWindowResources Resources;
+	OpenGLRHIInternals::OpenGL_OutputWindowResources Resources;
 	if (!OpenGLRHIInternals::GetOutputWindowResources(OutputWindowPlatformHandle, Resources))
 	{
 		return false;
@@ -423,31 +417,32 @@ void Rendering::RenderHardwareInterface::Cleanup()
 	OpenGLRHIInternals::ClearCurrentContext();
 
 	// Cleanup output window resources
-	for (const std::pair<void*, OpenGLRHIInternals::OpenGLOutputWindowResources>& Pair : OpenGLRHIInternals::OutputWindowResources)
+	for (const std::pair<void*, OpenGLRHIInternals::OpenGL_OutputWindowResources>& Pair : OpenGLRHIInternals::OutputWindowResources)
 	{
 		OpenGLRHIInternals::FreeOutputWindowResources(Pair.first, Pair.second);
 	}
 	OpenGLRHIInternals::OutputWindowResources.clear();
 
-	// Cleanup static render mesh objects
-	for (const std::pair<Core::Uuid, OpenGLRHIInternals::OpenGLStaticRenderMesh>& Pair : OpenGLRHIInternals::AllocatedStaticRenderMeshes)
+	// Cleanup mesh render objects
+	for (const std::pair<Core::Uuid, OpenGLRHIInternals::OpenGL_MeshRenderObject>& Pair : OpenGLRHIInternals::MeshRenderObjects)
 	{
-		OpenGLRHIInternals::ReleaseStaticRenderMeshResources(Pair.second);
+		OpenGLRHIInternals::DestroyMeshRenderObjectResources(Pair.second);
 	}
-	OpenGLRHIInternals::AllocatedStaticRenderMeshes.clear();
+	OpenGLRHIInternals::MeshRenderObjects.clear();
 
 	// Cleanup pipelines
-	for (const std::pair<Core::Uuid, OpenGLRHIInternals::OpenGLRenderingPipeline>& Pair : OpenGLRHIInternals::RenderingPipelines)
+	for (const std::pair<Core::Uuid, OpenGLRHIInternals::OpenGL_GraphicsPipeline>& Pair : OpenGLRHIInternals::GraphicsPipelines)
 	{
-		OpenGLRHIInternals::ReleasePipeline(Pair.second);
+		OpenGLRHIInternals::DestroyGraphicsPipelineResources(Pair.second);
 	}
-	OpenGLRHIInternals::RenderingPipelines.clear();
-	OpenGLRHIInternals::PipelineUuids = {};
+	OpenGLRHIInternals::GraphicsPipelines.clear();
+
+	OpenGLRHIInternals::MeshGraphicsPipeline.Reset();
 }
 
-Core::Uuid Rendering::RenderHardwareInterface::AllocateStaticRenderMesh(const size_t VertexDataSize, const void* VertexData)
+Core::Uuid Rendering::RenderHardwareInterface::CreateMeshRenderObject(const size_t VertexDataSize, const void* VertexData)
 {
-	// Generate identifier for render mesh object
+	// Generate identifier for mesh render object
 	Core::Uuid uuid = {};
 	uuid.Generate();
 
@@ -457,15 +452,15 @@ Core::Uuid Rendering::RenderHardwareInterface::AllocateStaticRenderMesh(const si
 	glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, VertexDataSize, VertexData, GL_STATIC_DRAW);
 
-	// Add render mesh to render mesh map with unique identifier key
-	OpenGLRHIInternals::AllocatedStaticRenderMeshes.emplace(uuid, VertexBuffer);
+	// Add mesh object to mesh map with unique identifier key
+	OpenGLRHIInternals::MeshRenderObjects.emplace(uuid, VertexBuffer);
 
 	// Return identifier
 	return uuid;
 }
 
-void Rendering::RenderHardwareInterface::ReleaseStaticRenderMesh(const Core::Uuid& StaticRenderMeshUuid)
+void Rendering::RenderHardwareInterface::DestroyMeshRenderObject(const Core::Uuid& ObjectUuid)
 {
-	OpenGLRHIInternals::ReleaseStaticRenderMeshResources(OpenGLRHIInternals::AllocatedStaticRenderMeshes.at(StaticRenderMeshUuid));
-	OpenGLRHIInternals::AllocatedStaticRenderMeshes.erase(StaticRenderMeshUuid);
+	OpenGLRHIInternals::DestroyMeshRenderObjectResources(OpenGLRHIInternals::MeshRenderObjects.at(ObjectUuid));
+	OpenGLRHIInternals::MeshRenderObjects.erase(ObjectUuid);
 }

@@ -18,8 +18,6 @@ namespace Rendering
 	class RenderingModule : public Core::Module
 	{
 	private:
-		Core::Uuid StaticMeshRenderPipelineUuid = {};
-
 		Core::Window* CurrentRenderOutputWindow = nullptr;
 
 	public:
@@ -30,8 +28,8 @@ namespace Rendering
 		bool DestroyRenderOutputWindowResources(void* const OutputWindowPlatformHandle);
 		void SetRenderOutputWindow(Core::Window* OutputWindow);
 
-		Core::Uuid AllocateStaticRenderMesh(const size_t VertexDataSize, const void* VertexData);
-		void ReleaseStaticRenderMesh(const Core::Uuid& StaticRenderMeshUuid);
+		Core::Uuid CreateMeshRenderObject(const size_t VertexDataSize, const void* VertexData);
+		void DestroyMeshRenderObject(const Core::Uuid& ObjectUuid);
 
 		// Render into the currently set render output window. Does nothing if there is not a render output window set
 		void Render();

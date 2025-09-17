@@ -48,14 +48,14 @@ void Rendering::RenderingModule::SetRenderOutputWindow(Core::Window* OutputWindo
 	}
 }
 
-Core::Uuid Rendering::RenderingModule::AllocateStaticRenderMesh(const size_t VertexDataSize, const void* VertexData)
+Core::Uuid Rendering::RenderingModule::CreateMeshRenderObject(const size_t VertexDataSize, const void* VertexData)
 {
-	return RenderHardwareInterface::AllocateStaticRenderMesh(VertexDataSize, VertexData);
+	return RenderHardwareInterface::CreateMeshRenderObject(VertexDataSize, VertexData);
 }
 
-void Rendering::RenderingModule::ReleaseStaticRenderMesh(const Core::Uuid& StaticRenderMeshUuid)
+void Rendering::RenderingModule::DestroyMeshRenderObject(const Core::Uuid& ObjectUuid)
 {
-	RenderHardwareInterface::ReleaseStaticRenderMesh(StaticRenderMeshUuid);
+	RenderHardwareInterface::DestroyMeshRenderObject(ObjectUuid);
 }
 
 void Rendering::RenderingModule::Render()
