@@ -48,9 +48,9 @@ namespace Core
 		{
 			// Create instance of module
 			std::unique_ptr<T> Temp = std::make_unique<T>();
-			T* TempResult = Temp.get();
+			T* pTemp = Temp.get();
 			Modules.emplace_back(std::move(Temp));
-			return TempResult;
+			return pTemp;
 		}
 
 		// Returns true if the engine should restart after BeginApplication() returns otherwise, returns false if the process should exit

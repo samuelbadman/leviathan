@@ -3,6 +3,7 @@
 #include "Core/NotificationManager.h"
 #include "TitleApplicationWindow.h"
 #include "Rendering/RenderingModule.h"
+#include "Rendering/RenderHardwareInterface/RenderHardwareInterface.h"
 
 IMPLEMENT(TitleApplication)
 
@@ -96,52 +97,35 @@ bool TitleApplication::InitializeRendering()
 		return false;
 	}
 
-	// Initialize rendering module
-	if (!RenderingModuleInstance->Initialize(MainAppWindow->GetPlatformHandle()))
+	// Initialize rhi
+	if (Rendering::RenderHardwareInterface::Initialize(MainAppWindow->GetPlatformHandle()))
 	{
 		return false;
 	}
 
-	// Set main app window as the current rendering context
-	RenderingModuleInstance->SetRenderOutputWindow(MainAppWindow.get());
-
-	// Test setup rendering scene
-	const std::array<float, 3 * 3> Vertices =
+	// Create render context for main app window
+	MainAppWindowRenderContext = Rendering::RenderHardwareInterface::NewContext(MainAppWindow->GetPlatformHandle());
+	if (!MainAppWindowRenderContext)
 	{
-		// Bottom left
-		-0.5f, -0.5f, 0.0f,
-		// Bottom right
-		0.5f, -0.5f, 0.0f,
-		// Top
-		0.0f,  0.5f, 0.0f
-	};
+		return false;
+	}
 
-	TriangleRenderMeshID = RenderingModuleInstance->CreateMeshRenderObject(sizeof(Vertices), Vertices.data());
+	// Make the main app window context the current context for rendering into
+	if (!Rendering::RenderHardwareInterface::MakeContextCurrent(MainAppWindowRenderContext))
+	{
+		return false;
+	}
 
 	return true;
 }
 
 bool TitleApplication::ShutdownRendering()
 {
-	// Test destroy rendering scene
-	if (RenderingModuleInstance)
-	{
-		RenderingModuleInstance->DestroyMeshRenderObject(TriangleRenderMeshID);
-	}
-
 	// Delete app window rendering context
-	if (RenderingModuleInstance && MainAppWindow)
-	{
-		RenderingModuleInstance->SetRenderOutputWindow(nullptr);
-		return RenderingModuleInstance->DestroyRenderOutputWindowResources(MainAppWindow->GetPlatformHandle());
-	}
-	return false;
+	return Rendering::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext);
 }
 
 void TitleApplication::RenderApp()
 {
-	if (RenderingModuleInstance)
-	{
-		RenderingModuleInstance->Render();
-	}
+
 }

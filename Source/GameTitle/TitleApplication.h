@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/Application.h"
-#include "Core/Platform/Uuid.h"
 
 namespace Core
 {
@@ -11,6 +10,11 @@ namespace Core
 namespace Rendering
 {
 	class RenderingModule;
+
+	namespace RenderHardwareInterface
+	{
+		struct Context;
+	}
 }
 
 class TitleApplicationWindow;
@@ -18,11 +22,11 @@ class TitleApplicationWindow;
 class TitleApplication : public Core::Application
 {
 private:
+	// TODO: Bind to window resize event to render app on resize
 	std::unique_ptr<TitleApplicationWindow> MainAppWindow = nullptr;
 
 	Rendering::RenderingModule* RenderingModuleInstance = nullptr;
-
-	Core::Uuid TriangleRenderMeshID = {};
+	Rendering::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);
