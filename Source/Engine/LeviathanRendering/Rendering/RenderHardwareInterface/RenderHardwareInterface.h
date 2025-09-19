@@ -14,12 +14,16 @@ namespace Rendering
 
 		bool Initialize(void* const InitWindowPlatformHandle);
 
-		Context* NewContext(void* const WindowPlatformHandle);
-		bool DeleteContext(Context* const pContext);
-		bool MakeContextCurrent(Context* const pContext);
+		// Resource management
+		Rendering::RenderHardwareInterface::Context* NewContext(void* const WindowPlatformHandle);
+		bool DeleteContext(Rendering::RenderHardwareInterface::Context* const Context);
 
-		bool SwapWindowBuffers(void* const WindowPlatformHandle);
+		// Frame management
+		bool Present(Rendering::RenderHardwareInterface::Context* const Context);
+		bool BeginFrame(Rendering::RenderHardwareInterface::Context* const Context);
+		bool EndFrame(Rendering::RenderHardwareInterface::Context* const Context);
 
+		// Command recording
 		void SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height);
 		void ClearColorBuffer(const float R, const float G, const float B, const float A);
 	};

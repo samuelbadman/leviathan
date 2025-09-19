@@ -98,7 +98,7 @@ bool TitleApplication::InitializeRendering()
 	}
 
 	// Initialize rhi
-	if (Rendering::RenderHardwareInterface::Initialize(MainAppWindow->GetPlatformHandle()))
+	if (!Rendering::RenderHardwareInterface::Initialize(MainAppWindow->GetPlatformHandle()))
 	{
 		return false;
 	}
@@ -110,22 +110,20 @@ bool TitleApplication::InitializeRendering()
 		return false;
 	}
 
-	// Make the main app window context the current context for rendering into
-	if (!Rendering::RenderHardwareInterface::MakeContextCurrent(MainAppWindowRenderContext))
-	{
-		return false;
-	}
-
 	return true;
 }
 
 bool TitleApplication::ShutdownRendering()
 {
-	// Delete app window rendering context
+	// Delete main app window rendering context
 	return Rendering::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext);
 }
 
 void TitleApplication::RenderApp()
 {
+	Rendering::RenderHardwareInterface::BeginFrame(MainAppWindowRenderContext);
 
+
+
+	Rendering::RenderHardwareInterface::EndFrame(MainAppWindowRenderContext);
 }

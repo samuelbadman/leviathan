@@ -22,6 +22,28 @@ namespace
 			CONSOLE_PRINTF("OpenGL version and driver version: %s\n", glGetString(GL_VERSION));
 		}
 
+		bool MakeContextCurrent(Rendering::RenderHardwareInterface::Context* const Context)
+		{
+#ifdef PLATFORM_WINDOWS
+			// If null context is passed, clear the current gl context
+			if (!Context)
+			{
+				return wglMakeCurrent(NULL, NULL) == TRUE;
+			}
+
+			GL_RHI::GL_Context* const GLContext = reinterpret_cast<GL_RHI::GL_Context* const>(Context);
+
+			if (!GLContext)
+			{
+				return false;
+			}
+
+			return wglMakeCurrent(GetDC(static_cast<HWND>(GLContext->PlatformWindowHandle)), static_cast<HGLRC>(GLContext->Context)) == TRUE;
+#else
+			return false;
+#endif // PLATFORM_WINDOWS
+		}
+
 		//bool ReadShaderSourceFromDisk(const std::string& SourceFilepath, std::string& OutSourceString)
 		//{
 		//	std::ifstream File(SourceFilepath);
@@ -73,7 +95,7 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 	// Create init context and make it current. A current gl context is needed to load api functions from os/driver
 	if (Rendering::RenderHardwareInterface::Context* InitContext = Rendering::RenderHardwareInterface::NewContext(InitWindowPlatformHandle))
 	{
-		if (Rendering::RenderHardwareInterface::MakeContextCurrent(InitContext))
+		if (GL_RHI::MakeContextCurrent(InitContext))
 		{
 			// Load gl api
 			if (!GL_RHI::LoadGLFunctions())
@@ -83,8 +105,8 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 
 			GL_RHI::PrintGLVersion();
 
-			// Clear current context
-			if (!Rendering::RenderHardwareInterface::MakeContextCurrent(nullptr))
+			// Clear current context, currently set as the init context
+			if (!GL_RHI::MakeContextCurrent(nullptr))
 			{
 				return false;
 			}
@@ -149,11 +171,11 @@ Rendering::RenderHardwareInterface::Context* Rendering::RenderHardwareInterface:
 #endif // PLATFORM_WINDOWS
 }
 
-bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardwareInterface::Context* const pContext)
+bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardwareInterface::Context* const Context)
 {
 #ifdef PLATFORM_WINDOWS
 
-	GL_RHI::GL_Context* const GLContext = reinterpret_cast<GL_RHI::GL_Context* const>(pContext);
+	GL_RHI::GL_Context* const GLContext = reinterpret_cast<GL_RHI::GL_Context* const>(Context);
 
 	if (!GLContext)
 	{
@@ -172,35 +194,28 @@ bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardware
 #endif // PLATFORM_WINDOWS
 }
 
-bool Rendering::RenderHardwareInterface::MakeContextCurrent(Context* const pContext)
+bool Rendering::RenderHardwareInterface::Present(Rendering::RenderHardwareInterface::Context* const Context)
 {
 #ifdef PLATFORM_WINDOWS
-	// If null context is passed, clear the current gl context
-	if (!pContext)
-	{
-		return wglMakeCurrent(NULL, NULL) == TRUE;
-	}
-
-	GL_RHI::GL_Context* const GLContext = reinterpret_cast<GL_RHI::GL_Context* const>(pContext);
-
-	if (!GLContext)
-	{
-		return false;
-	}
-
-	return wglMakeCurrent(GetDC(static_cast<HWND>(GLContext->PlatformWindowHandle)), static_cast<HGLRC>(GLContext->Context)) == TRUE;
+	return SwapBuffers(GetDC(static_cast<HWND>(reinterpret_cast<GL_RHI::GL_Context* const>(Context)->PlatformWindowHandle))) == TRUE;
 #else
 	return false;
 #endif // PLATFORM_WINDOWS
 }
 
-bool Rendering::RenderHardwareInterface::SwapWindowBuffers(void* const WindowPlatformHandle)
+bool Rendering::RenderHardwareInterface::BeginFrame(Rendering::RenderHardwareInterface::Context* const Context)
 {
-#ifdef PLATFORM_WINDOWS
-	return SwapBuffers(GetDC(static_cast<HWND>(WindowPlatformHandle))) == TRUE;
-#else
-	return false;
-#endif // PLATFORM_WINDOWS
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool Rendering::RenderHardwareInterface::EndFrame(Rendering::RenderHardwareInterface::Context* const Context)
+{
+	return true;
 }
 
 void Rendering::RenderHardwareInterface::SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height)
