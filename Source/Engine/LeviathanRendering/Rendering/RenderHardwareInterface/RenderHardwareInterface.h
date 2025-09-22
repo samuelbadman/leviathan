@@ -27,6 +27,7 @@ namespace Rendering
 		Rendering::RenderHardwareInterface::Context* NewContext(void* const WindowPlatformHandle);
 		bool DeleteContext(Rendering::RenderHardwareInterface::Context* const Context);
 		// TODO: Accept vertex data in any format and expose agnostic element/attribute description as input when creating new render geometry
+		// TODO: Make drawing more flexible. How do points/lines get drawn as well as triangles. Different vertex data layouts to support different pipelines?
 		Rendering::RenderHardwareInterface::Mesh* NewMesh(Rendering::RenderHardwareInterface::Context* const Context, const std::vector<MeshVertex>& Vertices);
 		bool DeleteMesh(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Mesh* const Mesh);
 		// TODO: Separate shader compilation into its own step to support d3d12/vulkan precompiled shader workflow.
