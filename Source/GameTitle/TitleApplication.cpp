@@ -56,6 +56,11 @@ void TitleApplication::NotificationListener(const Core::NotificationData& Notifi
 	}
 }
 
+void TitleApplication::OnMainAppWindowResized(const Core::WindowResizedDelegateParameters& Parameters)
+{
+	RenderApp();
+}
+
 void TitleApplication::OnMainAppWindowDestroyed()
 {
 	// Shutdown rendering for the application
@@ -80,6 +85,9 @@ bool TitleApplication::InitializeMainAppWindow()
 	{
 		return false;
 	}
+
+	// Bind to main app window resized delegate
+	MainAppWindow->GetResizedDelegate().AddMethod<TitleApplication, &TitleApplication::OnMainAppWindowResized>(this);
 
 	// Bind to main app window destroyed delegate
 	MainAppWindow->GetDestroyedDelegate().AddMethod<TitleApplication, &TitleApplication::OnMainAppWindowDestroyed>(this);
@@ -123,7 +131,12 @@ void TitleApplication::RenderApp()
 {
 	Rendering::RenderHardwareInterface::BeginFrame(MainAppWindowRenderContext);
 
+	const Core::Rectangle WindowClientRect = MainAppWindow->GetClientRegion();
+	Rendering::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
 
+	Rendering::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
 
 	Rendering::RenderHardwareInterface::EndFrame(MainAppWindowRenderContext);
+
+	Rendering::RenderHardwareInterface::Present(MainAppWindowRenderContext);
 }

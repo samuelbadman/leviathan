@@ -52,6 +52,9 @@ namespace Core
 		int32_t Left = 0;
 		int32_t Bottom = 0;
 		int32_t Right = 0;
+
+		int32_t CalcWidth() const;
+		int32_t CalcHeight() const;
 	};
 
 	struct WindowResizedDelegateParameters

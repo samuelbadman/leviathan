@@ -5,6 +5,7 @@
 namespace Core
 {
 	struct NotificationData;
+	struct WindowResizedDelegateParameters;
 }
 
 namespace Rendering
@@ -38,6 +39,7 @@ private:
 	// End Application interface
 
 	void NotificationListener(const Core::NotificationData& Notification);
+	void OnMainAppWindowResized(const Core::WindowResizedDelegateParameters& Parameters);
 	void OnMainAppWindowDestroyed();
 	bool InitializeMainAppWindow();
 	bool InitializeRendering();

@@ -127,3 +127,13 @@ bool Core::Window::ChangeMode(const Core::WindowMode NewMode)
 {
 	return EngineInstance.ChangeWindowModeOnPlatform(NewMode, *this);
 }
+
+int32_t Core::Rectangle::CalcWidth() const
+{
+	return Right - Left;
+}
+
+int32_t Core::Rectangle::CalcHeight() const
+{
+	return Bottom - Top;
+}
