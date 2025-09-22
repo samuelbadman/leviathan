@@ -16,6 +16,7 @@ namespace Rendering
 	{
 		struct Context;
 		struct Mesh;
+		struct Pipeline;
 	}
 }
 
@@ -27,8 +28,9 @@ private:
 	std::unique_ptr<TitleApplicationWindow> MainAppWindow = nullptr;
 
 	Rendering::RenderingModule* RenderingModuleInstance = nullptr;
-	Rendering::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
 
+	Rendering::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
+	Rendering::RenderHardwareInterface::Pipeline* MeshPipeline = nullptr;
 	Rendering::RenderHardwareInterface::Mesh* Mesh = nullptr;
 
 public:

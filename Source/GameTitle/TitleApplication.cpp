@@ -1,6 +1,7 @@
 #include "TitleApplication.h"
 #include "Core/ConsoleOutput.h"
 #include "Core/NotificationManager.h"
+#include "Core/FileIOManager.h"
 #include "TitleApplicationWindow.h"
 #include "Rendering/RenderingModule.h"
 #include "Rendering/RenderHardwareInterface/RenderHardwareInterface.h"
@@ -25,6 +26,9 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 
 TitleApplication::~TitleApplication()
 {
+	// Shutdown rendering for the application
+	ShutdownRendering();
+
 	// Remove console output window
 	GetEngine().RemoveConsoleWindowOnPlatform();
 
@@ -63,9 +67,6 @@ void TitleApplication::OnMainAppWindowResized(const Core::WindowResizedDelegateP
 
 void TitleApplication::OnMainAppWindowDestroyed()
 {
-	// Shutdown rendering for the application
-	ShutdownRendering();
-
 	// Tell the engine to quit
 	GetEngine().Quit();
 }
@@ -76,7 +77,7 @@ bool TitleApplication::InitializeMainAppWindow()
 	AppWindowCreateParameters.UniqueWindowName = "MainTitleAppWindow";
 	AppWindowCreateParameters.WindowTitle = "Main app window";
 	AppWindowCreateParameters.Mode = Core::WindowMode::Windowed;
-	AppWindowCreateParameters.Width = 960;
+	AppWindowCreateParameters.Width = 540;
 	AppWindowCreateParameters.Height = 540;
 
 	MainAppWindow = GetEngine().CreateWindowOnPlatform<TitleApplicationWindow>(AppWindowCreateParameters);
@@ -118,6 +119,15 @@ bool TitleApplication::InitializeRendering()
 		return false;
 	}
 
+	// Create app rendering pipelines
+	const std::string MeshPipelineVertexShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(
+		std::string("Shaders/MeshVertexShader.") + Rendering::RenderHardwareInterface::GetShaderSourceFileExtension());
+
+	const std::string MeshPipelinePixelShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(
+		std::string("Shaders/MeshPixelShader.") + Rendering::RenderHardwareInterface::GetShaderSourceFileExtension());
+
+	MeshPipeline = Rendering::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, MeshPipelineVertexShaderSource, MeshPipelinePixelShaderSource);
+
 	// Initialize rendering scene
 	std::vector<Rendering::RenderHardwareInterface::MeshVertex> Vertices =
 	{
@@ -138,20 +148,37 @@ bool TitleApplication::ShutdownRendering()
 	{
 		return false;
 	}
+	Mesh = nullptr;
+
+	if (!Rendering::RenderHardwareInterface::DeletePipeline(MainAppWindowRenderContext, MeshPipeline))
+	{
+		return false;
+	}
+	MeshPipeline = nullptr;
 
 	// Delete main app window rendering context
-	return Rendering::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext);
+	if (!Rendering::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext))
+	{
+		return false;
+	}
+	MainAppWindowRenderContext = nullptr;
+
+	return true;
 }
 
 void TitleApplication::RenderApp()
 {
 	Rendering::RenderHardwareInterface::BeginFrame(MainAppWindowRenderContext);
+	{
+		const Core::Rectangle WindowClientRect = MainAppWindow->GetClientRegion();
+		Rendering::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
 
-	const Core::Rectangle WindowClientRect = MainAppWindow->GetClientRegion();
-	Rendering::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
+		Rendering::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
 
-	Rendering::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
+		Rendering::RenderHardwareInterface::SetPipeline(MeshPipeline);
 
+		Rendering::RenderHardwareInterface::DrawMesh(Mesh);
+	}
 	Rendering::RenderHardwareInterface::EndFrame(MainAppWindowRenderContext);
 
 	Rendering::RenderHardwareInterface::Present(MainAppWindowRenderContext);

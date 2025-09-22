@@ -16,6 +16,12 @@ namespace
 		{
 			uint32_t VertexArray = 0;
 			uint32_t VertexBuffer = 0;
+			uint32_t VertexCount = 0;
+		};
+
+		struct GL_Pipeline
+		{
+			uint32_t ShaderProgram = 0;
 		};
 
 		bool LoadGLFunctions()
@@ -70,49 +76,25 @@ namespace
 #endif // PLATFORM_WINDOWS
 		}
 
-		//bool ReadShaderSourceFromDisk(const std::string& SourceFilepath, std::string& OutSourceString)
-		//{
-		//	std::ifstream File(SourceFilepath);
-		//	if (!File.is_open())
-		//	{
-		//		return false;
-		//	}
+		bool CompileShaderSourceString(GLenum ShaderStage, const std::string& Source, uint32_t& OutShader, std::array<char, 512>& ErrorMessageBuffer)
+		{
+			OutShader = glCreateShader(ShaderStage);
 
-		//	OutSourceString = {};
-		//	std::string Line;
-		//	while (std::getline(File, Line))
-		//	{
-		//		OutSourceString += Line;
-		//		OutSourceString += '\n';
-		//	}
+			const char* const SourceCString = Source.c_str();
+			glShaderSource(OutShader, 1, &SourceCString, nullptr);
+			glCompileShader(OutShader);
 
-		//	File.close();
+			int32_t Success;
+			glGetShaderiv(OutShader, GL_COMPILE_STATUS, &Success);
 
-		//	return true;
-		//}
+			if (!Success)
+			{
+				glGetShaderInfoLog(OutShader, ErrorMessageBuffer.size(), nullptr, ErrorMessageBuffer.data());
+				return false;
+			}
 
-		//bool CompileShaderSourceString(GLenum ShaderStage, const std::string& Source, uint32_t& OutShader, char* ErrorMessageBuffer = nullptr, size_t ErrorMessageBufferSizeBytes = 512)
-		//{
-		//	OutShader = glCreateShader(ShaderStage);
-
-		//	const char* const SourceCString = Source.c_str();
-		//	glShaderSource(OutShader, 1, &SourceCString, nullptr);
-		//	glCompileShader(OutShader);
-
-		//	int32_t Success;
-		//	glGetShaderiv(OutShader, GL_COMPILE_STATUS, &Success);
-
-		//	if (!Success)
-		//	{
-		//		if (ErrorMessageBuffer)
-		//		{
-		//			glGetShaderInfoLog(OutShader, ErrorMessageBufferSizeBytes, nullptr, ErrorMessageBuffer);
-		//		}
-		//		return false;
-		//	}
-
-		//	return true;
-		//}
+			return true;
+		}
 	}
 }
 
@@ -148,6 +130,11 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 	}
 
 	return false;
+}
+
+std::string Rendering::RenderHardwareInterface::GetShaderSourceFileExtension()
+{
+	return "glsl";
 }
 
 Rendering::RenderHardwareInterface::Context* Rendering::RenderHardwareInterface::NewContext(void* const WindowPlatformHandle)
@@ -250,6 +237,8 @@ Rendering::RenderHardwareInterface::Mesh* Rendering::RenderHardwareInterface::Ne
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<const void*>(0));
 	glEnableVertexAttribArray(0);
 
+	GLMesh->VertexCount = Vertices.size();
+
 	return reinterpret_cast<Rendering::RenderHardwareInterface::Mesh*>(GLMesh);
 }
 
@@ -263,6 +252,69 @@ bool Rendering::RenderHardwareInterface::DeleteMesh(Rendering::RenderHardwareInt
 
 	// Delete mesh on heap
 	delete reinterpret_cast<GL_RHI::GL_Mesh* const>(Mesh);
+
+	return true;
+}
+
+Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface::NewPipeline(
+	Rendering::RenderHardwareInterface::Context* const Context,
+	const std::string& VertexShaderSource,
+	const std::string& PixelShaderSource
+)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	std::array<char, 512> ErrorMessageBuffer = {};
+
+	uint32_t VertexShader;
+	if (!GL_RHI::CompileShaderSourceString(GL_VERTEX_SHADER, VertexShaderSource, VertexShader, ErrorMessageBuffer))
+	{
+		CONSOLE_PRINTF("Vertex shader source compilation error: %s\n", ErrorMessageBuffer.data());
+		return nullptr;
+	}
+
+	uint32_t FragmentShader;
+	if (!GL_RHI::CompileShaderSourceString(GL_FRAGMENT_SHADER, PixelShaderSource, FragmentShader, ErrorMessageBuffer))
+	{
+		CONSOLE_PRINTF("Pixel shader source compilation error: %s\n", ErrorMessageBuffer.data());
+		return nullptr;
+	}
+
+	GL_RHI::GL_Pipeline* GLPipeline = new GL_RHI::GL_Pipeline();
+
+	GLPipeline->ShaderProgram = glCreateProgram();
+	glAttachShader(GLPipeline->ShaderProgram, VertexShader);
+	glAttachShader(GLPipeline->ShaderProgram, FragmentShader);
+	glLinkProgram(GLPipeline->ShaderProgram);
+
+	glDeleteShader(VertexShader);
+	glDeleteShader(FragmentShader);
+
+	int32_t LinkSuccess;
+	glGetProgramiv(GLPipeline->ShaderProgram, GL_LINK_STATUS, &LinkSuccess);
+	if (!LinkSuccess)
+	{
+		CONSOLE_PRINTF("Shader source compilation error: %s\n", ErrorMessageBuffer.data());
+		delete GLPipeline;
+		return nullptr;
+	}
+
+	return reinterpret_cast<Rendering::RenderHardwareInterface::Pipeline*>(GLPipeline);
+}
+
+bool Rendering::RenderHardwareInterface::DeletePipeline(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Pipeline* const Pipeline)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	delete reinterpret_cast<GL_RHI::GL_Pipeline* const>(Pipeline);
 
 	return true;
 }
@@ -300,4 +352,16 @@ void Rendering::RenderHardwareInterface::ClearColorBuffer(const float R, const f
 {
 	glClearColor(R, G, B, A);
 	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Rendering::RenderHardwareInterface::SetPipeline(Rendering::RenderHardwareInterface::Pipeline* const Pipeline)
+{
+	glUseProgram(reinterpret_cast<GL_RHI::GL_Pipeline* const>(Pipeline)->ShaderProgram);
+}
+
+void Rendering::RenderHardwareInterface::DrawMesh(Rendering::RenderHardwareInterface::Mesh* const Mesh)
+{
+	GL_RHI::GL_Mesh* const GLMesh = reinterpret_cast<GL_RHI::GL_Mesh* const>(Mesh);
+	glBindVertexArray(GLMesh->VertexArray);
+	glDrawArrays(GL_TRIANGLES, 0, GLMesh->VertexCount);
 }

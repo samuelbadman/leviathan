@@ -62,6 +62,8 @@ add_library("LeviathanCore" STATIC
 "Source/Engine/LeviathanCore/Core/Module.h"
 "Source/Engine/LeviathanCore/Core/Module.cpp"
 "Source/Engine/LeviathanCore/Core/Platform/Uuid.h"
+"Source/Engine/LeviathanCore/Core/FileIOManager.h"
+"Source/Engine/LeviathanCore/Core/FileIOManager.cpp"
 )
 
 # Add source files to be compiled and libraries to link against only for specific platform builds
@@ -137,10 +139,11 @@ target_include_directories("LeviathanRendering" PRIVATE
 "Source/Engine/LeviathanRendering/Vendor/glad/"
 )
 
-# Copy rendering module shader source files to build target directory on rendering module post build
+# Add rendering module post build commands
 # TODO: Add switch for rendering api being used to only copy the shader source files for the api being used
-add_custom_command(TARGET "LeviathanRendering" 
-POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/Source/Engine/LeviathanRendering/Shaders/Source/OpenGL" "$<TARGET_FILE_DIR:GameTitle>/Shaders")
+# Copy rendering module shader source files to build target directory
+add_custom_command(TARGET "LeviathanRendering" POST_BUILD COMMAND ${CMAKE_COMMAND} 
+	-E copy_directory "${CMAKE_SOURCE_DIR}/Source/Engine/LeviathanRendering/Shaders/Source/OpenGL" "$<TARGET_FILE_DIR:GameTitle>/Shaders")
 # End rendering module static library module target setup
 
 #################################################################################################
@@ -176,8 +179,11 @@ target_include_directories("GameTitle" PRIVATE
 #################################################################################################
 #################################################################################################
 
-# Set Visual Studio startup project. Select game title being built here
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "GameTitle")
+ # Set game title being built here
+ set(TARGET_TITLE "GameTitle")
+
+# Set Visual Studio startup project
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "${TARGET_TITLE}")
 
 # Set working directory for game title being built to be the same as the game title target output directory
-set_property(TARGET "GameTitle" PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:GameTitle>")
+set_property(TARGET "${TARGET_TITLE}" PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:GameTitle>")

@@ -3,12 +3,14 @@
 #include "Platform/Platform.h"
 #include "Platform/Gamepad.h"
 #include "NotificationManager.h"
+#include "FileIOManager.h"
 #include "Window.h"
 #include "Module.h"
 
 Core::Engine::Engine()
 {
 	NotificationManagerInstance = std::make_unique<NotificationManager>();
+	FileIOManagerInstance = std::make_unique<FileIOManager>();
 
 	if (!Platform::Initialize(*this))
 	{
@@ -167,6 +169,11 @@ void Core::Engine::PlatformGamepadConnectionEventDetected() const
 Core::NotificationManager& Core::Engine::GetNotificationManager() const
 {
 	return *NotificationManagerInstance;
+}
+
+Core::FileIOManager& Core::Engine::GetFileIOManager() const
+{
+	return *FileIOManagerInstance;
 }
 
 void Core::Engine::Quit(bool RestartEngine)

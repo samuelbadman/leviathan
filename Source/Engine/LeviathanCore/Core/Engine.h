@@ -6,6 +6,7 @@ namespace Core
 
 	class Application;
 	class NotificationManager;
+	class FileIOManager;
 	class Window;
 	class Module;
 
@@ -28,10 +29,12 @@ namespace Core
 		static constexpr double TimeElapsedBetweenFixedTicksSeconds = 1.0;
 
 	private:
+		std::unique_ptr<Core::FileIOManager> FileIOManagerInstance = nullptr;
 		std::unique_ptr<Core::NotificationManager> NotificationManagerInstance = nullptr;
+
 		std::unique_ptr<Core::Application> ApplicationInstance = nullptr;
 
-		std::vector<std::unique_ptr<Core::Module>> Modules = {};
+		std::vector<std::unique_ptr<Core::Module>> ModuleInstances = {};
 
 		bool SignalRestart = false;
 		bool RunningApplicationInstance = false;
@@ -49,7 +52,7 @@ namespace Core
 			// Create instance of module
 			std::unique_ptr<T> Temp = std::make_unique<T>();
 			T* pTemp = Temp.get();
-			Modules.emplace_back(std::move(Temp));
+			ModuleInstances.emplace_back(std::move(Temp));
 			return pTemp;
 		}
 
@@ -127,6 +130,7 @@ namespace Core
 		void PlatformGamepadConnectionEventDetected() const;
 
 		Core::NotificationManager& GetNotificationManager() const;
+		Core::FileIOManager& GetFileIOManager() const;
 
 	private:
 		void EngineMainLoop();
