@@ -15,6 +15,7 @@ namespace Rendering
 	namespace RenderHardwareInterface
 	{
 		struct Context;
+		struct Mesh;
 	}
 }
 
@@ -23,11 +24,12 @@ class TitleApplicationWindow;
 class TitleApplication : public Core::Application
 {
 private:
-	// TODO: Bind to window resize event to render app on resize
 	std::unique_ptr<TitleApplicationWindow> MainAppWindow = nullptr;
 
 	Rendering::RenderingModule* RenderingModuleInstance = nullptr;
 	Rendering::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
+
+	Rendering::RenderHardwareInterface::Mesh* Mesh = nullptr;
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);

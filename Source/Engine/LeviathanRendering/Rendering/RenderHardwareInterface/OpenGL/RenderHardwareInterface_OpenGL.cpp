@@ -12,6 +12,12 @@ namespace
 			void* PlatformWindowHandle = nullptr;
 		};
 
+		struct GL_Mesh
+		{
+			uint32_t VertexArray = 0;
+			uint32_t VertexBuffer = 0;
+		};
+
 		bool LoadGLFunctions()
 		{
 			return gladLoadGL() != 0;
@@ -25,10 +31,9 @@ namespace
 		bool MakeContextCurrent(Rendering::RenderHardwareInterface::Context* const Context)
 		{
 #ifdef PLATFORM_WINDOWS
-			// If null context is passed, clear the current gl context
 			if (!Context)
 			{
-				return wglMakeCurrent(NULL, NULL) == TRUE;
+				return false;
 			}
 
 			GL_RHI::GL_Context* const GLContext = reinterpret_cast<GL_RHI::GL_Context* const>(Context);
@@ -39,6 +44,27 @@ namespace
 			}
 
 			return wglMakeCurrent(GetDC(static_cast<HWND>(GLContext->PlatformWindowHandle)), static_cast<HGLRC>(GLContext->Context)) == TRUE;
+#else
+			return false;
+#endif // PLATFORM_WINDOWS
+		}
+
+		bool MakeContextNotCurrent(Rendering::RenderHardwareInterface::Context* const Context)
+		{
+#ifdef PLATFORM_WINDOWS
+			if (!Context)
+			{
+				return false;
+			}
+
+			GL_RHI::GL_Context* const GLContext = reinterpret_cast<GL_RHI::GL_Context* const>(Context);
+
+			if (!GLContext)
+			{
+				return false;
+			}
+
+			return wglMakeCurrent(GetDC(static_cast<HWND>(GLContext->PlatformWindowHandle)), NULL) == TRUE;
 #else
 			return false;
 #endif // PLATFORM_WINDOWS
@@ -106,7 +132,7 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 			GL_RHI::PrintGLVersion();
 
 			// Clear current context, currently set as the init context
-			if (!GL_RHI::MakeContextCurrent(nullptr))
+			if (!GL_RHI::MakeContextNotCurrent(InitContext))
 			{
 				return false;
 			}
@@ -182,6 +208,12 @@ bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardware
 		return false;
 	}
 
+	// Ensure context being deleted is not the current gl context. Each gl implementation of an rhi function ensures a context is set before operating
+	if (!GL_RHI::MakeContextNotCurrent(Context))
+	{
+		return false;
+	}
+
 	if (wglDeleteContext(static_cast<HGLRC>(GLContext->Context)) != TRUE)
 	{
 		return false;
@@ -192,6 +224,47 @@ bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardware
 #else
 	return false;
 #endif // PLATFORM_WINDOWS
+}
+
+Rendering::RenderHardwareInterface::Mesh* Rendering::RenderHardwareInterface::NewMesh(
+	Rendering::RenderHardwareInterface::Context* const Context,
+	const std::vector<MeshVertex>& Vertices
+)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return nullptr;
+	}
+
+	// Create mesh on heap
+	GL_RHI::GL_Mesh* const GLMesh = new GL_RHI::GL_Mesh();
+
+	glGenVertexArrays(1, &GLMesh->VertexArray);
+	glBindVertexArray(GLMesh->VertexArray);
+
+	glGenBuffers(1, &GLMesh->VertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, GLMesh->VertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(Rendering::RenderHardwareInterface::MeshVertex), Vertices.data(), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<const void*>(0));
+	glEnableVertexAttribArray(0);
+
+	return reinterpret_cast<Rendering::RenderHardwareInterface::Mesh*>(GLMesh);
+}
+
+bool Rendering::RenderHardwareInterface::DeleteMesh(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Mesh* const Mesh)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	// Delete mesh on heap
+	delete reinterpret_cast<GL_RHI::GL_Mesh* const>(Mesh);
+
+	return true;
 }
 
 bool Rendering::RenderHardwareInterface::Present(Rendering::RenderHardwareInterface::Context* const Context)

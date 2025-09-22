@@ -5,6 +5,12 @@ namespace Rendering
 	namespace RenderHardwareInterface
 	{
 		struct Context;
+		struct Mesh;
+
+		struct MeshVertex
+		{
+			std::array<float, 3> Position = {};
+		};
 
 		/*
 			Resource management -- create, read, update, delete
@@ -17,6 +23,8 @@ namespace Rendering
 		// Resource management
 		Rendering::RenderHardwareInterface::Context* NewContext(void* const WindowPlatformHandle);
 		bool DeleteContext(Rendering::RenderHardwareInterface::Context* const Context);
+		Rendering::RenderHardwareInterface::Mesh* NewMesh(Rendering::RenderHardwareInterface::Context* const Context, const std::vector<MeshVertex>& Vertices);
+		bool DeleteMesh(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Mesh* const Mesh);
 
 		// Frame management
 		bool Present(Rendering::RenderHardwareInterface::Context* const Context);

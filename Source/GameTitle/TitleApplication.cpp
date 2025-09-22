@@ -36,7 +36,7 @@ void TitleApplication::Tick(double DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Render
+	// Render application
 	RenderApp();
 }
 
@@ -105,7 +105,7 @@ bool TitleApplication::InitializeRendering()
 		return false;
 	}
 
-	// Initialize rhi
+	// Initialize render hardware interface
 	if (!Rendering::RenderHardwareInterface::Initialize(MainAppWindow->GetPlatformHandle()))
 	{
 		return false;
@@ -118,11 +118,27 @@ bool TitleApplication::InitializeRendering()
 		return false;
 	}
 
+	// Initialize rendering scene
+	std::vector<Rendering::RenderHardwareInterface::MeshVertex> Vertices =
+	{
+		Rendering::RenderHardwareInterface::MeshVertex({-0.5f, -0.5f, 0.0f}),
+		Rendering::RenderHardwareInterface::MeshVertex({0.5f, -0.5f, 0.0f}),
+		Rendering::RenderHardwareInterface::MeshVertex({0.0f, 0.5f, 0.0f})
+	};
+
+	Mesh = Rendering::RenderHardwareInterface::NewMesh(MainAppWindowRenderContext, Vertices);
+
 	return true;
 }
 
 bool TitleApplication::ShutdownRendering()
 {
+	// Delete rendering resources
+	if (!Rendering::RenderHardwareInterface::DeleteMesh(MainAppWindowRenderContext, Mesh))
+	{
+		return false;
+	}
+
 	// Delete main app window rendering context
 	return Rendering::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext);
 }
