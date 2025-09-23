@@ -131,12 +131,19 @@ bool TitleApplication::InitializeRendering()
 	// Initialize rendering scene
 	std::vector<Rendering::RenderHardwareInterface::MeshVertex> Vertices =
 	{
-		Rendering::RenderHardwareInterface::MeshVertex({-0.5f, -0.5f, 0.0f}),
-		Rendering::RenderHardwareInterface::MeshVertex({0.5f, -0.5f, 0.0f}),
-		Rendering::RenderHardwareInterface::MeshVertex({0.0f, 0.5f, 0.0f})
+		Rendering::RenderHardwareInterface::MeshVertex({ 0.5f,  0.5f, 0.0f}),  // top right
+		Rendering::RenderHardwareInterface::MeshVertex({ 0.5f, -0.5f, 0.0f}),  // bottom right
+		Rendering::RenderHardwareInterface::MeshVertex({-0.5f, -0.5f, 0.0f}),  // bottom left
+		Rendering::RenderHardwareInterface::MeshVertex({-0.5f,  0.5f, 0.0f})   // top left 
 	};
 
-	Mesh = Rendering::RenderHardwareInterface::NewMesh(MainAppWindowRenderContext, Vertices);
+	std::vector<uint32_t> Indices =
+	{
+		0, 1, 3,   // first triangle
+		1, 2, 3    // second triangle
+	};
+
+	Mesh = Rendering::RenderHardwareInterface::NewMesh(MainAppWindowRenderContext, Vertices, Indices);
 
 	return true;
 }

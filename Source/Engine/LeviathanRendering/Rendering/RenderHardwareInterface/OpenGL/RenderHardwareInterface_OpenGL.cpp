@@ -16,7 +16,8 @@ namespace
 		{
 			uint32_t VertexArray = 0;
 			uint32_t VertexBuffer = 0;
-			uint32_t VertexCount = 0;
+			uint32_t ElementBuffer = 0;
+			uint32_t ElementCount = 0;
 		};
 
 		struct GL_Pipeline
@@ -215,7 +216,8 @@ bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardware
 
 Rendering::RenderHardwareInterface::Mesh* Rendering::RenderHardwareInterface::NewMesh(
 	Rendering::RenderHardwareInterface::Context* const Context,
-	const std::vector<MeshVertex>& Vertices
+	const std::vector<MeshVertex>& Vertices,
+	const std::vector<uint32_t>& Indices
 )
 {
 	// Set context
@@ -230,14 +232,21 @@ Rendering::RenderHardwareInterface::Mesh* Rendering::RenderHardwareInterface::Ne
 	glGenVertexArrays(1, &GLMesh->VertexArray);
 	glBindVertexArray(GLMesh->VertexArray);
 
+	// Vertex buffer
 	glGenBuffers(1, &GLMesh->VertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, GLMesh->VertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(Rendering::RenderHardwareInterface::MeshVertex), Vertices.data(), GL_STATIC_DRAW);
 
+	// Element buffer
+	glGenBuffers(1, &GLMesh->ElementBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLMesh->ElementBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(uint32_t), Indices.data(), GL_STATIC_DRAW);
+
+	// Vertex input layout
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<const void*>(0));
 	glEnableVertexAttribArray(0);
 
-	GLMesh->VertexCount = Vertices.size();
+	GLMesh->ElementCount = Indices.size();
 
 	return reinterpret_cast<Rendering::RenderHardwareInterface::Mesh*>(GLMesh);
 }
@@ -250,8 +259,14 @@ bool Rendering::RenderHardwareInterface::DeleteMesh(Rendering::RenderHardwareInt
 		return false;
 	}
 
-	// Delete mesh on heap
-	delete reinterpret_cast<GL_RHI::GL_Mesh* const>(Mesh);
+	// Delete gl resources
+	GL_RHI::GL_Mesh* const GLMesh = reinterpret_cast<GL_RHI::GL_Mesh* const>(Mesh);
+	glDeleteVertexArrays(1, &GLMesh->VertexArray);
+	glDeleteBuffers(1, &GLMesh->VertexBuffer);
+	glDeleteBuffers(1, &GLMesh->ElementBuffer);
+
+	// Delete mesh struct on heap
+	delete GLMesh;
 
 	return true;
 }
@@ -314,7 +329,13 @@ bool Rendering::RenderHardwareInterface::DeletePipeline(Rendering::RenderHardwar
 		return false;
 	}
 
-	delete reinterpret_cast<GL_RHI::GL_Pipeline* const>(Pipeline);
+	// Delete gl resources
+	GL_RHI::GL_Pipeline* const GLPipeline = reinterpret_cast<GL_RHI::GL_Pipeline* const>(Pipeline);
+
+	glDeleteProgram(GLPipeline->ShaderProgram);
+
+	// Delete pipeline struct on the heap
+	delete GLPipeline;
 
 	return true;
 }
@@ -363,5 +384,5 @@ void Rendering::RenderHardwareInterface::DrawMesh(Rendering::RenderHardwareInter
 {
 	GL_RHI::GL_Mesh* const GLMesh = reinterpret_cast<GL_RHI::GL_Mesh* const>(Mesh);
 	glBindVertexArray(GLMesh->VertexArray);
-	glDrawArrays(GL_TRIANGLES, 0, GLMesh->VertexCount);
+	glDrawElements(GL_TRIANGLES, GLMesh->ElementCount, GL_UNSIGNED_INT, 0);
 }
