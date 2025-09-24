@@ -15,7 +15,7 @@ namespace Rendering
 	namespace RenderHardwareInterface
 	{
 		struct Context;
-		struct Mesh;
+		struct Buffer;
 		struct Pipeline;
 	}
 }
@@ -31,7 +31,8 @@ private:
 
 	Rendering::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
 	Rendering::RenderHardwareInterface::Pipeline* MeshPipeline = nullptr;
-	Rendering::RenderHardwareInterface::Mesh* Mesh = nullptr;
+	Rendering::RenderHardwareInterface::Buffer* VertexBuffer = nullptr;
+	Rendering::RenderHardwareInterface::Buffer* IndexBuffer = nullptr;
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);

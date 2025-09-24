@@ -12,18 +12,24 @@ namespace
 			void* PlatformWindowHandle = nullptr;
 		};
 
-		struct GL_Mesh
+		struct GL_VertexBuffer
 		{
-			uint32_t VertexArray = 0;
-			uint32_t VertexBuffer = 0;
-			uint32_t ElementBuffer = 0;
-			uint32_t ElementCount = 0;
+			GLuint VBO = 0;
+		};
+
+		struct GL_ElementBuffer
+		{
+			GLuint EBO = 0;
+			GLuint ElementCount = 0;
 		};
 
 		struct GL_Pipeline
 		{
 			uint32_t ShaderProgram = 0;
 		};
+
+		// Single vertex array object bound throughout gl rhi initialized duration
+		GLuint VAO = 0;
 
 		bool LoadGLFunctions()
 		{
@@ -125,6 +131,10 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 
 			GL_RHI::PrintGLVersion();
 
+			// Create vertex array object
+			glGenVertexArrays(1, &GL_RHI::VAO);
+			glBindVertexArray(GL_RHI::VAO);
+
 			// Clear current context, currently set as the init context
 			if (!GL_RHI::MakeContextNotCurrent(InitContext))
 			{
@@ -142,6 +152,15 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 	}
 
 	return false;
+}
+
+bool Rendering::RenderHardwareInterface::Shutdown()
+{
+	// Destroy vertex array object
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &GL_RHI::VAO);
+
+	return true;
 }
 
 Rendering::RenderHardwareInterface::Context* Rendering::RenderHardwareInterface::NewContext(void* const WindowPlatformHandle)
@@ -220,59 +239,11 @@ bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardware
 #endif // PLATFORM_WINDOWS
 }
 
-Rendering::RenderHardwareInterface::Mesh* Rendering::RenderHardwareInterface::NewMesh(
-	Rendering::RenderHardwareInterface::Context* const Context,
-	const void* const VertexData,
-	const size_t VertexDataSizeBytes,
-	const VertexInputAttributeLayout& AttributeLayout,
-	const uint32_t* const IndexData,
-	const size_t IndexCount
+Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::NewVertexBuffer(
+	Rendering::RenderHardwareInterface::Context* const Context, 
+	const void* const VertexDataStart,
+	const size_t VertexDataSizeBytes
 )
-{
-	// Set context
-	if (!GL_RHI::MakeContextCurrent(Context))
-	{
-		return nullptr;
-	}
-
-	// Create mesh on heap
-	GL_RHI::GL_Mesh* const GLMesh = new GL_RHI::GL_Mesh();
-
-	// Vertex array
-	glGenVertexArrays(1, &GLMesh->VertexArray);
-	glBindVertexArray(GLMesh->VertexArray);
-
-	// Vertex buffer
-	glGenBuffers(1, &GLMesh->VertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, GLMesh->VertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, VertexDataSizeBytes, VertexData, GL_STATIC_DRAW);
-
-	// Element buffer
-	glGenBuffers(1, &GLMesh->ElementBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLMesh->ElementBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, IndexCount * sizeof(uint32_t), IndexData, GL_STATIC_DRAW);
-
-	// Vertex attribute layout
-	const size_t AttributeCount = AttributeLayout.Attributes.size();
-	for(uint32_t AttributeIndex = 0; AttributeIndex < AttributeCount; ++AttributeIndex)
-	{
-		glEnableVertexAttribArray(AttributeIndex);
-		glVertexAttribPointer(
-			AttributeLayout.Attributes[AttributeIndex].Index,
-			AttributeLayout.Attributes[AttributeIndex].ValueCount,
-			GL_RHI::GetVertexInputAttributeDataTypeGLType(AttributeLayout.Attributes[AttributeIndex].ValueType),
-			GL_FALSE,
-			AttributeLayout.Attributes[AttributeIndex].ByteStrideToNextAttribute,
-			reinterpret_cast<const void*>(AttributeLayout.Attributes[AttributeIndex].ByteOffsetFromVertexStart)
-		);
-	}
-
-	GLMesh->ElementCount = IndexCount;
-
-	return reinterpret_cast<Rendering::RenderHardwareInterface::Mesh*>(GLMesh);
-}
-
-bool Rendering::RenderHardwareInterface::DeleteMesh(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Mesh* const Mesh)
 {
 	// Set context
 	if (!GL_RHI::MakeContextCurrent(Context))
@@ -280,16 +251,70 @@ bool Rendering::RenderHardwareInterface::DeleteMesh(Rendering::RenderHardwareInt
 		return false;
 	}
 
-	// Delete gl resources
-	GL_RHI::GL_Mesh* const GLMesh = reinterpret_cast<GL_RHI::GL_Mesh* const>(Mesh);
-	glDeleteVertexArrays(1, &GLMesh->VertexArray);
-	glDeleteBuffers(1, &GLMesh->VertexBuffer);
-	glDeleteBuffers(1, &GLMesh->ElementBuffer);
+	// Create new gl vertex buffer structure
+	GL_RHI::GL_VertexBuffer* const GLVertexBuffer = new GL_RHI::GL_VertexBuffer();
 
-	// Delete mesh struct on heap
-	delete GLMesh;
+	// Create vertex buffer
+	glGenBuffers(1, &GLVertexBuffer->VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, GLVertexBuffer->VBO);
+	glBufferData(GL_ARRAY_BUFFER, VertexDataSizeBytes, VertexDataStart, GL_STATIC_DRAW);
+
+	return reinterpret_cast<Rendering::RenderHardwareInterface::Buffer*>(GLVertexBuffer);
+}
+
+bool Rendering::RenderHardwareInterface::DeleteVertexBuffer(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Buffer* const Buffer)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	GL_RHI::GL_VertexBuffer* const GLVertexBuffer = reinterpret_cast<GL_RHI::GL_VertexBuffer* const>(Buffer);
+
+	glDeleteBuffers(1, &GLVertexBuffer->VBO);
+
+	delete GLVertexBuffer;
 
 	return true;
+}
+
+Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::NewIndexBuffer(
+	Rendering::RenderHardwareInterface::Context* const Context,
+	const uint32_t* const IndexData, const size_t IndexCount
+)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	GL_RHI::GL_ElementBuffer* const GLElementBuffer = new GL_RHI::GL_ElementBuffer();
+
+	glGenBuffers(1, &GLElementBuffer->EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLElementBuffer->EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, IndexCount * sizeof(uint32_t), IndexData, GL_STATIC_DRAW);
+	GLElementBuffer->ElementCount = IndexCount;
+
+	return reinterpret_cast<Rendering::RenderHardwareInterface::Buffer*>(GLElementBuffer);
+}
+
+bool Rendering::RenderHardwareInterface::DeleteIndexBuffer(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Buffer* const Buffer)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	GL_RHI::GL_ElementBuffer* const GLElementBuffer = reinterpret_cast<GL_RHI::GL_ElementBuffer* const>(Buffer);
+
+	glDeleteBuffers(1, &GLElementBuffer->EBO);
+
+	delete GLElementBuffer;
+
+	return false;
 }
 
 Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface::NewPipeline(
@@ -401,9 +426,32 @@ void Rendering::RenderHardwareInterface::SetPipeline(Rendering::RenderHardwareIn
 	glUseProgram(reinterpret_cast<GL_RHI::GL_Pipeline* const>(Pipeline)->ShaderProgram);
 }
 
-void Rendering::RenderHardwareInterface::DrawMesh(Rendering::RenderHardwareInterface::Mesh* const Mesh)
+void Rendering::RenderHardwareInterface::DrawIndexed(
+	Rendering::RenderHardwareInterface::Buffer* const VertexBuffer,
+	Rendering::RenderHardwareInterface::Buffer* const IndexBuffer,
+	const Rendering::RenderHardwareInterface::VertexInputAttributeLayout& AttributeLayout
+)
 {
-	GL_RHI::GL_Mesh* const GLMesh = reinterpret_cast<GL_RHI::GL_Mesh* const>(Mesh);
-	glBindVertexArray(GLMesh->VertexArray);
-	glDrawElements(GL_TRIANGLES, GLMesh->ElementCount, GL_UNSIGNED_INT, 0);
+	GL_RHI::GL_VertexBuffer* const GLVertexBuffer = reinterpret_cast<GL_RHI::GL_VertexBuffer* const>(VertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, GLVertexBuffer->VBO);
+
+	GL_RHI::GL_ElementBuffer* const GLElementBuffer = reinterpret_cast<GL_RHI::GL_ElementBuffer* const>(IndexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLElementBuffer->EBO);
+
+	// TODO: Move into pipeline/tie with shaders. Vertex attribute layout
+	const size_t AttributeCount = AttributeLayout.AttributeDescriptions.size();
+	for (uint32_t AttributeIndex = 0; AttributeIndex < AttributeCount; ++AttributeIndex)
+	{
+		glEnableVertexAttribArray(AttributeIndex);
+		glVertexAttribPointer(
+			AttributeLayout.AttributeDescriptions[AttributeIndex].Index,
+			AttributeLayout.AttributeDescriptions[AttributeIndex].ValueCount,
+			GL_RHI::GetVertexInputAttributeDataTypeGLType(AttributeLayout.AttributeDescriptions[AttributeIndex].ValueType),
+			GL_FALSE,
+			AttributeLayout.AttributeDescriptions[AttributeIndex].ByteStrideToNextAttribute,
+			reinterpret_cast<const void*>(AttributeLayout.AttributeDescriptions[AttributeIndex].ByteOffsetFromVertexStart)
+		);
+	}
+
+	glDrawElements(GL_TRIANGLES, GLElementBuffer->ElementCount, GL_UNSIGNED_INT, 0);
 }

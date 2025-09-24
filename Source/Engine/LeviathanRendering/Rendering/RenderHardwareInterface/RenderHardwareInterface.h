@@ -5,7 +5,7 @@ namespace Rendering
 	namespace RenderHardwareInterface
 	{
 		struct Context;
-		struct Mesh;
+		struct Buffer;
 		struct Pipeline;
 
 		enum class VertexInputAttributeValueDataType : uint8_t
@@ -14,7 +14,7 @@ namespace Rendering
 			MAX
 		};
 
-		struct VertexInputAttribute
+		struct VertexInputAttributeDesc
 		{
 			uint32_t Index = 0;
 			int32_t ValueCount = 0;
@@ -25,7 +25,7 @@ namespace Rendering
 
 		struct VertexInputAttributeLayout
 		{
-			std::vector<VertexInputAttribute> Attributes = {};
+			std::vector<VertexInputAttributeDesc> AttributeDescriptions = {};
 		};
 
 		/*
@@ -35,20 +35,31 @@ namespace Rendering
 		*/
 
 		bool Initialize(void* const InitWindowPlatformHandle);
+		bool Shutdown();
 
 		// Resource management
 		Rendering::RenderHardwareInterface::Context* NewContext(void* const WindowPlatformHandle);
 		bool DeleteContext(Rendering::RenderHardwareInterface::Context* const Context);
 
-		Rendering::RenderHardwareInterface::Mesh* NewMesh(
+		Rendering::RenderHardwareInterface::Buffer* NewVertexBuffer(
 			Rendering::RenderHardwareInterface::Context* const Context,
-			const void* const VertexData,
-			const size_t VertexDataSizeBytes,
-			const VertexInputAttributeLayout& AttributeLayout,
+			const void* const VertexDataStart,
+			const size_t VertexDataSizeBytes
+		);
+		bool DeleteVertexBuffer(
+			Rendering::RenderHardwareInterface::Context* const Context,
+			Rendering::RenderHardwareInterface::Buffer* const Buffer
+		);
+
+		Rendering::RenderHardwareInterface::Buffer* NewIndexBuffer(
+			Rendering::RenderHardwareInterface::Context* const Context,
 			const uint32_t* const IndexData,
 			const size_t IndexCount
 		);
-		bool DeleteMesh(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Mesh* const Mesh);
+		bool DeleteIndexBuffer(
+			Rendering::RenderHardwareInterface::Context* const Context,
+			Rendering::RenderHardwareInterface::Buffer* const Buffer
+		);
 
 		Rendering::RenderHardwareInterface::Pipeline* NewPipeline(
 			Rendering::RenderHardwareInterface::Context* const Context,
@@ -66,6 +77,10 @@ namespace Rendering
 		void SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height);
 		void ClearColorBuffer(const float R, const float G, const float B, const float A);
 		void SetPipeline(Rendering::RenderHardwareInterface::Pipeline* const Pipeline);
-		void DrawMesh(Rendering::RenderHardwareInterface::Mesh* const Mesh);
+		void DrawIndexed(
+			Rendering::RenderHardwareInterface::Buffer* const VertexBuffer,
+			Rendering::RenderHardwareInterface::Buffer* const IndexBuffer, 
+			const Rendering::RenderHardwareInterface::VertexInputAttributeLayout& AttributeLayout
+		);
 	};
 }

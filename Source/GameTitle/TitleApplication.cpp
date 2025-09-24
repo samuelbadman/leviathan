@@ -140,20 +140,8 @@ bool TitleApplication::InitializeRendering()
 		1, 2, 3    // second triangle
 	};
 
-	Rendering::RenderHardwareInterface::VertexInputAttributeLayout AttributeLayout = {};
-	AttributeLayout.Attributes =
-	{
-		Rendering::RenderHardwareInterface::VertexInputAttribute{0, 3, Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType::Float3, sizeof(float) * 3, 0}
-	};
-
-	Mesh = Rendering::RenderHardwareInterface::NewMesh(
-		MainAppWindowRenderContext,
-		Vertices.data(),
-		Vertices.size() * sizeof(float),
-		AttributeLayout,
-		Indices.data(),
-		Indices.size()
-	);
+	VertexBuffer = Rendering::RenderHardwareInterface::NewVertexBuffer(MainAppWindowRenderContext, Vertices.data(), Vertices.size() * sizeof(float));
+	IndexBuffer = Rendering::RenderHardwareInterface::NewIndexBuffer(MainAppWindowRenderContext, Indices.data(), Indices.size());
 
 	return true;
 }
@@ -161,11 +149,17 @@ bool TitleApplication::InitializeRendering()
 bool TitleApplication::ShutdownRendering()
 {
 	// Delete rendering resources
-	if (!Rendering::RenderHardwareInterface::DeleteMesh(MainAppWindowRenderContext, Mesh))
+	if (!Rendering::RenderHardwareInterface::DeleteVertexBuffer(MainAppWindowRenderContext, VertexBuffer))
 	{
 		return false;
 	}
-	Mesh = nullptr;
+	VertexBuffer = nullptr;
+
+	if (!Rendering::RenderHardwareInterface::DeleteIndexBuffer(MainAppWindowRenderContext, IndexBuffer))
+	{
+		return false;
+	}
+	IndexBuffer = nullptr;
 
 	if (!Rendering::RenderHardwareInterface::DeletePipeline(MainAppWindowRenderContext, MeshPipeline))
 	{
@@ -179,6 +173,12 @@ bool TitleApplication::ShutdownRendering()
 		return false;
 	}
 	MainAppWindowRenderContext = nullptr;
+
+	// Shutdown rhi
+	if (!Rendering::RenderHardwareInterface::Shutdown())
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -194,7 +194,12 @@ void TitleApplication::RenderApp()
 
 		Rendering::RenderHardwareInterface::SetPipeline(MeshPipeline);
 
-		Rendering::RenderHardwareInterface::DrawMesh(Mesh);
+		Rendering::RenderHardwareInterface::VertexInputAttributeLayout AttributeLayout = {};
+		AttributeLayout.AttributeDescriptions =
+		{
+			Rendering::RenderHardwareInterface::VertexInputAttributeDesc{0, 3, Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType::Float3, sizeof(float) * 3, 0}
+		};
+		Rendering::RenderHardwareInterface::DrawIndexed(VertexBuffer, IndexBuffer, AttributeLayout);
 	}
 	Rendering::RenderHardwareInterface::EndFrame(MainAppWindowRenderContext);
 
