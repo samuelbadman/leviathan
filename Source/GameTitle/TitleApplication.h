@@ -16,6 +16,7 @@ namespace Rendering
 	{
 		struct Context;
 		struct Buffer;
+		struct Shader;
 		struct Pipeline;
 	}
 }
@@ -30,9 +31,11 @@ private:
 	Rendering::RenderingModule* RenderingModuleInstance = nullptr;
 
 	Rendering::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
-	Rendering::RenderHardwareInterface::Pipeline* Pipeline = nullptr;
 	Rendering::RenderHardwareInterface::Buffer* VertexBuffer = nullptr;
 	Rendering::RenderHardwareInterface::Buffer* IndexBuffer = nullptr;
+	Rendering::RenderHardwareInterface::Shader* PipelineVertexShader = nullptr;
+	Rendering::RenderHardwareInterface::Shader* PipelinePixelShader = nullptr;
+	Rendering::RenderHardwareInterface::Pipeline* Pipeline = nullptr;
 	size_t IndexCount = 0;
 
 public:

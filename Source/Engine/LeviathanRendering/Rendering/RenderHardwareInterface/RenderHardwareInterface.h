@@ -6,7 +6,23 @@ namespace Rendering
 	{
 		struct Context;
 		struct Buffer;
+		struct Shader;
 		struct Pipeline;
+
+		enum class BufferType : uint8_t
+		{
+			Vertex = 0,
+			Index,
+			//Constant
+			MAX
+		};
+
+		enum class ShaderStage : uint8_t
+		{
+			Vertex = 0,
+			Pixel,
+			MAX
+		};
 
 		enum class InputVertexAttributeValueDataType : uint8_t
 		{
@@ -41,31 +57,32 @@ namespace Rendering
 		Rendering::RenderHardwareInterface::Context* NewContext(void* const WindowPlatformHandle);
 		bool DeleteContext(Rendering::RenderHardwareInterface::Context* const Context);
 
-		Rendering::RenderHardwareInterface::Buffer* NewVertexBuffer(
+		Rendering::RenderHardwareInterface::Buffer* NewBuffer(
 			Rendering::RenderHardwareInterface::Context* const Context,
-			const void* const VertexDataStart,
-			const size_t VertexDataSizeBytes
+			const Rendering::RenderHardwareInterface::BufferType Type,
+			const void* const BufferDataStart,
+			const size_t BufferDataSizeBytes
 		);
-		bool DeleteVertexBuffer(
+		bool DeleteBuffer(
 			Rendering::RenderHardwareInterface::Context* const Context,
 			Rendering::RenderHardwareInterface::Buffer* const Buffer
 		);
 
-		Rendering::RenderHardwareInterface::Buffer* NewIndexBuffer(
+		Rendering::RenderHardwareInterface::Shader* NewShader(
 			Rendering::RenderHardwareInterface::Context* const Context,
-			const uint32_t* const IndexData,
-			const size_t IndexCount
+			const Rendering::RenderHardwareInterface::ShaderStage Stage,
+			const std::string& Source
 		);
-		bool DeleteIndexBuffer(
-			Rendering::RenderHardwareInterface::Context* const Context,
-			Rendering::RenderHardwareInterface::Buffer* const Buffer
+		bool DeleteShader(
+			Rendering::RenderHardwareInterface::Context* const Context, 
+			Rendering::RenderHardwareInterface::Shader* const Shader
 		);
 
 		Rendering::RenderHardwareInterface::Pipeline* NewPipeline(
 			Rendering::RenderHardwareInterface::Context* const Context,
-			const std::string& VertexShaderSource,
-			const Rendering::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout,
-			const std::string& PixelShaderSource
+			Rendering::RenderHardwareInterface::Shader* const VertexShader,
+			Rendering::RenderHardwareInterface::Shader* const PixelShader,
+			const Rendering::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout
 		);
 		bool DeletePipeline(
 			Rendering::RenderHardwareInterface::Context* const Context, 

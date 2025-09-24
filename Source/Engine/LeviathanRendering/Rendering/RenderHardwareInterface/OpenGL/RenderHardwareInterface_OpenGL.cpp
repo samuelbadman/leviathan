@@ -12,30 +12,30 @@ namespace
 			void* PlatformWindowHandle = nullptr;
 		};
 
-		struct GL_VertexBuffer
+		struct GL_Buffer
 		{
-			GLuint VBO = 0;
+			GLuint Buffer = 0;
 		};
 
-		struct GL_ElementBuffer
+		struct GL_Shader
 		{
-			GLuint EBO = 0;
+			GLuint Shader = 0;
+		};
+
+		struct GL_InputVertexAttributeDesc
+		{
+			GLuint Index = 0;
+			GLint Size = 0;
+			GLenum Type = GL_NONE;
+			GLboolean Normalized = GL_FALSE;
+			GLsizei Stride = 0;
+			const void* Offset = 0;
 		};
 
 		struct GL_Pipeline
 		{
-			struct InputVertexAttributeDesc
-			{
-				GLuint Index = 0;
-				GLint Size = 0;
-				GLenum Type = GL_NONE;
-				GLboolean Normalized = GL_FALSE;
-				GLsizei Stride = 0;
-				const void* Offset = 0;
-			};
-
 			uint32_t ShaderProgram = 0;
-			std::vector<GL_Pipeline::InputVertexAttributeDesc> InputVertexAttributeLayout = {};
+			std::vector<GL_RHI::GL_InputVertexAttributeDesc> InputVertexAttributeLayout = {};
 		};
 
 		// Single vertex array object bound throughout gl rhi initialized duration
@@ -118,8 +118,26 @@ namespace
 			switch (DataType)
 			{
 			case Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType::Float: return GL_FLOAT;
+			default: return GL_NONE;
+			}
+		}
 
-			case Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType::MAX:
+		GLenum GetBufferTypeGLType(const Rendering::RenderHardwareInterface::BufferType Type)
+		{
+			switch (Type)
+			{
+			case Rendering::RenderHardwareInterface::BufferType::Vertex: return GL_ARRAY_BUFFER;
+			case Rendering::RenderHardwareInterface::BufferType::Index: return GL_ELEMENT_ARRAY_BUFFER;
+			default: return GL_NONE;
+			}
+		}
+
+		GLenum GetShaderStageGLType(const Rendering::RenderHardwareInterface::ShaderStage Stage)
+		{
+			switch (Stage)
+			{
+			case Rendering::RenderHardwareInterface::ShaderStage::Vertex: return GL_VERTEX_SHADER;
+			case Rendering::RenderHardwareInterface::ShaderStage::Pixel: return GL_FRAGMENT_SHADER;
 			default: return GL_NONE;
 			}
 		}
@@ -249,53 +267,42 @@ bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardware
 #endif // PLATFORM_WINDOWS
 }
 
-Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::NewVertexBuffer(
-	Rendering::RenderHardwareInterface::Context* const Context, 
-	const void* const VertexDataStart,
-	const size_t VertexDataSizeBytes
+Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::NewBuffer(
+	Rendering::RenderHardwareInterface::Context* const Context,
+	const Rendering::RenderHardwareInterface::BufferType Type,
+	const void* const BufferDataStart,
+	const size_t BufferDataSizeBytes
 )
 {
-	// Set context
-	if (!GL_RHI::MakeContextCurrent(Context))
-	{
-		return false;
-	}
+	GL_RHI::GL_Buffer* const GLBuffer = new GL_RHI::GL_Buffer();
 
-	// Create new gl vertex buffer structure
-	GL_RHI::GL_VertexBuffer* const GLVertexBuffer = new GL_RHI::GL_VertexBuffer();
+	const GLenum GLType = GL_RHI::GetBufferTypeGLType(Type);
 
-	// Create vertex buffer
-	glGenBuffers(1, &GLVertexBuffer->VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, GLVertexBuffer->VBO);
-	glBufferData(GL_ARRAY_BUFFER, VertexDataSizeBytes, VertexDataStart, GL_STATIC_DRAW);
+	glGenBuffers(1, &GLBuffer->Buffer);
+	glBindBuffer(GLType, GLBuffer->Buffer);
+	glBufferData(GLType, BufferDataSizeBytes, BufferDataStart, GL_STATIC_DRAW);
 
-	return reinterpret_cast<Rendering::RenderHardwareInterface::Buffer*>(GLVertexBuffer);
+	return reinterpret_cast<Rendering::RenderHardwareInterface::Buffer*>(GLBuffer);
 }
 
-bool Rendering::RenderHardwareInterface::DeleteVertexBuffer(
-	Rendering::RenderHardwareInterface::Context* const Context,
+bool Rendering::RenderHardwareInterface::DeleteBuffer(
+	Rendering::RenderHardwareInterface::Context* const Context, 
 	Rendering::RenderHardwareInterface::Buffer* const Buffer
 )
 {
-	// Set context
-	if (!GL_RHI::MakeContextCurrent(Context))
-	{
-		return false;
-	}
+	GL_RHI::GL_Buffer* const GLBuffer = reinterpret_cast<GL_RHI::GL_Buffer* const>(Buffer);
 
-	GL_RHI::GL_VertexBuffer* const GLVertexBuffer = reinterpret_cast<GL_RHI::GL_VertexBuffer* const>(Buffer);
+	glDeleteBuffers(1, &GLBuffer->Buffer);
 
-	glDeleteBuffers(1, &GLVertexBuffer->VBO);
-
-	delete GLVertexBuffer;
+	delete GLBuffer;
 
 	return true;
 }
 
-Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::NewIndexBuffer(
-	Rendering::RenderHardwareInterface::Context* const Context,
-	const uint32_t* const IndexData, 
-	const size_t IndexCount
+Rendering::RenderHardwareInterface::Shader* Rendering::RenderHardwareInterface::NewShader(
+	Rendering::RenderHardwareInterface::Context* const Context, 
+	const Rendering::RenderHardwareInterface::ShaderStage Stage,
+	const std::string& Source
 )
 {
 	// Set context
@@ -304,19 +311,19 @@ Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::
 		return false;
 	}
 
-	GL_RHI::GL_ElementBuffer* const GLElementBuffer = new GL_RHI::GL_ElementBuffer();
+	GL_RHI::GL_Shader* const GLShader = new GL_RHI::GL_Shader();
 
-	glGenBuffers(1, &GLElementBuffer->EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLElementBuffer->EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, IndexCount * sizeof(uint32_t), IndexData, GL_STATIC_DRAW);
+	std::array<char, 512> ErrorMessageBuffer = {};
+	if (!GL_RHI::CompileShaderSourceString(GL_RHI::GetShaderStageGLType(Stage), Source, GLShader->Shader, ErrorMessageBuffer))
+	{
+		CONSOLE_PRINTF("Shader compilation error: %s\n", ErrorMessageBuffer.data());
+		return nullptr;
+	}
 
-	return reinterpret_cast<Rendering::RenderHardwareInterface::Buffer*>(GLElementBuffer);
+	return reinterpret_cast<Rendering::RenderHardwareInterface::Shader*>(GLShader);
 }
 
-bool Rendering::RenderHardwareInterface::DeleteIndexBuffer(
-	Rendering::RenderHardwareInterface::Context* const Context, 
-	Rendering::RenderHardwareInterface::Buffer* const Buffer
-)
+bool Rendering::RenderHardwareInterface::DeleteShader(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Shader* const Shader)
 {
 	// Set context
 	if (!GL_RHI::MakeContextCurrent(Context))
@@ -324,60 +331,42 @@ bool Rendering::RenderHardwareInterface::DeleteIndexBuffer(
 		return false;
 	}
 
-	GL_RHI::GL_ElementBuffer* const GLElementBuffer = reinterpret_cast<GL_RHI::GL_ElementBuffer* const>(Buffer);
+	GL_RHI::GL_Shader* const GLShader = reinterpret_cast<GL_RHI::GL_Shader* const>(Shader);
 
-	glDeleteBuffers(1, &GLElementBuffer->EBO);
+	glDeleteShader(GLShader->Shader);
 
-	delete GLElementBuffer;
+	delete GLShader;
 
-	return false;
+	return true;
 }
 
 Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface::NewPipeline(
 	Rendering::RenderHardwareInterface::Context* const Context,
-	const std::string& VertexShaderSource,
-	const Rendering::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout,
-	const std::string& PixelShaderSource
+	Rendering::RenderHardwareInterface::Shader* const VertexShader,
+	Rendering::RenderHardwareInterface::Shader* const PixelShader,
+	const Rendering::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout
 )
 {
 	// Set context
 	if (!GL_RHI::MakeContextCurrent(Context))
 	{
 		return false;
-	}
-
-	std::array<char, 512> ErrorMessageBuffer = {};
-
-	uint32_t VertexShader;
-	if (!GL_RHI::CompileShaderSourceString(GL_VERTEX_SHADER, VertexShaderSource, VertexShader, ErrorMessageBuffer))
-	{
-		CONSOLE_PRINTF("Vertex shader source compilation error: %s\n", ErrorMessageBuffer.data());
-		return nullptr;
-	}
-
-	uint32_t FragmentShader;
-	if (!GL_RHI::CompileShaderSourceString(GL_FRAGMENT_SHADER, PixelShaderSource, FragmentShader, ErrorMessageBuffer))
-	{
-		CONSOLE_PRINTF("Pixel shader source compilation error: %s\n", ErrorMessageBuffer.data());
-		return nullptr;
 	}
 
 	GL_RHI::GL_Pipeline* GLPipeline = new GL_RHI::GL_Pipeline();
 
 	// Link shader program
 	GLPipeline->ShaderProgram = glCreateProgram();
-	glAttachShader(GLPipeline->ShaderProgram, VertexShader);
-	glAttachShader(GLPipeline->ShaderProgram, FragmentShader);
+	glAttachShader(GLPipeline->ShaderProgram, reinterpret_cast<GL_RHI::GL_Shader* const>(VertexShader)->Shader);
+	glAttachShader(GLPipeline->ShaderProgram, reinterpret_cast<GL_RHI::GL_Shader* const>(PixelShader)->Shader);
 	glLinkProgram(GLPipeline->ShaderProgram);
 
-	glDeleteShader(VertexShader);
-	glDeleteShader(FragmentShader);
-
 	int32_t LinkSuccess;
+	std::array<char, 512> ErrorMessageBuffer = {};
 	glGetProgramiv(GLPipeline->ShaderProgram, GL_LINK_STATUS, &LinkSuccess);
 	if (!LinkSuccess)
 	{
-		CONSOLE_PRINTF("Shader source compilation error: %s\n", ErrorMessageBuffer.data());
+		CONSOLE_PRINTF("Shader program linking error: %s\n", ErrorMessageBuffer.data());
 		delete GLPipeline;
 		return nullptr;
 	}
@@ -388,7 +377,7 @@ Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface
 
 	for (uint32_t AttributeDescIndex = 0; AttributeDescIndex < AttributeCount; ++AttributeDescIndex)
 	{
-		GLPipeline->InputVertexAttributeLayout.emplace_back(GL_RHI::GL_Pipeline::InputVertexAttributeDesc
+		GLPipeline->InputVertexAttributeLayout.emplace_back(GL_RHI::GL_InputVertexAttributeDesc
 			{
 				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].Index,
 				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueCount,
@@ -403,7 +392,10 @@ Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface
 	return reinterpret_cast<Rendering::RenderHardwareInterface::Pipeline*>(GLPipeline);
 }
 
-bool Rendering::RenderHardwareInterface::DeletePipeline(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Pipeline* const Pipeline)
+bool Rendering::RenderHardwareInterface::DeletePipeline(
+	Rendering::RenderHardwareInterface::Context* const Context, 
+	Rendering::RenderHardwareInterface::Pipeline* const Pipeline
+)
 {
 	// Set context
 	if (!GL_RHI::MakeContextCurrent(Context))
@@ -486,11 +478,7 @@ void Rendering::RenderHardwareInterface::DrawIndexed(
 	const size_t IndexCount
 )
 {
-	GL_RHI::GL_VertexBuffer* const GLVertexBuffer = reinterpret_cast<GL_RHI::GL_VertexBuffer* const>(VertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, GLVertexBuffer->VBO);
-
-	GL_RHI::GL_ElementBuffer* const GLElementBuffer = reinterpret_cast<GL_RHI::GL_ElementBuffer* const>(IndexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLElementBuffer->EBO);
-
+	glBindBuffer(GL_ARRAY_BUFFER, reinterpret_cast<GL_RHI::GL_Buffer* const>(VertexBuffer)->Buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, reinterpret_cast<GL_RHI::GL_Buffer* const>(IndexBuffer)->Buffer);
 	glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, 0);
 }

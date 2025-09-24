@@ -120,19 +120,25 @@ bool TitleApplication::InitializeRendering()
 	}
 
 	// Create app rendering pipelines
+	// TODO: Add preprocessor definition defining which rendering api is being compiled
+	PipelineVertexShader = Rendering::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
+		Rendering::RenderHardwareInterface::ShaderStage::Vertex,
+		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/VertexShader.glsl")));
+
+	PipelinePixelShader = Rendering::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
+		Rendering::RenderHardwareInterface::ShaderStage::Pixel,
+		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/PixelShader.glsl")));
+
 	Rendering::RenderHardwareInterface::InputVertexAttributeLayout PipelineInputVertexAttributeLayout = {};
 	PipelineInputVertexAttributeLayout.AttributeDescriptions =
 	{
 		Rendering::RenderHardwareInterface::InputVertexAttributeDesc{0, 3, Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType::Float, sizeof(float) * 3, 0}
 	};
 
-	const std::string PipelineVertexShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/MeshVertexShader.glsl"));
-	const std::string PipelinePixelShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/MeshPixelShader.glsl"));
-
 	Pipeline = Rendering::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, 
-		PipelineVertexShaderSource,
-		PipelineInputVertexAttributeLayout,
-		PipelinePixelShaderSource);
+		PipelineVertexShader,
+		PipelinePixelShader,
+		PipelineInputVertexAttributeLayout);
 
 	// Initialize rendering scene
 	std::vector<float> Vertices =
@@ -151,8 +157,15 @@ bool TitleApplication::InitializeRendering()
 
 	IndexCount = Indices.size();
 
-	VertexBuffer = Rendering::RenderHardwareInterface::NewVertexBuffer(MainAppWindowRenderContext, Vertices.data(), Vertices.size() * sizeof(float));
-	IndexBuffer = Rendering::RenderHardwareInterface::NewIndexBuffer(MainAppWindowRenderContext, Indices.data(), Indices.size());
+	VertexBuffer = Rendering::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext, 
+		Rendering::RenderHardwareInterface::BufferType::Vertex,
+		Vertices.data(), 
+		Vertices.size() * sizeof(float));
+
+	IndexBuffer = Rendering::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext, 
+		Rendering::RenderHardwareInterface::BufferType::Index,
+		Indices.data(), 
+		Indices.size() * sizeof(uint32_t));
 
 	return true;
 }
@@ -160,17 +173,29 @@ bool TitleApplication::InitializeRendering()
 bool TitleApplication::ShutdownRendering()
 {
 	// Delete rendering resources
-	if (!Rendering::RenderHardwareInterface::DeleteVertexBuffer(MainAppWindowRenderContext, VertexBuffer))
+	if (!Rendering::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, VertexBuffer))
 	{
 		return false;
 	}
 	VertexBuffer = nullptr;
 
-	if (!Rendering::RenderHardwareInterface::DeleteIndexBuffer(MainAppWindowRenderContext, IndexBuffer))
+	if (!Rendering::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, IndexBuffer))
 	{
 		return false;
 	}
 	IndexBuffer = nullptr;
+
+	if (!Rendering::RenderHardwareInterface::DeleteShader(MainAppWindowRenderContext, PipelineVertexShader))
+	{
+		return false;
+	}
+	PipelineVertexShader = nullptr;
+
+	if (!Rendering::RenderHardwareInterface::DeleteShader(MainAppWindowRenderContext, PipelinePixelShader))
+	{
+		return false;
+	}
+	PipelinePixelShader = nullptr;
 
 	if (!Rendering::RenderHardwareInterface::DeletePipeline(MainAppWindowRenderContext, Pipeline))
 	{
