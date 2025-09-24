@@ -8,9 +8,24 @@ namespace Rendering
 		struct Mesh;
 		struct Pipeline;
 
-		struct MeshVertex
+		enum class VertexInputAttributeValueDataType : uint8_t
 		{
-			std::array<float, 3> Position = {};
+			Float3 = 0,
+			MAX
+		};
+
+		struct VertexInputAttribute
+		{
+			uint32_t Index = 0;
+			int32_t ValueCount = 0;
+			VertexInputAttributeValueDataType ValueType = VertexInputAttributeValueDataType::MAX;
+			size_t ByteStrideToNextAttribute = 0;
+			size_t ByteOffsetFromVertexStart = 0;
+		};
+
+		struct VertexInputAttributeLayout
+		{
+			std::vector<VertexInputAttribute> Attributes = {};
 		};
 
 		/*
@@ -26,16 +41,22 @@ namespace Rendering
 		// Resource management
 		Rendering::RenderHardwareInterface::Context* NewContext(void* const WindowPlatformHandle);
 		bool DeleteContext(Rendering::RenderHardwareInterface::Context* const Context);
-		// TODO: Accept vertex data in any format and expose agnostic element/attribute description as input when creating new render geometry
-		// TODO: Make drawing more flexible. How do points/lines get drawn as well as triangles. Different vertex data layouts to support different pipelines?
-		Rendering::RenderHardwareInterface::Mesh* NewMesh(Rendering::RenderHardwareInterface::Context* const Context,
-			const std::vector<MeshVertex>& Vertices,
-			const std::vector<uint32_t>& Indices);
+
+		Rendering::RenderHardwareInterface::Mesh* NewMesh(
+			Rendering::RenderHardwareInterface::Context* const Context,
+			const void* const VertexData,
+			const size_t VertexDataSizeBytes,
+			const VertexInputAttributeLayout& AttributeLayout,
+			const uint32_t* const IndexData,
+			const size_t IndexCount
+		);
 		bool DeleteMesh(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Mesh* const Mesh);
-		// TODO: Separate shader compilation into its own step to support d3d12/vulkan precompiled shader workflow.
-		Rendering::RenderHardwareInterface::Pipeline* NewPipeline(Rendering::RenderHardwareInterface::Context* const Context,
+
+		Rendering::RenderHardwareInterface::Pipeline* NewPipeline(
+			Rendering::RenderHardwareInterface::Context* const Context,
 			const std::string& VertexShaderSource,
-			const std::string& PixelShaderSource);
+			const std::string& PixelShaderSource
+		);
 		bool DeletePipeline(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Pipeline* const Pipeline);
 
 		// Frame management

@@ -129,12 +129,12 @@ bool TitleApplication::InitializeRendering()
 	MeshPipeline = Rendering::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, MeshPipelineVertexShaderSource, MeshPipelinePixelShaderSource);
 
 	// Initialize rendering scene
-	std::vector<Rendering::RenderHardwareInterface::MeshVertex> Vertices =
+	std::vector<float> Vertices =
 	{
-		Rendering::RenderHardwareInterface::MeshVertex({ 0.5f,  0.5f, 0.0f}),  // top right
-		Rendering::RenderHardwareInterface::MeshVertex({ 0.5f, -0.5f, 0.0f}),  // bottom right
-		Rendering::RenderHardwareInterface::MeshVertex({-0.5f, -0.5f, 0.0f}),  // bottom left
-		Rendering::RenderHardwareInterface::MeshVertex({-0.5f,  0.5f, 0.0f})   // top left 
+		0.5f,  0.5f, 0.0f,  // top right
+		0.5f, -0.5f, 0.0f,  // bottom right
+		-0.5f, -0.5f, 0.0f,  // bottom left
+		-0.5f,  0.5f, 0.0f   // top left 
 	};
 
 	std::vector<uint32_t> Indices =
@@ -143,7 +143,20 @@ bool TitleApplication::InitializeRendering()
 		1, 2, 3    // second triangle
 	};
 
-	Mesh = Rendering::RenderHardwareInterface::NewMesh(MainAppWindowRenderContext, Vertices, Indices);
+	Rendering::RenderHardwareInterface::VertexInputAttributeLayout AttributeLayout = {};
+	AttributeLayout.Attributes =
+	{
+		Rendering::RenderHardwareInterface::VertexInputAttribute{0, 3, Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType::Float3, sizeof(float) * 3, 0}
+	};
+
+	Mesh = Rendering::RenderHardwareInterface::NewMesh(
+		MainAppWindowRenderContext,
+		Vertices.data(),
+		Vertices.size() * sizeof(float),
+		AttributeLayout,
+		Indices.data(),
+		Indices.size()
+	);
 
 	return true;
 }

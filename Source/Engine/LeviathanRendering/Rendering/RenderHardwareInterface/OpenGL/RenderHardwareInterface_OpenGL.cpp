@@ -96,6 +96,17 @@ namespace
 
 			return true;
 		}
+
+		GLenum GetVertexInputAttributeDataTypeGLType(const Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType DataType)
+		{
+			switch (DataType)
+			{
+			case Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType::Float3: return GL_FLOAT;
+
+			case Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType::MAX:
+			default: return GL_NONE;
+			}
+		}
 	}
 }
 
@@ -216,8 +227,11 @@ bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardware
 
 Rendering::RenderHardwareInterface::Mesh* Rendering::RenderHardwareInterface::NewMesh(
 	Rendering::RenderHardwareInterface::Context* const Context,
-	const std::vector<MeshVertex>& Vertices,
-	const std::vector<uint32_t>& Indices
+	const void* const VertexData,
+	const size_t VertexDataSizeBytes,
+	const VertexInputAttributeLayout& AttributeLayout,
+	const uint32_t* const IndexData,
+	const size_t IndexCount
 )
 {
 	// Set context
@@ -229,24 +243,36 @@ Rendering::RenderHardwareInterface::Mesh* Rendering::RenderHardwareInterface::Ne
 	// Create mesh on heap
 	GL_RHI::GL_Mesh* const GLMesh = new GL_RHI::GL_Mesh();
 
+	// Vertex array
 	glGenVertexArrays(1, &GLMesh->VertexArray);
 	glBindVertexArray(GLMesh->VertexArray);
 
 	// Vertex buffer
 	glGenBuffers(1, &GLMesh->VertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, GLMesh->VertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(Rendering::RenderHardwareInterface::MeshVertex), Vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, VertexDataSizeBytes, VertexData, GL_STATIC_DRAW);
 
 	// Element buffer
 	glGenBuffers(1, &GLMesh->ElementBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLMesh->ElementBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(uint32_t), Indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, IndexCount * sizeof(uint32_t), IndexData, GL_STATIC_DRAW);
 
-	// Vertex input layout
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<const void*>(0));
-	glEnableVertexAttribArray(0);
+	// Vertex attribute layout
+	const size_t AttributeCount = AttributeLayout.Attributes.size();
+	for(uint32_t AttributeIndex = 0; AttributeIndex < AttributeCount; ++AttributeIndex)
+	{
+		glEnableVertexAttribArray(AttributeIndex);
+		glVertexAttribPointer(
+			AttributeLayout.Attributes[AttributeIndex].Index,
+			AttributeLayout.Attributes[AttributeIndex].ValueCount,
+			GL_RHI::GetVertexInputAttributeDataTypeGLType(AttributeLayout.Attributes[AttributeIndex].ValueType),
+			GL_FALSE,
+			AttributeLayout.Attributes[AttributeIndex].ByteStrideToNextAttribute,
+			reinterpret_cast<const void*>(AttributeLayout.Attributes[AttributeIndex].ByteOffsetFromVertexStart)
+		);
+	}
 
-	GLMesh->ElementCount = Indices.size();
+	GLMesh->ElementCount = IndexCount;
 
 	return reinterpret_cast<Rendering::RenderHardwareInterface::Mesh*>(GLMesh);
 }
