@@ -8,9 +8,9 @@ namespace Core
 	struct WindowResizedDelegateParameters;
 }
 
-namespace Rendering
+namespace RenderingAbstraction
 {
-	class RenderingModule;
+	class RenderingAbstractionModule;
 
 	namespace RenderHardwareInterface
 	{
@@ -28,14 +28,14 @@ class TitleApplication : public Core::Application
 private:
 	std::unique_ptr<TitleApplicationWindow> MainAppWindow = nullptr;
 
-	Rendering::RenderingModule* RenderingModuleInstance = nullptr;
+	RenderingAbstraction::RenderingAbstractionModule* RenderingModuleInstance = nullptr;
 
-	Rendering::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
-	Rendering::RenderHardwareInterface::Buffer* VertexBuffer = nullptr;
-	Rendering::RenderHardwareInterface::Buffer* IndexBuffer = nullptr;
-	Rendering::RenderHardwareInterface::Shader* PipelineVertexShader = nullptr;
-	Rendering::RenderHardwareInterface::Shader* PipelinePixelShader = nullptr;
-	Rendering::RenderHardwareInterface::Pipeline* Pipeline = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Buffer* VertexBuffer = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Buffer* IndexBuffer = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Shader* PipelineVertexShader = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Shader* PipelinePixelShader = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Pipeline* Pipeline = nullptr;
 	size_t IndexCount = 0;
 
 public:

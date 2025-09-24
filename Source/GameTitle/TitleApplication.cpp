@@ -3,8 +3,8 @@
 #include "Core/NotificationManager.h"
 #include "Core/FileIOManager.h"
 #include "TitleApplicationWindow.h"
-#include "Rendering/RenderingModule.h"
-#include "Rendering/RenderHardwareInterface/RenderHardwareInterface.h"
+#include "RenderingAbstraction/RenderingAbstractionModule.h"
+#include "RenderingAbstraction/RenderHardwareInterface/RenderHardwareInterface.h"
 
 IMPLEMENT(TitleApplication)
 
@@ -99,7 +99,7 @@ bool TitleApplication::InitializeMainAppWindow()
 bool TitleApplication::InitializeRendering()
 {
 	// Create rendering module
-	RenderingModuleInstance = GetEngine().CreateModule<Rendering::RenderingModule>();
+	RenderingModuleInstance = GetEngine().CreateModule<RenderingAbstraction::RenderingAbstractionModule>();
 
 	if (!RenderingModuleInstance || !MainAppWindow)
 	{
@@ -107,13 +107,13 @@ bool TitleApplication::InitializeRendering()
 	}
 
 	// Initialize render hardware interface
-	if (!Rendering::RenderHardwareInterface::Initialize(MainAppWindow->GetPlatformHandle()))
+	if (!RenderingAbstraction::RenderHardwareInterface::Initialize(MainAppWindow->GetPlatformHandle()))
 	{
 		return false;
 	}
 
 	// Create render context for main app window
-	MainAppWindowRenderContext = Rendering::RenderHardwareInterface::NewContext(MainAppWindow->GetPlatformHandle());
+	MainAppWindowRenderContext = RenderingAbstraction::RenderHardwareInterface::NewContext(MainAppWindow->GetPlatformHandle());
 	if (!MainAppWindowRenderContext)
 	{
 		return false;
@@ -121,21 +121,21 @@ bool TitleApplication::InitializeRendering()
 
 	// Create app rendering pipelines
 	// TODO: Add preprocessor definition defining which rendering api is being compiled
-	PipelineVertexShader = Rendering::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
-		Rendering::RenderHardwareInterface::ShaderStage::Vertex,
+	PipelineVertexShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
+		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Vertex,
 		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/VertexShader.glsl")));
 
-	PipelinePixelShader = Rendering::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
-		Rendering::RenderHardwareInterface::ShaderStage::Pixel,
+	PipelinePixelShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
+		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Pixel,
 		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/PixelShader.glsl")));
 
-	Rendering::RenderHardwareInterface::InputVertexAttributeLayout PipelineInputVertexAttributeLayout = {};
+	RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout PipelineInputVertexAttributeLayout = {};
 	PipelineInputVertexAttributeLayout.AttributeDescriptions =
 	{
-		Rendering::RenderHardwareInterface::InputVertexAttributeDesc{0, 3, Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType::Float, sizeof(float) * 3, 0}
+		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc{0, 3, RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float, sizeof(float) * 3, 0}
 	};
 
-	Pipeline = Rendering::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, 
+	Pipeline = RenderingAbstraction::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, 
 		PipelineVertexShader,
 		PipelinePixelShader,
 		PipelineInputVertexAttributeLayout);
@@ -157,13 +157,13 @@ bool TitleApplication::InitializeRendering()
 
 	IndexCount = Indices.size();
 
-	VertexBuffer = Rendering::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext, 
-		Rendering::RenderHardwareInterface::BufferType::Vertex,
+	VertexBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext, 
+		RenderingAbstraction::RenderHardwareInterface::BufferType::Vertex,
 		Vertices.data(), 
 		Vertices.size() * sizeof(float));
 
-	IndexBuffer = Rendering::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext, 
-		Rendering::RenderHardwareInterface::BufferType::Index,
+	IndexBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext, 
+		RenderingAbstraction::RenderHardwareInterface::BufferType::Index,
 		Indices.data(), 
 		Indices.size() * sizeof(uint32_t));
 
@@ -173,45 +173,45 @@ bool TitleApplication::InitializeRendering()
 bool TitleApplication::ShutdownRendering()
 {
 	// Delete rendering resources
-	if (!Rendering::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, VertexBuffer))
+	if (!RenderingAbstraction::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, VertexBuffer))
 	{
 		return false;
 	}
 	VertexBuffer = nullptr;
 
-	if (!Rendering::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, IndexBuffer))
+	if (!RenderingAbstraction::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, IndexBuffer))
 	{
 		return false;
 	}
 	IndexBuffer = nullptr;
 
-	if (!Rendering::RenderHardwareInterface::DeleteShader(MainAppWindowRenderContext, PipelineVertexShader))
+	if (!RenderingAbstraction::RenderHardwareInterface::DeleteShader(MainAppWindowRenderContext, PipelineVertexShader))
 	{
 		return false;
 	}
 	PipelineVertexShader = nullptr;
 
-	if (!Rendering::RenderHardwareInterface::DeleteShader(MainAppWindowRenderContext, PipelinePixelShader))
+	if (!RenderingAbstraction::RenderHardwareInterface::DeleteShader(MainAppWindowRenderContext, PipelinePixelShader))
 	{
 		return false;
 	}
 	PipelinePixelShader = nullptr;
 
-	if (!Rendering::RenderHardwareInterface::DeletePipeline(MainAppWindowRenderContext, Pipeline))
+	if (!RenderingAbstraction::RenderHardwareInterface::DeletePipeline(MainAppWindowRenderContext, Pipeline))
 	{
 		return false;
 	}
 	Pipeline = nullptr;
 
 	// Delete main app window rendering context
-	if (!Rendering::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext))
+	if (!RenderingAbstraction::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext))
 	{
 		return false;
 	}
 	MainAppWindowRenderContext = nullptr;
 
 	// Shutdown rhi
-	if (!Rendering::RenderHardwareInterface::Shutdown())
+	if (!RenderingAbstraction::RenderHardwareInterface::Shutdown())
 	{
 		return false;
 	}
@@ -221,18 +221,18 @@ bool TitleApplication::ShutdownRendering()
 
 void TitleApplication::RenderApp()
 {
-	Rendering::RenderHardwareInterface::BeginFrame(MainAppWindowRenderContext);
+	RenderingAbstraction::RenderHardwareInterface::BeginFrame(MainAppWindowRenderContext);
 	{
 		const Core::Rectangle WindowClientRect = MainAppWindow->GetClientRegion();
-		Rendering::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
+		RenderingAbstraction::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
 
-		Rendering::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
+		RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
 
-		Rendering::RenderHardwareInterface::SetPipeline(Pipeline);
+		RenderingAbstraction::RenderHardwareInterface::SetPipeline(Pipeline);
 
-		Rendering::RenderHardwareInterface::DrawIndexed(VertexBuffer, IndexBuffer, IndexCount);
+		RenderingAbstraction::RenderHardwareInterface::DrawIndexed(VertexBuffer, IndexBuffer, IndexCount);
 	}
-	Rendering::RenderHardwareInterface::EndFrame(MainAppWindowRenderContext);
+	RenderingAbstraction::RenderHardwareInterface::EndFrame(MainAppWindowRenderContext);
 
-	Rendering::RenderHardwareInterface::Present(MainAppWindowRenderContext);
+	RenderingAbstraction::RenderHardwareInterface::Present(MainAppWindowRenderContext);
 }

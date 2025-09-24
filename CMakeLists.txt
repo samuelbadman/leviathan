@@ -94,51 +94,51 @@ target_include_directories("LeviathanCore" PRIVATE
 # End core module static library module target setup
 
 #------------------------------------------------------------------------------------------------
-# Rendering module
+# Rendering abstraction module
 #------------------------------------------------------------------------------------------------
 
-# Begin rendering module static library module target setup
-# Add rendering static library module target with source files to be compiled for all platforms
-add_library("LeviathanRendering" STATIC 
-"Source/Engine/LeviathanRendering/Rendering/RenderingModule.h"
-"Source/Engine/LeviathanRendering/Rendering/RenderingModule.cpp"
-"Source/Engine/LeviathanRendering/Rendering/RenderHardwareInterface/RenderHardwareInterface.h"
+# Begin rendering abstraction module static library module target setup
+# Add rendering abstraction static library module target with source files to be compiled for all platforms
+add_library("LeviathanRenderingAbstraction" STATIC 
+"Source/Engine/LeviathanRenderingAbstraction/RenderingAbstraction/RenderingAbstractionModule.h"
+"Source/Engine/LeviathanRenderingAbstraction/RenderingAbstraction/RenderingAbstractionModule.cpp"
+"Source/Engine/LeviathanRenderingAbstraction/RenderingAbstraction/RenderHardwareInterface/RenderHardwareInterface.h"
 )
 
 # Add source files for rendering api being compiled
 # TODO: Add switch to specify which rendering API to compile the engine with
-target_sources("LeviathanRendering" PRIVATE 
-"Source/Engine/LeviathanRendering/Vendor/glad/glad.cpp"
-"Source/Engine/LeviathanRendering/Rendering/RenderHardwareInterface/OpenGL/RenderHardwareInterface_OpenGL.cpp"
+target_sources("LeviathanRenderingAbstraction" PRIVATE 
+"Source/Engine/LeviathanRenderingAbstraction/Vendor/glad/glad.cpp"
+"Source/Engine/LeviathanRenderingAbstraction/RenderingAbstraction/RenderHardwareInterface/OpenGL/RenderHardwareInterface_OpenGL.cpp"
 )
 
 # Add source files to be compiled and libraries to link against only for specific platform builds
 if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
-#target_sources("LeviathanRendering" PRIVATE
+#target_sources("LeviathanRenderingAbstraction" PRIVATE
 #""
 #)
 
-target_link_libraries("LeviathanRendering" 
+target_link_libraries("LeviathanRenderingAbstraction" 
 # TODO: Add switch for which rendering api libraries to link against
 "Opengl32.lib"
 )
 endif()
 
-# Add target headers to precompile for rendering static library module
+# Add target headers to precompile for rendering abstraction static library module
 # Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
-target_precompile_headers("LeviathanRendering" PUBLIC 
-"Source/Engine/LeviathanRendering/Rendering/RenderingPrecompiledHeader.h"
+target_precompile_headers("LeviathanRenderingAbstraction" PUBLIC 
+"Source/Engine/LeviathanRenderingAbstraction/RenderingAbstraction/RenderingAbstractionPrecompiledHeader.h"
 "Source/Engine/LeviathanCore/Core/CorePrecompiledHeader.h"
 )
 
 # Add static library module include directories
-target_include_directories("LeviathanRendering" PRIVATE 
+target_include_directories("LeviathanRenderingAbstraction" PRIVATE 
 "Source/Engine/LeviathanCore/"
-"Source/Engine/LeviathanRendering/"
+"Source/Engine/LeviathanRenderingAbstraction/"
 # TODO: Add switch to specify which rendering API to compile the engine with
-"Source/Engine/LeviathanRendering/Vendor/glad/"
+"Source/Engine/LeviathanRenderingAbstraction/Vendor/glad/"
 )
-# End rendering module static library module target setup
+# End rendering abstraction module static library module target setup
 
 #################################################################################################
 # Titles
@@ -160,13 +160,13 @@ add_executable("GameTitle" "${BUILD_EXECUTABLE_TARGET}"
 # Link engine static library modules used by game title executable
 target_link_libraries("GameTitle" 
 "LeviathanCore"
-"LeviathanRendering"
+"LeviathanRenderingAbstraction"
 )
 
 # Add engine static library module source directories as include directories for game title executable
 target_include_directories("GameTitle" PRIVATE 
 "Source/Engine/LeviathanCore/"
-"Source/Engine/LeviathanRendering/"
+"Source/Engine/LeviathanRenderingAbstraction/"
 )
 
 # Add game title post build commands

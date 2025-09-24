@@ -1,4 +1,4 @@
-#include "Rendering/RenderHardwareInterface/RenderHardwareInterface.h"
+#include "RenderingAbstraction/RenderHardwareInterface/RenderHardwareInterface.h"
 #include "glad/glad.h"
 #include "Core/ConsoleOutput.h"
 
@@ -39,7 +39,7 @@ namespace
 		};
 
 		// Single vertex array object bound throughout gl rhi initialized duration
-		GLuint VAO = 0;
+		GLuint VertexArrayObject = 0;
 
 		bool LoadGLFunctions()
 		{
@@ -51,7 +51,7 @@ namespace
 			CONSOLE_PRINTF("OpenGL version and driver version: %s\n", glGetString(GL_VERSION));
 		}
 
-		bool MakeContextCurrent(Rendering::RenderHardwareInterface::Context* const Context)
+		bool MakeContextCurrent(RenderingAbstraction::RenderHardwareInterface::Context* const Context)
 		{
 #ifdef PLATFORM_WINDOWS
 			if (!Context)
@@ -72,7 +72,7 @@ namespace
 #endif // PLATFORM_WINDOWS
 		}
 
-		bool MakeContextNotCurrent(Rendering::RenderHardwareInterface::Context* const Context)
+		bool MakeContextNotCurrent(RenderingAbstraction::RenderHardwareInterface::Context* const Context)
 		{
 #ifdef PLATFORM_WINDOWS
 			if (!Context)
@@ -113,41 +113,41 @@ namespace
 			return true;
 		}
 
-		GLenum GetInputVertexAttributeDataTypeGLType(const Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType DataType)
+		GLenum GetInputVertexAttributeDataTypeGLType(const RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType DataType)
 		{
 			switch (DataType)
 			{
-			case Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType::Float: return GL_FLOAT;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float: return GL_FLOAT;
 			default: return GL_NONE;
 			}
 		}
 
-		GLenum GetBufferTypeGLType(const Rendering::RenderHardwareInterface::BufferType Type)
+		GLenum GetBufferTypeGLType(const RenderingAbstraction::RenderHardwareInterface::BufferType Type)
 		{
 			switch (Type)
 			{
-			case Rendering::RenderHardwareInterface::BufferType::Vertex: return GL_ARRAY_BUFFER;
-			case Rendering::RenderHardwareInterface::BufferType::Index: return GL_ELEMENT_ARRAY_BUFFER;
+			case RenderingAbstraction::RenderHardwareInterface::BufferType::Vertex: return GL_ARRAY_BUFFER;
+			case RenderingAbstraction::RenderHardwareInterface::BufferType::Index: return GL_ELEMENT_ARRAY_BUFFER;
 			default: return GL_NONE;
 			}
 		}
 
-		GLenum GetShaderStageGLType(const Rendering::RenderHardwareInterface::ShaderStage Stage)
+		GLenum GetShaderStageGLType(const RenderingAbstraction::RenderHardwareInterface::ShaderStage Stage)
 		{
 			switch (Stage)
 			{
-			case Rendering::RenderHardwareInterface::ShaderStage::Vertex: return GL_VERTEX_SHADER;
-			case Rendering::RenderHardwareInterface::ShaderStage::Pixel: return GL_FRAGMENT_SHADER;
+			case RenderingAbstraction::RenderHardwareInterface::ShaderStage::Vertex: return GL_VERTEX_SHADER;
+			case RenderingAbstraction::RenderHardwareInterface::ShaderStage::Pixel: return GL_FRAGMENT_SHADER;
 			default: return GL_NONE;
 			}
 		}
 	}
 }
 
-bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatformHandle)
+bool RenderingAbstraction::RenderHardwareInterface::Initialize(void* const InitWindowPlatformHandle)
 {
 	// Create init context and make it current. A current gl context is needed to load api functions from os/driver
-	if (Rendering::RenderHardwareInterface::Context* InitContext = Rendering::RenderHardwareInterface::NewContext(InitWindowPlatformHandle))
+	if (RenderingAbstraction::RenderHardwareInterface::Context* InitContext = RenderingAbstraction::RenderHardwareInterface::NewContext(InitWindowPlatformHandle))
 	{
 		if (GL_RHI::MakeContextCurrent(InitContext))
 		{
@@ -160,8 +160,8 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 			GL_RHI::PrintGLVersion();
 
 			// Create vertex array object
-			glGenVertexArrays(1, &GL_RHI::VAO);
-			glBindVertexArray(GL_RHI::VAO);
+			glGenVertexArrays(1, &GL_RHI::VertexArrayObject);
+			glBindVertexArray(GL_RHI::VertexArrayObject);
 
 			// Clear current context, currently set as the init context
 			if (!GL_RHI::MakeContextNotCurrent(InitContext))
@@ -170,7 +170,7 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 			}
 
 			// Delete init context
-			if (!Rendering::RenderHardwareInterface::DeleteContext(InitContext))
+			if (!RenderingAbstraction::RenderHardwareInterface::DeleteContext(InitContext))
 			{
 				return false;
 			}
@@ -182,16 +182,16 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 	return false;
 }
 
-bool Rendering::RenderHardwareInterface::Shutdown()
+bool RenderingAbstraction::RenderHardwareInterface::Shutdown()
 {
 	// Destroy vertex array object
 	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &GL_RHI::VAO);
+	glDeleteVertexArrays(1, &GL_RHI::VertexArrayObject);
 
 	return true;
 }
 
-Rendering::RenderHardwareInterface::Context* Rendering::RenderHardwareInterface::NewContext(void* const WindowPlatformHandle)
+RenderingAbstraction::RenderHardwareInterface::Context* RenderingAbstraction::RenderHardwareInterface::NewContext(void* const WindowPlatformHandle)
 {
 #ifdef PLATFORM_WINDOWS
 	// Get the window device context
@@ -232,13 +232,13 @@ Rendering::RenderHardwareInterface::Context* Rendering::RenderHardwareInterface:
 	GLContext->Context = static_cast<void*>(wglCreateContext(WindowHandleToDeviceContext));
 	GLContext->PlatformWindowHandle = WindowPlatformHandle;
 
-	return reinterpret_cast<Rendering::RenderHardwareInterface::Context*>(GLContext);
+	return reinterpret_cast<RenderingAbstraction::RenderHardwareInterface::Context*>(GLContext);
 #else
 	return nullptr;
 #endif // PLATFORM_WINDOWS
 }
 
-bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardwareInterface::Context* const Context)
+bool RenderingAbstraction::RenderHardwareInterface::DeleteContext(RenderingAbstraction::RenderHardwareInterface::Context* const Context)
 {
 #ifdef PLATFORM_WINDOWS
 
@@ -267,9 +267,9 @@ bool Rendering::RenderHardwareInterface::DeleteContext(Rendering::RenderHardware
 #endif // PLATFORM_WINDOWS
 }
 
-Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::NewBuffer(
-	Rendering::RenderHardwareInterface::Context* const Context,
-	const Rendering::RenderHardwareInterface::BufferType Type,
+RenderingAbstraction::RenderHardwareInterface::Buffer* RenderingAbstraction::RenderHardwareInterface::NewBuffer(
+	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+	const RenderingAbstraction::RenderHardwareInterface::BufferType Type,
 	const void* const BufferDataStart,
 	const size_t BufferDataSizeBytes
 )
@@ -282,12 +282,12 @@ Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::
 	glBindBuffer(GLType, GLBuffer->Buffer);
 	glBufferData(GLType, BufferDataSizeBytes, BufferDataStart, GL_STATIC_DRAW);
 
-	return reinterpret_cast<Rendering::RenderHardwareInterface::Buffer*>(GLBuffer);
+	return reinterpret_cast<RenderingAbstraction::RenderHardwareInterface::Buffer*>(GLBuffer);
 }
 
-bool Rendering::RenderHardwareInterface::DeleteBuffer(
-	Rendering::RenderHardwareInterface::Context* const Context, 
-	Rendering::RenderHardwareInterface::Buffer* const Buffer
+bool RenderingAbstraction::RenderHardwareInterface::DeleteBuffer(
+	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+	RenderingAbstraction::RenderHardwareInterface::Buffer* const Buffer
 )
 {
 	GL_RHI::GL_Buffer* const GLBuffer = reinterpret_cast<GL_RHI::GL_Buffer* const>(Buffer);
@@ -299,9 +299,9 @@ bool Rendering::RenderHardwareInterface::DeleteBuffer(
 	return true;
 }
 
-Rendering::RenderHardwareInterface::Shader* Rendering::RenderHardwareInterface::NewShader(
-	Rendering::RenderHardwareInterface::Context* const Context, 
-	const Rendering::RenderHardwareInterface::ShaderStage Stage,
+RenderingAbstraction::RenderHardwareInterface::Shader* RenderingAbstraction::RenderHardwareInterface::NewShader(
+	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+	const RenderingAbstraction::RenderHardwareInterface::ShaderStage Stage,
 	const std::string& Source
 )
 {
@@ -320,10 +320,13 @@ Rendering::RenderHardwareInterface::Shader* Rendering::RenderHardwareInterface::
 		return nullptr;
 	}
 
-	return reinterpret_cast<Rendering::RenderHardwareInterface::Shader*>(GLShader);
+	return reinterpret_cast<RenderingAbstraction::RenderHardwareInterface::Shader*>(GLShader);
 }
 
-bool Rendering::RenderHardwareInterface::DeleteShader(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Shader* const Shader)
+bool RenderingAbstraction::RenderHardwareInterface::DeleteShader(
+	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+	RenderingAbstraction::RenderHardwareInterface::Shader* const Shader
+)
 {
 	// Set context
 	if (!GL_RHI::MakeContextCurrent(Context))
@@ -340,11 +343,11 @@ bool Rendering::RenderHardwareInterface::DeleteShader(Rendering::RenderHardwareI
 	return true;
 }
 
-Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface::NewPipeline(
-	Rendering::RenderHardwareInterface::Context* const Context,
-	Rendering::RenderHardwareInterface::Shader* const VertexShader,
-	Rendering::RenderHardwareInterface::Shader* const PixelShader,
-	const Rendering::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout
+RenderingAbstraction::RenderHardwareInterface::Pipeline* RenderingAbstraction::RenderHardwareInterface::NewPipeline(
+	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+	RenderingAbstraction::RenderHardwareInterface::Shader* const VertexShader,
+	RenderingAbstraction::RenderHardwareInterface::Shader* const PixelShader,
+	const RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout
 )
 {
 	// Set context
@@ -389,12 +392,12 @@ Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface
 		);
 	}
 
-	return reinterpret_cast<Rendering::RenderHardwareInterface::Pipeline*>(GLPipeline);
+	return reinterpret_cast<RenderingAbstraction::RenderHardwareInterface::Pipeline*>(GLPipeline);
 }
 
-bool Rendering::RenderHardwareInterface::DeletePipeline(
-	Rendering::RenderHardwareInterface::Context* const Context, 
-	Rendering::RenderHardwareInterface::Pipeline* const Pipeline
+bool RenderingAbstraction::RenderHardwareInterface::DeletePipeline(
+	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+	RenderingAbstraction::RenderHardwareInterface::Pipeline* const Pipeline
 )
 {
 	// Set context
@@ -414,7 +417,7 @@ bool Rendering::RenderHardwareInterface::DeletePipeline(
 	return true;
 }
 
-bool Rendering::RenderHardwareInterface::Present(Rendering::RenderHardwareInterface::Context* const Context)
+bool RenderingAbstraction::RenderHardwareInterface::Present(RenderingAbstraction::RenderHardwareInterface::Context* const Context)
 {
 #ifdef PLATFORM_WINDOWS
 	return SwapBuffers(GetDC(static_cast<HWND>(reinterpret_cast<GL_RHI::GL_Context* const>(Context)->PlatformWindowHandle))) == TRUE;
@@ -423,7 +426,7 @@ bool Rendering::RenderHardwareInterface::Present(Rendering::RenderHardwareInterf
 #endif // PLATFORM_WINDOWS
 }
 
-bool Rendering::RenderHardwareInterface::BeginFrame(Rendering::RenderHardwareInterface::Context* const Context)
+bool RenderingAbstraction::RenderHardwareInterface::BeginFrame(RenderingAbstraction::RenderHardwareInterface::Context* const Context)
 {
 	if (!GL_RHI::MakeContextCurrent(Context))
 	{
@@ -433,23 +436,23 @@ bool Rendering::RenderHardwareInterface::BeginFrame(Rendering::RenderHardwareInt
 	return true;
 }
 
-bool Rendering::RenderHardwareInterface::EndFrame(Rendering::RenderHardwareInterface::Context* const Context)
+bool RenderingAbstraction::RenderHardwareInterface::EndFrame(RenderingAbstraction::RenderHardwareInterface::Context* const Context)
 {
 	return true;
 }
 
-void Rendering::RenderHardwareInterface::SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height)
+void RenderingAbstraction::RenderHardwareInterface::SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height)
 {
 	glViewport(X, Y, Width, Height);
 }
 
-void Rendering::RenderHardwareInterface::ClearColorBuffer(const float R, const float G, const float B, const float A)
+void RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(const float R, const float G, const float B, const float A)
 {
 	glClearColor(R, G, B, A);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Rendering::RenderHardwareInterface::SetPipeline(Rendering::RenderHardwareInterface::Pipeline* const Pipeline)
+void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstraction::RenderHardwareInterface::Pipeline* const Pipeline)
 {
 	GL_RHI::GL_Pipeline* const GLPipeline = reinterpret_cast<GL_RHI::GL_Pipeline* const>(Pipeline);
 
@@ -472,9 +475,9 @@ void Rendering::RenderHardwareInterface::SetPipeline(Rendering::RenderHardwareIn
 	}
 }
 
-void Rendering::RenderHardwareInterface::DrawIndexed(
-	Rendering::RenderHardwareInterface::Buffer* const VertexBuffer,
-	Rendering::RenderHardwareInterface::Buffer* const IndexBuffer,
+void RenderingAbstraction::RenderHardwareInterface::DrawIndexed(
+	RenderingAbstraction::RenderHardwareInterface::Buffer* const VertexBuffer,
+	RenderingAbstraction::RenderHardwareInterface::Buffer* const IndexBuffer,
 	const size_t IndexCount
 )
 {
