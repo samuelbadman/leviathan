@@ -30,9 +30,10 @@ private:
 	Rendering::RenderingModule* RenderingModuleInstance = nullptr;
 
 	Rendering::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
-	Rendering::RenderHardwareInterface::Pipeline* MeshPipeline = nullptr;
+	Rendering::RenderHardwareInterface::Pipeline* Pipeline = nullptr;
 	Rendering::RenderHardwareInterface::Buffer* VertexBuffer = nullptr;
 	Rendering::RenderHardwareInterface::Buffer* IndexBuffer = nullptr;
+	size_t IndexCount = 0;
 
 public:
 	TitleApplication(Core::Engine& EngineInstanceRunningApplication);

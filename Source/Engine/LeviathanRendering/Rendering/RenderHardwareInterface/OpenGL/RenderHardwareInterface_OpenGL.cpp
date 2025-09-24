@@ -20,12 +20,22 @@ namespace
 		struct GL_ElementBuffer
 		{
 			GLuint EBO = 0;
-			GLuint ElementCount = 0;
 		};
 
 		struct GL_Pipeline
 		{
+			struct InputVertexAttributeDesc
+			{
+				GLuint Index = 0;
+				GLint Size = 0;
+				GLenum Type = GL_NONE;
+				GLboolean Normalized = GL_FALSE;
+				GLsizei Stride = 0;
+				const void* Offset = 0;
+			};
+
 			uint32_t ShaderProgram = 0;
+			std::vector<GL_Pipeline::InputVertexAttributeDesc> InputVertexAttributeLayout = {};
 		};
 
 		// Single vertex array object bound throughout gl rhi initialized duration
@@ -103,13 +113,13 @@ namespace
 			return true;
 		}
 
-		GLenum GetVertexInputAttributeDataTypeGLType(const Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType DataType)
+		GLenum GetInputVertexAttributeDataTypeGLType(const Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType DataType)
 		{
 			switch (DataType)
 			{
-			case Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType::Float3: return GL_FLOAT;
+			case Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType::Float: return GL_FLOAT;
 
-			case Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType::MAX:
+			case Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType::MAX:
 			default: return GL_NONE;
 			}
 		}
@@ -262,7 +272,10 @@ Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::
 	return reinterpret_cast<Rendering::RenderHardwareInterface::Buffer*>(GLVertexBuffer);
 }
 
-bool Rendering::RenderHardwareInterface::DeleteVertexBuffer(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Buffer* const Buffer)
+bool Rendering::RenderHardwareInterface::DeleteVertexBuffer(
+	Rendering::RenderHardwareInterface::Context* const Context,
+	Rendering::RenderHardwareInterface::Buffer* const Buffer
+)
 {
 	// Set context
 	if (!GL_RHI::MakeContextCurrent(Context))
@@ -281,7 +294,8 @@ bool Rendering::RenderHardwareInterface::DeleteVertexBuffer(Rendering::RenderHar
 
 Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::NewIndexBuffer(
 	Rendering::RenderHardwareInterface::Context* const Context,
-	const uint32_t* const IndexData, const size_t IndexCount
+	const uint32_t* const IndexData, 
+	const size_t IndexCount
 )
 {
 	// Set context
@@ -295,12 +309,14 @@ Rendering::RenderHardwareInterface::Buffer* Rendering::RenderHardwareInterface::
 	glGenBuffers(1, &GLElementBuffer->EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLElementBuffer->EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, IndexCount * sizeof(uint32_t), IndexData, GL_STATIC_DRAW);
-	GLElementBuffer->ElementCount = IndexCount;
 
 	return reinterpret_cast<Rendering::RenderHardwareInterface::Buffer*>(GLElementBuffer);
 }
 
-bool Rendering::RenderHardwareInterface::DeleteIndexBuffer(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Buffer* const Buffer)
+bool Rendering::RenderHardwareInterface::DeleteIndexBuffer(
+	Rendering::RenderHardwareInterface::Context* const Context, 
+	Rendering::RenderHardwareInterface::Buffer* const Buffer
+)
 {
 	// Set context
 	if (!GL_RHI::MakeContextCurrent(Context))
@@ -320,6 +336,7 @@ bool Rendering::RenderHardwareInterface::DeleteIndexBuffer(Rendering::RenderHard
 Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface::NewPipeline(
 	Rendering::RenderHardwareInterface::Context* const Context,
 	const std::string& VertexShaderSource,
+	const Rendering::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout,
 	const std::string& PixelShaderSource
 )
 {
@@ -347,6 +364,7 @@ Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface
 
 	GL_RHI::GL_Pipeline* GLPipeline = new GL_RHI::GL_Pipeline();
 
+	// Link shader program
 	GLPipeline->ShaderProgram = glCreateProgram();
 	glAttachShader(GLPipeline->ShaderProgram, VertexShader);
 	glAttachShader(GLPipeline->ShaderProgram, FragmentShader);
@@ -362,6 +380,24 @@ Rendering::RenderHardwareInterface::Pipeline* Rendering::RenderHardwareInterface
 		CONSOLE_PRINTF("Shader source compilation error: %s\n", ErrorMessageBuffer.data());
 		delete GLPipeline;
 		return nullptr;
+	}
+
+	// Translate input vertex attribute layout to gl input vertex attribute layout. Used when setting pipeline to use for drawing
+	const size_t AttributeCount = InputVertexAttributeLayout.AttributeDescriptions.size();
+	GLPipeline->InputVertexAttributeLayout.reserve(AttributeCount);
+
+	for (uint32_t AttributeDescIndex = 0; AttributeDescIndex < AttributeCount; ++AttributeDescIndex)
+	{
+		GLPipeline->InputVertexAttributeLayout.emplace_back(GL_RHI::GL_Pipeline::InputVertexAttributeDesc
+			{
+				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].Index,
+				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueCount,
+				GL_RHI::GetInputVertexAttributeDataTypeGLType(InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueType),
+				GL_FALSE,
+				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ByteStrideToNextAttribute,
+				reinterpret_cast<const void*>(InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ByteOffsetFromVertexStart)
+			}
+		);
 	}
 
 	return reinterpret_cast<Rendering::RenderHardwareInterface::Pipeline*>(GLPipeline);
@@ -423,13 +459,31 @@ void Rendering::RenderHardwareInterface::ClearColorBuffer(const float R, const f
 
 void Rendering::RenderHardwareInterface::SetPipeline(Rendering::RenderHardwareInterface::Pipeline* const Pipeline)
 {
-	glUseProgram(reinterpret_cast<GL_RHI::GL_Pipeline* const>(Pipeline)->ShaderProgram);
+	GL_RHI::GL_Pipeline* const GLPipeline = reinterpret_cast<GL_RHI::GL_Pipeline* const>(Pipeline);
+
+	// Bind shader program
+	glUseProgram(GLPipeline->ShaderProgram);
+
+	// Bind input vertex attributes
+	const size_t AttributeCount = GLPipeline->InputVertexAttributeLayout.size();
+	for (size_t i = 0; i < AttributeCount; ++i)
+	{
+		glEnableVertexAttribArray(i);
+		glVertexAttribPointer(
+			GLPipeline->InputVertexAttributeLayout[i].Index,
+			GLPipeline->InputVertexAttributeLayout[i].Size,
+			GLPipeline->InputVertexAttributeLayout[i].Type,
+			GLPipeline->InputVertexAttributeLayout[i].Normalized,
+			GLPipeline->InputVertexAttributeLayout[i].Stride,
+			GLPipeline->InputVertexAttributeLayout[i].Offset
+		);
+	}
 }
 
 void Rendering::RenderHardwareInterface::DrawIndexed(
 	Rendering::RenderHardwareInterface::Buffer* const VertexBuffer,
 	Rendering::RenderHardwareInterface::Buffer* const IndexBuffer,
-	const Rendering::RenderHardwareInterface::VertexInputAttributeLayout& AttributeLayout
+	const size_t IndexCount
 )
 {
 	GL_RHI::GL_VertexBuffer* const GLVertexBuffer = reinterpret_cast<GL_RHI::GL_VertexBuffer* const>(VertexBuffer);
@@ -438,20 +492,5 @@ void Rendering::RenderHardwareInterface::DrawIndexed(
 	GL_RHI::GL_ElementBuffer* const GLElementBuffer = reinterpret_cast<GL_RHI::GL_ElementBuffer* const>(IndexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GLElementBuffer->EBO);
 
-	// TODO: Move into pipeline/tie with shaders. Vertex attribute layout
-	const size_t AttributeCount = AttributeLayout.AttributeDescriptions.size();
-	for (uint32_t AttributeIndex = 0; AttributeIndex < AttributeCount; ++AttributeIndex)
-	{
-		glEnableVertexAttribArray(AttributeIndex);
-		glVertexAttribPointer(
-			AttributeLayout.AttributeDescriptions[AttributeIndex].Index,
-			AttributeLayout.AttributeDescriptions[AttributeIndex].ValueCount,
-			GL_RHI::GetVertexInputAttributeDataTypeGLType(AttributeLayout.AttributeDescriptions[AttributeIndex].ValueType),
-			GL_FALSE,
-			AttributeLayout.AttributeDescriptions[AttributeIndex].ByteStrideToNextAttribute,
-			reinterpret_cast<const void*>(AttributeLayout.AttributeDescriptions[AttributeIndex].ByteOffsetFromVertexStart)
-		);
-	}
-
-	glDrawElements(GL_TRIANGLES, GLElementBuffer->ElementCount, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, 0);
 }

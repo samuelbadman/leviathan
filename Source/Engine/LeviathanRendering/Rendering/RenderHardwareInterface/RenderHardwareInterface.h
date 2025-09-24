@@ -8,24 +8,24 @@ namespace Rendering
 		struct Buffer;
 		struct Pipeline;
 
-		enum class VertexInputAttributeValueDataType : uint8_t
+		enum class InputVertexAttributeValueDataType : uint8_t
 		{
-			Float3 = 0,
+			Float = 0,
 			MAX
 		};
 
-		struct VertexInputAttributeDesc
+		struct InputVertexAttributeDesc
 		{
 			uint32_t Index = 0;
 			int32_t ValueCount = 0;
-			VertexInputAttributeValueDataType ValueType = VertexInputAttributeValueDataType::MAX;
-			size_t ByteStrideToNextAttribute = 0;
+			InputVertexAttributeValueDataType ValueType = InputVertexAttributeValueDataType::MAX;
+			int32_t ByteStrideToNextAttribute = 0;
 			size_t ByteOffsetFromVertexStart = 0;
 		};
 
-		struct VertexInputAttributeLayout
+		struct InputVertexAttributeLayout
 		{
-			std::vector<VertexInputAttributeDesc> AttributeDescriptions = {};
+			std::vector<InputVertexAttributeDesc> AttributeDescriptions = {};
 		};
 
 		/*
@@ -64,9 +64,13 @@ namespace Rendering
 		Rendering::RenderHardwareInterface::Pipeline* NewPipeline(
 			Rendering::RenderHardwareInterface::Context* const Context,
 			const std::string& VertexShaderSource,
+			const Rendering::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout,
 			const std::string& PixelShaderSource
 		);
-		bool DeletePipeline(Rendering::RenderHardwareInterface::Context* const Context, Rendering::RenderHardwareInterface::Pipeline* const Pipeline);
+		bool DeletePipeline(
+			Rendering::RenderHardwareInterface::Context* const Context, 
+			Rendering::RenderHardwareInterface::Pipeline* const Pipeline
+		);
 
 		// Frame management
 		bool Present(Rendering::RenderHardwareInterface::Context* const Context);
@@ -79,8 +83,8 @@ namespace Rendering
 		void SetPipeline(Rendering::RenderHardwareInterface::Pipeline* const Pipeline);
 		void DrawIndexed(
 			Rendering::RenderHardwareInterface::Buffer* const VertexBuffer,
-			Rendering::RenderHardwareInterface::Buffer* const IndexBuffer, 
-			const Rendering::RenderHardwareInterface::VertexInputAttributeLayout& AttributeLayout
+			Rendering::RenderHardwareInterface::Buffer* const IndexBuffer,
+			const size_t IndexCount
 		);
 	};
 }

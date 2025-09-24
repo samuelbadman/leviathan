@@ -120,10 +120,19 @@ bool TitleApplication::InitializeRendering()
 	}
 
 	// Create app rendering pipelines
-	const std::string MeshPipelineVertexShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/MeshVertexShader.glsl"));
-	const std::string MeshPipelinePixelShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/MeshPixelShader.glsl"));
+	Rendering::RenderHardwareInterface::InputVertexAttributeLayout PipelineInputVertexAttributeLayout = {};
+	PipelineInputVertexAttributeLayout.AttributeDescriptions =
+	{
+		Rendering::RenderHardwareInterface::InputVertexAttributeDesc{0, 3, Rendering::RenderHardwareInterface::InputVertexAttributeValueDataType::Float, sizeof(float) * 3, 0}
+	};
 
-	MeshPipeline = Rendering::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, MeshPipelineVertexShaderSource, MeshPipelinePixelShaderSource);
+	const std::string PipelineVertexShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/MeshVertexShader.glsl"));
+	const std::string PipelinePixelShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/MeshPixelShader.glsl"));
+
+	Pipeline = Rendering::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, 
+		PipelineVertexShaderSource,
+		PipelineInputVertexAttributeLayout,
+		PipelinePixelShaderSource);
 
 	// Initialize rendering scene
 	std::vector<float> Vertices =
@@ -139,6 +148,8 @@ bool TitleApplication::InitializeRendering()
 		0, 1, 3,   // first triangle
 		1, 2, 3    // second triangle
 	};
+
+	IndexCount = Indices.size();
 
 	VertexBuffer = Rendering::RenderHardwareInterface::NewVertexBuffer(MainAppWindowRenderContext, Vertices.data(), Vertices.size() * sizeof(float));
 	IndexBuffer = Rendering::RenderHardwareInterface::NewIndexBuffer(MainAppWindowRenderContext, Indices.data(), Indices.size());
@@ -161,11 +172,11 @@ bool TitleApplication::ShutdownRendering()
 	}
 	IndexBuffer = nullptr;
 
-	if (!Rendering::RenderHardwareInterface::DeletePipeline(MainAppWindowRenderContext, MeshPipeline))
+	if (!Rendering::RenderHardwareInterface::DeletePipeline(MainAppWindowRenderContext, Pipeline))
 	{
 		return false;
 	}
-	MeshPipeline = nullptr;
+	Pipeline = nullptr;
 
 	// Delete main app window rendering context
 	if (!Rendering::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext))
@@ -192,14 +203,9 @@ void TitleApplication::RenderApp()
 
 		Rendering::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
 
-		Rendering::RenderHardwareInterface::SetPipeline(MeshPipeline);
+		Rendering::RenderHardwareInterface::SetPipeline(Pipeline);
 
-		Rendering::RenderHardwareInterface::VertexInputAttributeLayout AttributeLayout = {};
-		AttributeLayout.AttributeDescriptions =
-		{
-			Rendering::RenderHardwareInterface::VertexInputAttributeDesc{0, 3, Rendering::RenderHardwareInterface::VertexInputAttributeValueDataType::Float3, sizeof(float) * 3, 0}
-		};
-		Rendering::RenderHardwareInterface::DrawIndexed(VertexBuffer, IndexBuffer, AttributeLayout);
+		Rendering::RenderHardwareInterface::DrawIndexed(VertexBuffer, IndexBuffer, IndexCount);
 	}
 	Rendering::RenderHardwareInterface::EndFrame(MainAppWindowRenderContext);
 
