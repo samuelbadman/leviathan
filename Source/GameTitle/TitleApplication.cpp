@@ -120,11 +120,8 @@ bool TitleApplication::InitializeRendering()
 	}
 
 	// Create app rendering pipelines
-	const std::string MeshPipelineVertexShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(
-		std::string("Shaders/MeshVertexShader.") + Rendering::RenderHardwareInterface::GetShaderSourceFileExtension());
-
-	const std::string MeshPipelinePixelShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(
-		std::string("Shaders/MeshPixelShader.") + Rendering::RenderHardwareInterface::GetShaderSourceFileExtension());
+	const std::string MeshPipelineVertexShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/MeshVertexShader.glsl"));
+	const std::string MeshPipelinePixelShaderSource = GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/MeshPixelShader.glsl"));
 
 	MeshPipeline = Rendering::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, MeshPipelineVertexShaderSource, MeshPipelinePixelShaderSource);
 

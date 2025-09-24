@@ -34,8 +34,6 @@ namespace Rendering
 			Command recording -- essentially one big class that records all commands using the same API
 		*/
 
-		std::string GetShaderSourceFileExtension();
-
 		bool Initialize(void* const InitWindowPlatformHandle);
 
 		// Resource management

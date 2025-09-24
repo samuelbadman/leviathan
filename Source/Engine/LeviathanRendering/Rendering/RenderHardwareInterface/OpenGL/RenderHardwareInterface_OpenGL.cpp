@@ -144,11 +144,6 @@ bool Rendering::RenderHardwareInterface::Initialize(void* const InitWindowPlatfo
 	return false;
 }
 
-std::string Rendering::RenderHardwareInterface::GetShaderSourceFileExtension()
-{
-	return "glsl";
-}
-
 Rendering::RenderHardwareInterface::Context* Rendering::RenderHardwareInterface::NewContext(void* const WindowPlatformHandle)
 {
 #ifdef PLATFORM_WINDOWS
