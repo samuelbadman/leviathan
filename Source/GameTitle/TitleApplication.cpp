@@ -149,7 +149,7 @@ bool TitleApplication::InitializeRendering()
 		Indices.size() * sizeof(uint32_t));
 
 	// Create app rendering pipelines
-	// TODO: Add preprocessor definition defining which rendering api is being compiled
+	// TODO: Add preprocessor definition defining which rendering api is being compiled to know which source files to read
 	PipelineVertexShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
 		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Vertex,
 		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/VertexShader.glsl")));
