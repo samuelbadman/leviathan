@@ -138,7 +138,8 @@ bool TitleApplication::InitializeRendering()
 	Pipeline = RenderingAbstraction::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, 
 		PipelineVertexShader,
 		PipelinePixelShader,
-		PipelineInputVertexAttributeLayout);
+		PipelineInputVertexAttributeLayout,
+		RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle);
 
 	// Initialize rendering scene
 	std::vector<float> Vertices =

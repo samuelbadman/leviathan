@@ -36,10 +36,14 @@ namespace
 		{
 			uint32_t ShaderProgram = 0;
 			std::vector<GL_RHI::GL_InputVertexAttributeDesc> InputVertexAttributeLayout = {};
+			GLenum PrimitiveType = GL_NONE;
 		};
 
 		// Single vertex array object bound throughout gl rhi initialized duration
 		GLuint VertexArrayObject = 0;
+
+		// The primitive type that is currently used to interpret input primitives
+		GLenum CurrentPrimitiveType = GL_NONE;
 
 		bool LoadGLFunctions()
 		{
@@ -141,6 +145,15 @@ namespace
 			default: return GL_NONE;
 			}
 		}
+
+		GLenum GetPrimitiveTypeGLType(const RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType Type)
+		{
+			switch (Type)
+			{
+			case RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle: return GL_TRIANGLES;
+			default: return GL_NONE;
+			}
+		}
 	}
 }
 
@@ -187,6 +200,11 @@ bool RenderingAbstraction::RenderHardwareInterface::Shutdown()
 	// Destroy vertex array object
 	glBindVertexArray(0);
 	glDeleteVertexArrays(1, &GL_RHI::VertexArrayObject);
+
+	GL_RHI::VertexArrayObject = 0;
+
+	// Unset primitive topology
+	GL_RHI::CurrentPrimitiveType = GL_NONE;
 
 	return true;
 }
@@ -347,7 +365,8 @@ RenderingAbstraction::RenderHardwareInterface::Pipeline* RenderingAbstraction::R
 	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
 	RenderingAbstraction::RenderHardwareInterface::Shader* const VertexShader,
 	RenderingAbstraction::RenderHardwareInterface::Shader* const PixelShader,
-	const RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout
+	const RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout,
+	const RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType PrimitiveTopologyType
 )
 {
 	// Set context
@@ -391,6 +410,9 @@ RenderingAbstraction::RenderHardwareInterface::Pipeline* RenderingAbstraction::R
 			}
 		);
 	}
+
+	// Translate topology type. Used when drawing geomotry to know how to interpret input primitives (points, lines or triangles)
+	GLPipeline->PrimitiveType = GL_RHI::GetPrimitiveTypeGLType(PrimitiveTopologyType);
 
 	return reinterpret_cast<RenderingAbstraction::RenderHardwareInterface::Pipeline*>(GLPipeline);
 }
@@ -473,6 +495,9 @@ void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstrac
 			GLPipeline->InputVertexAttributeLayout[i].Offset
 		);
 	}
+
+	// Set current primitive topology type
+	GL_RHI::CurrentPrimitiveType = GLPipeline->PrimitiveType;
 }
 
 void RenderingAbstraction::RenderHardwareInterface::DrawIndexed(
@@ -483,5 +508,5 @@ void RenderingAbstraction::RenderHardwareInterface::DrawIndexed(
 {
 	glBindBuffer(GL_ARRAY_BUFFER, reinterpret_cast<GL_RHI::GL_Buffer* const>(VertexBuffer)->Buffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, reinterpret_cast<GL_RHI::GL_Buffer* const>(IndexBuffer)->Buffer);
-	glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_RHI::CurrentPrimitiveType, IndexCount, GL_UNSIGNED_INT, 0);
 }

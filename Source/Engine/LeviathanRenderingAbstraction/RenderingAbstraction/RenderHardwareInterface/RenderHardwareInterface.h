@@ -44,6 +44,14 @@ namespace RenderingAbstraction
 			std::vector<InputVertexAttributeDesc> AttributeDescriptions = {};
 		};
 
+		enum class PrimitiveTopologyType : uint8_t
+		{
+			Triangle = 0,
+			//Line,
+			//Point,
+			MAX
+		};
+
 		/*
 			Resource management -- create, read, update, delete
 			Frame management -- When to start a frame, what swapchain image is being used etc
@@ -82,7 +90,8 @@ namespace RenderingAbstraction
 			RenderingAbstraction::RenderHardwareInterface::Context* const Context,
 			RenderingAbstraction::RenderHardwareInterface::Shader* const VertexShader,
 			RenderingAbstraction::RenderHardwareInterface::Shader* const PixelShader,
-			const RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout
+			const RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout& InputVertexAttributeLayout,
+			const RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType PrimitiveTopologyType
 		);
 		bool DeletePipeline(
 			RenderingAbstraction::RenderHardwareInterface::Context* const Context,
