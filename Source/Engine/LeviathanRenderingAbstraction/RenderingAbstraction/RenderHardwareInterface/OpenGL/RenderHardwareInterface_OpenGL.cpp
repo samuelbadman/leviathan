@@ -154,6 +154,15 @@ namespace
 			default: return GL_NONE;
 			}
 		}
+
+		GLint GetInputVertexAttributeDataTypeSize(const RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType DataType)
+		{
+			switch (DataType)
+			{
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float: return 3;
+			default: return GL_NONE;
+			}
+		}
 	}
 }
 

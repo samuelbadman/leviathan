@@ -158,9 +158,9 @@ bool TitleApplication::InitializeRendering()
 
 	IndexCount = Indices.size();
 
-	VertexBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext, 
+	VertexBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext,
 		RenderingAbstraction::RenderHardwareInterface::BufferType::Vertex,
-		Vertices.data(), 
+		Vertices.data(),
 		Vertices.size() * sizeof(float));
 
 	IndexBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext, 
@@ -226,10 +226,9 @@ void TitleApplication::RenderApp()
 	{
 		const Core::Rectangle WindowClientRect = MainAppWindow->GetClientRegion();
 		RenderingAbstraction::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
+		RenderingAbstraction::RenderHardwareInterface::SetPipeline(Pipeline);
 
 		RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
-
-		RenderingAbstraction::RenderHardwareInterface::SetPipeline(Pipeline);
 
 		RenderingAbstraction::RenderHardwareInterface::DrawIndexed(VertexBuffer, IndexBuffer, IndexCount);
 	}
