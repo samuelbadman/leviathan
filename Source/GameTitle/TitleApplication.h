@@ -36,6 +36,7 @@ private:
 	RenderingAbstraction::RenderHardwareInterface::Shader* PipelineVertexShader = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Shader* PipelinePixelShader = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Pipeline* Pipeline = nullptr;
+	size_t VertexStrideBytes = 0;
 	size_t IndexCount = 0;
 
 public:

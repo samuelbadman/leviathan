@@ -35,8 +35,8 @@ namespace RenderingAbstraction
 			uint32_t Index = 0;
 			int32_t ValueCount = 0;
 			InputVertexAttributeValueDataType ValueType = InputVertexAttributeValueDataType::MAX;
-			int32_t ByteStrideToNextAttribute = 0;
-			size_t ByteOffsetFromVertexStart = 0;
+			int32_t ByteStrideToSameAttributeInNextVertex = 0;
+			uint32_t ByteOffsetFromVertexStart = 0;
 		};
 
 		struct InputVertexAttributeLayout
@@ -105,10 +105,11 @@ namespace RenderingAbstraction
 
 		// Command recording
 		void SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height);
-		void ClearColorBuffer(const float R, const float G, const float B, const float A);
 		void SetPipeline(RenderingAbstraction::RenderHardwareInterface::Pipeline* const Pipeline);
+		void ClearColorBuffer(const float R, const float G, const float B, const float A);
 		void DrawIndexed(
 			RenderingAbstraction::RenderHardwareInterface::Buffer* const VertexBuffer,
+			const size_t VertexStrideBytes,
 			RenderingAbstraction::RenderHardwareInterface::Buffer* const IndexBuffer,
 			const size_t IndexCount
 		);

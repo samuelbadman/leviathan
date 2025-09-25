@@ -29,7 +29,7 @@ namespace
 			GLenum Type = GL_NONE;
 			GLboolean Normalized = GL_FALSE;
 			GLsizei Stride = 0;
-			const void* Offset = 0;
+			GLuint RelativeOffset = 0;
 		};
 
 		struct GL_Pipeline
@@ -301,6 +301,12 @@ RenderingAbstraction::RenderHardwareInterface::Buffer* RenderingAbstraction::Ren
 	const size_t BufferDataSizeBytes
 )
 {
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
 	GL_RHI::GL_Buffer* const GLBuffer = new GL_RHI::GL_Buffer();
 
 	const GLenum GLType = GL_RHI::GetBufferTypeGLType(Type);
@@ -308,6 +314,8 @@ RenderingAbstraction::RenderHardwareInterface::Buffer* RenderingAbstraction::Ren
 	glGenBuffers(1, &GLBuffer->Buffer);
 	glBindBuffer(GLType, GLBuffer->Buffer);
 	glBufferData(GLType, BufferDataSizeBytes, BufferDataStart, GL_STATIC_DRAW);
+
+	glBindBuffer(GLType, 0);
 
 	return reinterpret_cast<RenderingAbstraction::RenderHardwareInterface::Buffer*>(GLBuffer);
 }
@@ -317,6 +325,12 @@ bool RenderingAbstraction::RenderHardwareInterface::DeleteBuffer(
 	RenderingAbstraction::RenderHardwareInterface::Buffer* const Buffer
 )
 {
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
 	GL_RHI::GL_Buffer* const GLBuffer = reinterpret_cast<GL_RHI::GL_Buffer* const>(Buffer);
 
 	glDeleteBuffers(1, &GLBuffer->Buffer);
@@ -414,8 +428,8 @@ RenderingAbstraction::RenderHardwareInterface::Pipeline* RenderingAbstraction::R
 				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueCount,
 				GL_RHI::GetInputVertexAttributeDataTypeGLType(InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueType),
 				GL_FALSE,
-				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ByteStrideToNextAttribute,
-				reinterpret_cast<const void*>(InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ByteOffsetFromVertexStart)
+				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ByteStrideToSameAttributeInNextVertex,
+				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ByteOffsetFromVertexStart
 			}
 		);
 	}
@@ -477,12 +491,6 @@ void RenderingAbstraction::RenderHardwareInterface::SetViewport(const int32_t X,
 	glViewport(X, Y, Width, Height);
 }
 
-void RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(const float R, const float G, const float B, const float A)
-{
-	glClearColor(R, G, B, A);
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-
 void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstraction::RenderHardwareInterface::Pipeline* const Pipeline)
 {
 	GL_RHI::GL_Pipeline* const GLPipeline = reinterpret_cast<GL_RHI::GL_Pipeline* const>(Pipeline);
@@ -490,32 +498,47 @@ void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstrac
 	// Bind shader program
 	glUseProgram(GLPipeline->ShaderProgram);
 
-	// Bind input vertex attributes
+	// Specify input vertex attribute format
 	const size_t AttributeCount = GLPipeline->InputVertexAttributeLayout.size();
 	for (size_t i = 0; i < AttributeCount; ++i)
 	{
+		// Enable attribute
 		glEnableVertexAttribArray(i);
-		glVertexAttribPointer(
-			GLPipeline->InputVertexAttributeLayout[i].Index,
-			GLPipeline->InputVertexAttributeLayout[i].Size,
-			GLPipeline->InputVertexAttributeLayout[i].Type,
+
+		// Set up attribute format
+		glVertexAttribFormat(
+			i, 
+			GLPipeline->InputVertexAttributeLayout[i].Size, 
+			GLPipeline->InputVertexAttributeLayout[i].Type, 
 			GLPipeline->InputVertexAttributeLayout[i].Normalized,
-			GLPipeline->InputVertexAttributeLayout[i].Stride,
-			GLPipeline->InputVertexAttributeLayout[i].Offset
+			GLPipeline->InputVertexAttributeLayout[i].RelativeOffset
 		);
+
+		// Make attribute use binding 0
+		glVertexAttribBinding(i, 0);
 	}
 
 	// Set current primitive topology type
 	GL_RHI::CurrentPrimitiveType = GLPipeline->PrimitiveType;
 }
 
+void RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(const float R, const float G, const float B, const float A)
+{
+	glClearColor(R, G, B, A);
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
 void RenderingAbstraction::RenderHardwareInterface::DrawIndexed(
 	RenderingAbstraction::RenderHardwareInterface::Buffer* const VertexBuffer,
+	const size_t VertexStrideBytes,
 	RenderingAbstraction::RenderHardwareInterface::Buffer* const IndexBuffer,
 	const size_t IndexCount
 )
 {
-	glBindBuffer(GL_ARRAY_BUFFER, reinterpret_cast<GL_RHI::GL_Buffer* const>(VertexBuffer)->Buffer);
+	// Bind all attributes at binding 0 to use input vertex buffer
+	glBindVertexBuffer(0, reinterpret_cast<GL_RHI::GL_Buffer* const>(VertexBuffer)->Buffer, 0, VertexStrideBytes);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, reinterpret_cast<GL_RHI::GL_Buffer* const>(IndexBuffer)->Buffer);
+
 	glDrawElements(GL_RHI::CurrentPrimitiveType, IndexCount, GL_UNSIGNED_INT, 0);
 }

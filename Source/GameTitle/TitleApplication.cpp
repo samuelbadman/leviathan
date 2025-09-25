@@ -119,28 +119,6 @@ bool TitleApplication::InitializeRendering()
 		return false;
 	}
 
-	// Create app rendering pipelines
-	// TODO: Add preprocessor definition defining which rendering api is being compiled
-	PipelineVertexShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
-		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Vertex,
-		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/VertexShader.glsl")));
-
-	PipelinePixelShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
-		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Pixel,
-		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/PixelShader.glsl")));
-
-	RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout PipelineInputVertexAttributeLayout = {};
-	PipelineInputVertexAttributeLayout.AttributeDescriptions =
-	{
-		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc{0, 3, RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float, sizeof(float) * 3, 0}
-	};
-
-	Pipeline = RenderingAbstraction::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, 
-		PipelineVertexShader,
-		PipelinePixelShader,
-		PipelineInputVertexAttributeLayout,
-		RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle);
-
 	// Initialize rendering scene
 	std::vector<float> Vertices =
 	{
@@ -149,6 +127,8 @@ bool TitleApplication::InitializeRendering()
 		-0.5f, -0.5f, 0.0f,  // bottom left
 		-0.5f,  0.5f, 0.0f   // top left 
 	};
+
+	VertexStrideBytes = sizeof(float) * 3;
 
 	std::vector<uint32_t> Indices =
 	{
@@ -163,10 +143,39 @@ bool TitleApplication::InitializeRendering()
 		Vertices.data(),
 		Vertices.size() * sizeof(float));
 
-	IndexBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext, 
+	IndexBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext,
 		RenderingAbstraction::RenderHardwareInterface::BufferType::Index,
-		Indices.data(), 
+		Indices.data(),
 		Indices.size() * sizeof(uint32_t));
+
+	// Create app rendering pipelines
+	// TODO: Add preprocessor definition defining which rendering api is being compiled
+	PipelineVertexShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
+		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Vertex,
+		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/VertexShader.glsl")));
+
+	PipelinePixelShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
+		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Pixel,
+		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/PixelShader.glsl")));
+
+	RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout PipelineInputVertexAttributeLayout = {};
+	PipelineInputVertexAttributeLayout.AttributeDescriptions =
+	{
+		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
+		{
+			0, 
+			3, 
+			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float, 
+			sizeof(float) * 3, 
+			0
+		}
+	};
+
+	Pipeline = RenderingAbstraction::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, 
+		PipelineVertexShader,
+		PipelinePixelShader,
+		PipelineInputVertexAttributeLayout,
+		RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle);
 
 	return true;
 }
@@ -230,7 +239,7 @@ void TitleApplication::RenderApp()
 
 		RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
 
-		RenderingAbstraction::RenderHardwareInterface::DrawIndexed(VertexBuffer, IndexBuffer, IndexCount);
+		RenderingAbstraction::RenderHardwareInterface::DrawIndexed(VertexBuffer, VertexStrideBytes, IndexBuffer, IndexCount);
 	}
 	RenderingAbstraction::RenderHardwareInterface::EndFrame(MainAppWindowRenderContext);
 
