@@ -234,6 +234,7 @@ void TitleApplication::RenderApp()
 		const Core::Rectangle WindowClientRect = MainAppWindow->GetClientRegion();
 		RenderingAbstraction::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
 		RenderingAbstraction::RenderHardwareInterface::SetPipeline(Pipeline);
+		RenderingAbstraction::RenderHardwareInterface::SetPrimitiveTopology(RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle);
 
 		RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
 

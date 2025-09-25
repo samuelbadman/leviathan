@@ -104,6 +104,7 @@ namespace RenderingAbstraction
 		// Command recording
 		void SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height);
 		void SetPipeline(RenderingAbstraction::RenderHardwareInterface::Pipeline* const Pipeline);
+		void SetPrimitiveTopology(const RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType Type);
 		void ClearColorBuffer(const float R, const float G, const float B, const float A);
 		void DrawIndexed(
 			RenderingAbstraction::RenderHardwareInterface::Buffer* const VertexBuffer,

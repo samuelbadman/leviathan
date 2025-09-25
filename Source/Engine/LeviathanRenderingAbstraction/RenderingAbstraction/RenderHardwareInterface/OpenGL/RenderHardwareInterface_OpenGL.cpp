@@ -515,9 +515,11 @@ void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstrac
 		// Make attribute use binding 0
 		glVertexAttribBinding(i, 0);
 	}
+}
 
-	// Set current primitive topology type
-	GL_RHI::CurrentPrimitiveType = GLPipeline->PrimitiveType;
+void RenderingAbstraction::RenderHardwareInterface::SetPrimitiveTopology(const RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType Type)
+{
+	GL_RHI::CurrentPrimitiveType = GL_RHI::GetPrimitiveTypeGLType(Type);
 }
 
 void RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(const float R, const float G, const float B, const float A)
