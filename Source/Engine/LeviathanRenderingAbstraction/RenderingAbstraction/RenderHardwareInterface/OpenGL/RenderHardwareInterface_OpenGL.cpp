@@ -24,7 +24,6 @@ namespace
 
 		struct GL_InputVertexAttributeDesc
 		{
-			GLuint Index = 0;
 			GLint Size = 0;
 			GLenum Type = GL_NONE;
 			GLboolean Normalized = GL_FALSE;
@@ -121,7 +120,7 @@ namespace
 		{
 			switch (DataType)
 			{
-			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float: return GL_FLOAT;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3: return GL_FLOAT;
 			default: return GL_NONE;
 			}
 		}
@@ -159,7 +158,7 @@ namespace
 		{
 			switch (DataType)
 			{
-			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float: return 3;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3: return 3;
 			default: return GL_NONE;
 			}
 		}
@@ -424,12 +423,11 @@ RenderingAbstraction::RenderHardwareInterface::Pipeline* RenderingAbstraction::R
 	{
 		GLPipeline->InputVertexAttributeLayout.emplace_back(GL_RHI::GL_InputVertexAttributeDesc
 			{
-				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].Index,
-				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueCount,
+				GL_RHI::GetInputVertexAttributeDataTypeSize(InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueType),
 				GL_RHI::GetInputVertexAttributeDataTypeGLType(InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueType),
 				GL_FALSE,
-				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ByteStrideToSameAttributeInNextVertex,
-				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ByteOffsetFromVertexStart
+				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].StrideToSameAttributeInNextVertexBytes,
+				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].OffsetFromVertexStartBytes
 			}
 		);
 	}

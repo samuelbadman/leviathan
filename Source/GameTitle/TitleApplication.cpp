@@ -163,9 +163,7 @@ bool TitleApplication::InitializeRendering()
 	{
 		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
 		{
-			0, 
-			3, 
-			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float, 
+			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3, 
 			sizeof(float) * 3, 
 			0
 		}

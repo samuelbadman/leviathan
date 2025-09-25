@@ -26,17 +26,15 @@ namespace RenderingAbstraction
 
 		enum class InputVertexAttributeValueDataType : uint8_t
 		{
-			Float = 0,
+			Float3 = 0,
 			MAX
 		};
 
 		struct InputVertexAttributeDesc
 		{
-			uint32_t Index = 0;
-			int32_t ValueCount = 0;
 			InputVertexAttributeValueDataType ValueType = InputVertexAttributeValueDataType::MAX;
-			int32_t ByteStrideToSameAttributeInNextVertex = 0;
-			uint32_t ByteOffsetFromVertexStart = 0;
+			int32_t StrideToSameAttributeInNextVertexBytes = 0;
+			uint32_t OffsetFromVertexStartBytes = 0;
 		};
 
 		struct InputVertexAttributeLayout
