@@ -122,6 +122,7 @@ bool TitleApplication::InitializeRendering()
 	// Initialize rendering scene
 	std::vector<float> Vertices =
 	{
+		// X, Y, Z, R, G, B, A
 		0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // top right
 		0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom right
 		-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, // bottom left
@@ -163,11 +164,11 @@ bool TitleApplication::InitializeRendering()
 	{
 		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
 		{
-			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3, 
-			sizeof(float) * 7, 
+			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3,
+			sizeof(float) * 7,
 			0
 		},
-		
+
 		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
 		{
 			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float4,
@@ -176,11 +177,28 @@ bool TitleApplication::InitializeRendering()
 		}
 	};
 
-	Pipeline = RenderingAbstraction::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext, 
+	Pipeline = RenderingAbstraction::RenderHardwareInterface::NewPipeline(MainAppWindowRenderContext,
 		PipelineVertexShader,
 		PipelinePixelShader,
 		PipelineInputVertexAttributeLayout,
 		RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle);
+
+	// Create pipeline constant buffers to store constant buffer
+	ShaderConstantsConstantBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext,
+		RenderingAbstraction::RenderHardwareInterface::BufferType::Constant,
+		nullptr,
+		sizeof(ShaderConstants));
+
+	// Update shader constants constant buffer data
+	Constants.VertexPositionOffset[0] = 0.0f;
+	Constants.VertexPositionOffset[1] = 0.0f;
+	Constants.VertexPositionOffset[2] = 0.0f;
+
+	RenderingAbstraction::RenderHardwareInterface::UpdateConstantBufferData(MainAppWindowRenderContext,
+		ShaderConstantsConstantBuffer,
+		0,
+		&Constants,
+		sizeof(ShaderConstants));
 
 	return true;
 }
@@ -218,6 +236,12 @@ bool TitleApplication::ShutdownRendering()
 	}
 	Pipeline = nullptr;
 
+	if (!RenderingAbstraction::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, ShaderConstantsConstantBuffer))
+	{
+		return false;
+	}
+	ShaderConstantsConstantBuffer = nullptr;
+
 	// Delete main app window rendering context
 	if (!RenderingAbstraction::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext))
 	{
@@ -241,6 +265,7 @@ void TitleApplication::RenderApp()
 		const Core::Rectangle WindowClientRect = MainAppWindow->GetClientRegion();
 		RenderingAbstraction::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
 		RenderingAbstraction::RenderHardwareInterface::SetPipeline(Pipeline);
+		RenderingAbstraction::RenderHardwareInterface::SetConstantBuffer(0, ShaderConstantsConstantBuffer, 0, sizeof(ShaderConstants)); // Binding parameter maps to binding set when defining constant buffer in shader
 		RenderingAbstraction::RenderHardwareInterface::SetPrimitiveTopology(RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle);
 
 		RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);

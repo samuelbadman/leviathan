@@ -13,7 +13,7 @@ namespace RenderingAbstraction
 		{
 			Vertex = 0,
 			Index,
-			//Constant
+			Constant,
 			MAX
 		};
 
@@ -74,6 +74,13 @@ namespace RenderingAbstraction
 			RenderingAbstraction::RenderHardwareInterface::Context* const Context,
 			RenderingAbstraction::RenderHardwareInterface::Buffer* const Buffer
 		);
+		bool UpdateConstantBufferData(
+			RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+			RenderingAbstraction::RenderHardwareInterface::Buffer* ConstantBuffer,
+			const size_t UpdateStartOffsetIntoConstantBufferBytes,
+			const void* const UpdateDataStart,
+			const size_t UpdateDataSizeBytes
+		);
 
 		RenderingAbstraction::RenderHardwareInterface::Shader* NewShader(
 			RenderingAbstraction::RenderHardwareInterface::Context* const Context,
@@ -106,6 +113,13 @@ namespace RenderingAbstraction
 		void SetViewport(const int32_t X, const int32_t Y, const int32_t Width, const int32_t Height);
 		void SetPipeline(RenderingAbstraction::RenderHardwareInterface::Pipeline* const Pipeline);
 		void SetPrimitiveTopology(const RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType Type);
+		void SetConstantBuffer(const uint32_t Binding, RenderingAbstraction::RenderHardwareInterface::Buffer* const ConstantBuffer);
+		void SetConstantBuffer(
+			const uint32_t Binding,
+			RenderingAbstraction::RenderHardwareInterface::Buffer* const ConstantBuffer,
+			const size_t OffsetBindingStartBytes, // Offset into the constant buffer to start the binding at
+			const size_t BufferBoundRangeSizeBytes // Size length from OffsetBindingStartBytes into the constant buffer to bind to the binding
+		);
 		void ClearColorBuffer(const float R, const float G, const float B, const float A);
 		void DrawIndexed(
 			RenderingAbstraction::RenderHardwareInterface::Buffer* const VertexBuffer,

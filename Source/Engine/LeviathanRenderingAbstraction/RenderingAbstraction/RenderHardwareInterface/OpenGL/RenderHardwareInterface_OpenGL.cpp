@@ -132,6 +132,7 @@ namespace
 			{
 			case RenderingAbstraction::RenderHardwareInterface::BufferType::Vertex: return GL_ARRAY_BUFFER;
 			case RenderingAbstraction::RenderHardwareInterface::BufferType::Index: return GL_ELEMENT_ARRAY_BUFFER;
+			case RenderingAbstraction::RenderHardwareInterface::BufferType::Constant: return GL_UNIFORM_BUFFER;
 			default: return GL_NONE;
 			}
 		}
@@ -341,6 +342,30 @@ bool RenderingAbstraction::RenderHardwareInterface::DeleteBuffer(
 	return true;
 }
 
+bool RenderingAbstraction::RenderHardwareInterface::UpdateConstantBufferData(
+	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+	RenderingAbstraction::RenderHardwareInterface::Buffer* ConstantBuffer,
+	const size_t UpdateStartOffsetIntoConstantBufferBytes,
+	const void* const UpdateDataStart,
+	const size_t UpdateDataSizeBytes
+)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	GL_RHI::GL_Buffer* const GLBuffer = reinterpret_cast<GL_RHI::GL_Buffer* const>(ConstantBuffer);
+
+	glBindBuffer(GL_UNIFORM_BUFFER, GLBuffer->Buffer);
+	glBufferSubData(GL_UNIFORM_BUFFER, UpdateStartOffsetIntoConstantBufferBytes, UpdateDataSizeBytes, UpdateDataStart);
+
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	return true;
+}
+
 RenderingAbstraction::RenderHardwareInterface::Shader* RenderingAbstraction::RenderHardwareInterface::NewShader(
 	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
 	const RenderingAbstraction::RenderHardwareInterface::ShaderStage Stage,
@@ -507,9 +532,9 @@ void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstrac
 
 		// Set up attribute format
 		glVertexAttribFormat(
-			i, 
-			GLPipeline->InputVertexAttributeLayout[i].Size, 
-			GLPipeline->InputVertexAttributeLayout[i].Type, 
+			i,
+			GLPipeline->InputVertexAttributeLayout[i].Size,
+			GLPipeline->InputVertexAttributeLayout[i].Type,
 			GLPipeline->InputVertexAttributeLayout[i].Normalized,
 			GLPipeline->InputVertexAttributeLayout[i].RelativeOffset
 		);
@@ -522,6 +547,21 @@ void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstrac
 void RenderingAbstraction::RenderHardwareInterface::SetPrimitiveTopology(const RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType Type)
 {
 	GL_RHI::CurrentPrimitiveType = GL_RHI::GetPrimitiveTypeGLType(Type);
+}
+
+void RenderingAbstraction::RenderHardwareInterface::SetConstantBuffer(const uint32_t Binding, RenderingAbstraction::RenderHardwareInterface::Buffer* const ConstantBuffer)
+{
+	glBindBufferBase(GL_UNIFORM_BUFFER, Binding, reinterpret_cast<GL_RHI::GL_Buffer* const>(ConstantBuffer)->Buffer);
+}
+
+void RenderingAbstraction::RenderHardwareInterface::SetConstantBuffer(
+	const uint32_t Binding,
+	RenderingAbstraction::RenderHardwareInterface::Buffer* const ConstantBuffer,
+	const size_t OffsetBindingStartBytes, 
+	const size_t BufferBoundRangeSizeBytes 
+)
+{
+	glBindBufferRange(GL_UNIFORM_BUFFER, Binding, reinterpret_cast<GL_RHI::GL_Buffer* const>(ConstantBuffer)->Buffer, OffsetBindingStartBytes, BufferBoundRangeSizeBytes);
 }
 
 void RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(const float R, const float G, const float B, const float A)

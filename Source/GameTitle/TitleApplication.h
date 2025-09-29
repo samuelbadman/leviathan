@@ -21,6 +21,11 @@ namespace RenderingAbstraction
 	}
 }
 
+struct ShaderConstants
+{
+	float VertexPositionOffset[3] = {0.0f, 0.0f, 0.0f};
+};
+
 class TitleApplicationWindow;
 
 class TitleApplication : public Core::Application
@@ -36,6 +41,8 @@ private:
 	RenderingAbstraction::RenderHardwareInterface::Shader* PipelineVertexShader = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Shader* PipelinePixelShader = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Pipeline* Pipeline = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Buffer* ShaderConstantsConstantBuffer = nullptr;
+	ShaderConstants Constants = {};
 	size_t VertexStrideBytes = 0;
 	size_t IndexCount = 0;
 
