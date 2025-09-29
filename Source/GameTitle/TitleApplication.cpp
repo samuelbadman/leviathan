@@ -122,13 +122,13 @@ bool TitleApplication::InitializeRendering()
 	// Initialize rendering scene
 	std::vector<float> Vertices =
 	{
-		0.5f,  0.5f, 0.0f,  // top right
-		0.5f, -0.5f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f,  // bottom left
-		-0.5f,  0.5f, 0.0f   // top left 
+		0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // top right
+		0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom right
+		-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, // bottom left
+		-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f // top left 
 	};
 
-	VertexStrideBytes = sizeof(float) * 3;
+	VertexStrideBytes = sizeof(float) * 7;
 
 	std::vector<uint32_t> Indices =
 	{
@@ -164,8 +164,15 @@ bool TitleApplication::InitializeRendering()
 		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
 		{
 			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3, 
-			sizeof(float) * 3, 
+			sizeof(float) * 7, 
 			0
+		},
+		
+		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
+		{
+			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float4,
+			sizeof(float) * 7,
+			sizeof(float) * 3
 		}
 	};
 

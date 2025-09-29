@@ -27,6 +27,7 @@ namespace RenderingAbstraction
 		enum class InputVertexAttributeValueDataType : uint8_t
 		{
 			Float3 = 0,
+			Float4,
 			MAX
 		};
 

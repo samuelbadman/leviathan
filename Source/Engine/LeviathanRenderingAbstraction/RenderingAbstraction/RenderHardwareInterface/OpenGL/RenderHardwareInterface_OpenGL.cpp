@@ -121,6 +121,7 @@ namespace
 			switch (DataType)
 			{
 			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3: return GL_FLOAT;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float4: return GL_FLOAT;
 			default: return GL_NONE;
 			}
 		}
@@ -159,6 +160,7 @@ namespace
 			switch (DataType)
 			{
 			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3: return 3;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float4: return 4;
 			default: return GL_NONE;
 			}
 		}
