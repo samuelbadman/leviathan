@@ -1,10 +1,13 @@
 #version 460 core
 
-in vec4 VertexColor;
+in VS_OUT
+{
+	vec4 VertexColor;
+} FS_In;
 
 out vec4 FragmentColor;
 
 void main()
 {
-	FragmentColor = VertexColor;
+	FragmentColor = FS_In.VertexColor;
 }
