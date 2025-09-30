@@ -135,10 +135,39 @@ target_precompile_headers("LeviathanRenderingAbstraction" PUBLIC
 target_include_directories("LeviathanRenderingAbstraction" PRIVATE 
 "Source/Engine/LeviathanCore/"
 "Source/Engine/LeviathanRenderingAbstraction/"
-# TODO: Add switch to specify which rendering API to compile the engine with
+# TODO: Add switch to specify which rendering API vendor sources to compile the engine with
 "Source/Engine/LeviathanRenderingAbstraction/Vendor/glad/"
 )
-# End rendering abstraction module static library module target setup
+# End rendering abstraction static library module target setup
+
+# TODO: Build separate renderer modules that implement specific renderers (2D batch focused (sprite)/ 3D PBR etc...)
+
+#------------------------------------------------------------------------------------------------
+# Texture importer module
+#------------------------------------------------------------------------------------------------
+
+# Begin texture importer static library module target setup
+# Add static library module target with source files to be compiled for all platforms
+add_library("LeviathanTextureImporter" STATIC 
+"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureImporterModule.h"
+"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureImporterModule.cpp"
+"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureLoader.h"
+"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureLoader.cpp"
+)
+
+# Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
+target_precompile_headers("LeviathanTextureImporter" PUBLIC 
+"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureImporterPrecompiledHeader.h"
+"Source/Engine/LeviathanCore/Core/CorePrecompiledHeader.h"
+)
+
+# Add static library module include directories
+target_include_directories("LeviathanTextureImporter" PRIVATE 
+"Source/Engine/LeviathanCore/"
+"Source/Engine/LeviathanTextureImporter/"
+"Source/Engine/LeviathanTextureImporter/Vendor/stb_image/"
+)
+# End assets static library module target setup
 
 #################################################################################################
 # Titles
@@ -161,20 +190,20 @@ add_executable("GameTitle" "${BUILD_EXECUTABLE_TARGET}"
 target_link_libraries("GameTitle" 
 "LeviathanCore"
 "LeviathanRenderingAbstraction"
+"LeviathanTextureImporter"
 )
 
 # Add engine static library module source directories as include directories for game title executable
 target_include_directories("GameTitle" PRIVATE 
 "Source/Engine/LeviathanCore/"
 "Source/Engine/LeviathanRenderingAbstraction/"
+"Source/Engine/LeviathanTextureImporter/"
 )
 
 # Add game title post build commands
-# Copy shader source files to build target directory
-# TODO: Add switch for rendering api being compiled
-# TODO: Build renderer modules that implement specific renderers (2D batch focused/ 3D PBR etc...)
+# Copy game title content to build target directory
 add_custom_command(TARGET "GameTitle" POST_BUILD COMMAND ${CMAKE_COMMAND} 
-	-E copy_directory "${CMAKE_SOURCE_DIR}/Source/GameTitle/Shaders/Source/OpenGL" "$<TARGET_FILE_DIR:GameTitle>/Shaders"
+	-E copy_directory "${CMAKE_SOURCE_DIR}/GameTitleContent/" "$<TARGET_FILE_DIR:GameTitle>/GameTitleContent/"
 )
 # End game title executable target setup
 
@@ -184,7 +213,7 @@ add_custom_command(TARGET "GameTitle" POST_BUILD COMMAND ${CMAKE_COMMAND}
  # Set game title being built here
  set(TARGET_TITLE "GameTitle")
 
-# Set Visual Studio startup project
+# Set Visual Studio startup project to target game title executable target
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "${TARGET_TITLE}")
 
 # Set working directory for game title being built to be the same as the game title target output directory

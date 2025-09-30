@@ -5,6 +5,6 @@ namespace Core
 	class FileIOManager
 	{
 	public:
-		std::string ReadDiskFileToString(const std::string& File);
+		std::string ReadFileToString(const std::string& File);
 	};
 }

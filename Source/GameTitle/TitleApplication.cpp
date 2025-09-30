@@ -1,10 +1,15 @@
 #include "TitleApplication.h"
+#include "TitleApplicationWindow.h"
+
 #include "Core/ConsoleOutput.h"
 #include "Core/NotificationManager.h"
 #include "Core/FileIOManager.h"
-#include "TitleApplicationWindow.h"
+
 #include "RenderingAbstraction/RenderingAbstractionModule.h"
 #include "RenderingAbstraction/RenderHardwareInterface/RenderHardwareInterface.h"
+
+#include "TextureImporter/TextureImporterModule.h"
+#include "TextureImporter/TextureLoader.h"
 
 IMPLEMENT(TitleApplication)
 
@@ -16,6 +21,9 @@ TitleApplication::TitleApplication(Core::Engine& EngineInstanceRunningApplicatio
 
 	// Add title application notification listener
 	GetEngine().GetNotificationManager().AddNotificationListenerMethod<TitleApplication, &TitleApplication::NotificationListener>(this);
+
+	// Create engine module instances used by application
+	TextureImporterModuleInstance = GetEngine().CreateModule<TextureImporter::TextureImporterModule>();
 
 	// Create a main window for the title application
 	InitializeMainAppWindow();
@@ -99,9 +107,9 @@ bool TitleApplication::InitializeMainAppWindow()
 bool TitleApplication::InitializeRendering()
 {
 	// Create rendering module
-	RenderingModuleInstance = GetEngine().CreateModule<RenderingAbstraction::RenderingAbstractionModule>();
+	RenderingAbstractionModuleInstance = GetEngine().CreateModule<RenderingAbstraction::RenderingAbstractionModule>();
 
-	if (!RenderingModuleInstance || !MainAppWindow)
+	if (!RenderingAbstractionModuleInstance || !MainAppWindow)
 	{
 		return false;
 	}
@@ -150,14 +158,15 @@ bool TitleApplication::InitializeRendering()
 		Indices.size() * sizeof(uint32_t));
 
 	// Create app rendering pipelines
-	// TODO: Add preprocessor definition defining which rendering api is being compiled to know which source files to read
+	// TODO: Add preprocessor definition defining which rendering api is being compiled to know which source files to read or build custom shader language that 
+	// translates to glsl/hlsl depending on which rendering api is being compiled
 	PipelineVertexShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
 		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Vertex,
-		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/VertexShader.glsl")));
+		GetEngine().GetFileIOManager().ReadFileToString(std::string("GameTitleContent/Shaders/OpenGL/Source/VertexShader.glsl")));
 
 	PipelinePixelShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
 		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Pixel,
-		GetEngine().GetFileIOManager().ReadDiskFileToString(std::string("Shaders/PixelShader.glsl")));
+		GetEngine().GetFileIOManager().ReadFileToString(std::string("GameTitleContent/Shaders/OpenGL/Source/PixelShader.glsl")));
 
 	RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout PipelineInputVertexAttributeLayout = {};
 	PipelineInputVertexAttributeLayout.AttributeDescriptions =
@@ -199,6 +208,10 @@ bool TitleApplication::InitializeRendering()
 		0,
 		&Constants,
 		sizeof(ShaderConstants));
+
+	// Create texture resources
+	TextureImporter::TextureLoadData WallTextureData = TextureImporterModuleInstance->GetTextureLoader().LoadTexture("GameTitleContent/Textures/Wall.jpg");
+	TextureImporterModuleInstance->GetTextureLoader().FreeTextureLoadData(WallTextureData);
 
 	return true;
 }

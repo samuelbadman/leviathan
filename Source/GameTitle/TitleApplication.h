@@ -21,6 +21,11 @@ namespace RenderingAbstraction
 	}
 }
 
+namespace TextureImporter
+{
+	class TextureImporterModule;
+}
+
 struct ShaderConstants
 {
 	float VertexPositionOffset[3] = {0.0f, 0.0f, 0.0f};
@@ -33,7 +38,8 @@ class TitleApplication : public Core::Application
 private:
 	std::unique_ptr<TitleApplicationWindow> MainAppWindow = nullptr;
 
-	RenderingAbstraction::RenderingAbstractionModule* RenderingModuleInstance = nullptr;
+	RenderingAbstraction::RenderingAbstractionModule* RenderingAbstractionModuleInstance = nullptr;
+	TextureImporter::TextureImporterModule* TextureImporterModuleInstance = nullptr;
 
 	RenderingAbstraction::RenderHardwareInterface::Context* MainAppWindowRenderContext = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Buffer* VertexBuffer = nullptr;
