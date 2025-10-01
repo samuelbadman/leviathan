@@ -1,6 +1,6 @@
-#include "Core/Platform/Platform.h"
-#include "Core/Engine.h"
-#include "Core/Window.h"
+#include "Platform/Platform.h"
+#include "Engine.h"
+#include "Window.h"
 #include "Definitions_Windows.h"
 
 namespace

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Window.h"
+#include "Window.h"
 
 class TitleApplicationWindow : public Core::Window
 {

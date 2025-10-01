@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Module.h"
+#include "Module.h"
 
 namespace RenderingAbstraction
 {

@@ -42,54 +42,56 @@ endif()
 # Begin core module static library module target setup
 # Add core static library module target with source files to be compiled for all platforms
 add_library("LeviathanCore" STATIC 
-"Source/Engine/LeviathanCore/Core/Platform/PlatformEntryPointPrototype.h"
-"Source/Engine/LeviathanCore/Core/Platform/PlatformEntryPointImplementation.h"
-"Source/Engine/LeviathanCore/Core/Platform/Platform.h"
-"Source/Engine/LeviathanCore/Core/Platform/Gamepad.h"
-"Source/Engine/LeviathanCore/Core/ProgrammingTools/Delegate.h"
-"Source/Engine/LeviathanCore/Core/ProgrammingTools/Bits.h"
-"Source/Engine/LeviathanCore/Core/Application.h"
-"Source/Engine/LeviathanCore/Core/Application.cpp"
-"Source/Engine/LeviathanCore/Core/Engine.h"
-"Source/Engine/LeviathanCore/Core/Engine.cpp"
-"Source/Engine/LeviathanCore/Core/ConsoleOutput.h"
-"Source/Engine/LeviathanCore/Core/NotificationManager.h"
-"Source/Engine/LeviathanCore/Core/NotificationManager.cpp"
-"Source/Engine/LeviathanCore/Core/Window.h"
-"Source/Engine/LeviathanCore/Core/Window.cpp"
-"Source/Engine/LeviathanCore/Core/InputKey.h"
-"Source/Engine/LeviathanCore/Core/InputKey.cpp"
-"Source/Engine/LeviathanCore/Core/Module.h"
-"Source/Engine/LeviathanCore/Core/Module.cpp"
-"Source/Engine/LeviathanCore/Core/Platform/Uuid.h"
-"Source/Engine/LeviathanCore/Core/FileIOManager.h"
-"Source/Engine/LeviathanCore/Core/FileIOManager.cpp"
+"Source/Engine/LeviathanCore/Public/Engine.h"
+"Source/Engine/LeviathanCore/Public/FileIOManager.h"
+"Source/Engine/LeviathanCore/Public/Window.h"
+"Source/Engine/LeviathanCore/Public/Application.h"
+"Source/Engine/LeviathanCore/Public/ConsoleOutput.h"
+"Source/Engine/LeviathanCore/Public/NotificationManager.h"
+"Source/Engine/LeviathanCore/Public/Platform/PlatformEntryPointImplementation.h"
+"Source/Engine/LeviathanCore/Public/Platform/PlatformEntryPointPrototype.h"
+"Source/Engine/LeviathanCore/Public/Module.h"
+"Source/Engine/LeviathanCore/Public/InputKey.h"
+"Source/Engine/LeviathanCore/Public/ProgrammingTools/Delegate.h"
+"Source/Engine/LeviathanCore/Public/ProgrammingTools/Bits.h"
+
+"Source/Engine/LeviathanCore/Private/Platform/Platform.h"
+"Source/Engine/LeviathanCore/Private/Platform/Gamepad.h"
+"Source/Engine/LeviathanCore/Private/Application.cpp"
+"Source/Engine/LeviathanCore/Private/Engine.cpp"
+"Source/Engine/LeviathanCore/Private/NotificationManager.cpp"
+"Source/Engine/LeviathanCore/Private/Window.cpp"
+"Source/Engine/LeviathanCore/Private/InputKey.cpp"
+"Source/Engine/LeviathanCore/Private/Module.cpp"
+"Source/Engine/LeviathanCore/Private/Platform/Uuid.h"
+"Source/Engine/LeviathanCore/Private/FileIOManager.cpp"
 )
 
 # Add source files to be compiled and libraries to link against only for specific platform builds
 if("${BUILD_PLATFORM_WINDOWS}" MATCHES ON)
 target_sources("LeviathanCore" PRIVATE
-"Source/Engine/LeviathanCore/Core/Platform/Windows/Platform_Windows.cpp"
-"Source/Engine/LeviathanCore/Core/Platform/Windows/Gamepad_XInput.cpp"
-"Source/Engine/LeviathanCore/Core/Platform/Windows/Definitions_Windows.h"
-"Source/Engine/LeviathanCore/Core/Platform/Windows/Uuid_Windows.cpp"
+"Source/Engine/LeviathanCore/Private/Platform/Windows/Platform_Windows.cpp"
+"Source/Engine/LeviathanCore/Private/Platform/Windows/Gamepad_XInput.cpp"
+"Source/Engine/LeviathanCore/Private/Platform/Windows/Definitions_Windows.h"
+"Source/Engine/LeviathanCore/Private/Platform/Windows/Uuid_Windows.cpp"
 )
 
 target_link_libraries("LeviathanCore" 
 "xinput.lib"
-"Rpcrt4.lib" # Uuids
+"Rpcrt4.lib" # Used for uuid implementation
 )
 endif()
 
 # Add target headers to precompile for core static library module
 # Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
 target_precompile_headers("LeviathanCore" PUBLIC 
-"Source/Engine/LeviathanCore/Core/CorePrecompiledHeader.h"
+"Source/Engine/LeviathanCore/Public/CorePrecompiledHeader.h"
 )
 
 # Add static library module include directories
 target_include_directories("LeviathanCore" PRIVATE 
-"Source/Engine/LeviathanCore/"
+"Source/Engine/LeviathanCore/Public/"
+"Source/Engine/LeviathanCore/Private/"
 )
 # End core module static library module target setup
 
@@ -128,12 +130,12 @@ endif()
 # Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
 target_precompile_headers("LeviathanRenderingAbstraction" PUBLIC 
 "Source/Engine/LeviathanRenderingAbstraction/RenderingAbstraction/RenderingAbstractionPrecompiledHeader.h"
-"Source/Engine/LeviathanCore/Core/CorePrecompiledHeader.h"
+"Source/Engine/LeviathanCore/Public/CorePrecompiledHeader.h"
 )
 
 # Add static library module include directories
 target_include_directories("LeviathanRenderingAbstraction" PRIVATE 
-"Source/Engine/LeviathanCore/"
+"Source/Engine/LeviathanCore/Public/"
 "Source/Engine/LeviathanRenderingAbstraction/"
 # TODO: Add switch to specify which rendering API vendor sources to compile the engine with
 "Source/Engine/LeviathanRenderingAbstraction/Vendor/glad/"
@@ -158,12 +160,12 @@ add_library("LeviathanTextureImporter" STATIC
 # Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
 target_precompile_headers("LeviathanTextureImporter" PUBLIC 
 "Source/Engine/LeviathanTextureImporter/TextureImporter/TextureImporterPrecompiledHeader.h"
-"Source/Engine/LeviathanCore/Core/CorePrecompiledHeader.h"
+"Source/Engine/LeviathanCore/Public/CorePrecompiledHeader.h"
 )
 
 # Add static library module include directories
 target_include_directories("LeviathanTextureImporter" PRIVATE 
-"Source/Engine/LeviathanCore/"
+"Source/Engine/LeviathanCore/Public/"
 "Source/Engine/LeviathanTextureImporter/"
 "Source/Engine/LeviathanTextureImporter/Vendor/stb_image/"
 )
@@ -195,15 +197,9 @@ target_link_libraries("GameTitle"
 
 # Add engine static library module source directories as include directories for game title executable
 target_include_directories("GameTitle" PRIVATE 
-"Source/Engine/LeviathanCore/"
+"Source/Engine/LeviathanCore/Public/"
 "Source/Engine/LeviathanRenderingAbstraction/"
 "Source/Engine/LeviathanTextureImporter/"
-)
-
-# Add game title post build commands
-# Copy game title content to build target directory
-add_custom_command(TARGET "GameTitle" POST_BUILD COMMAND ${CMAKE_COMMAND} 
-	-E copy_directory "${CMAKE_SOURCE_DIR}/GameTitleContent/" "$<TARGET_FILE_DIR:GameTitle>/GameTitleContent/"
 )
 # End game title executable target setup
 
@@ -218,3 +214,8 @@ set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "${TARGET_TITLE}")
 
 # Set working directory for game title being built to be the same as the game title target output directory
 set_property(TARGET "${TARGET_TITLE}" PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:GameTitle>")
+
+# Copy target title content to build target directory post target build
+add_custom_command(TARGET "${TARGET_TITLE}" POST_BUILD COMMAND ${CMAKE_COMMAND} 
+	-E copy_directory "${CMAKE_SOURCE_DIR}/GameTitleContent/" "$<TARGET_FILE_DIR:GameTitle>/GameTitleContent/"
+)

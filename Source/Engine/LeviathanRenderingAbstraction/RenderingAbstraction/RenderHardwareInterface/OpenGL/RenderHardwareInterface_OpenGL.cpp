@@ -1,6 +1,6 @@
 #include "RenderingAbstraction/RenderHardwareInterface/RenderHardwareInterface.h"
 #include "glad/glad.h"
-#include "Core/ConsoleOutput.h"
+#include "ConsoleOutput.h"
 
 namespace
 {

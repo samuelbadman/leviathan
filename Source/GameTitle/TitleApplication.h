@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Application.h"
+#include "Application.h"
 
 namespace Core
 {

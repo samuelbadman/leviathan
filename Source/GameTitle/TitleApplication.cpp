@@ -1,9 +1,9 @@
 #include "TitleApplication.h"
 #include "TitleApplicationWindow.h"
 
-#include "Core/ConsoleOutput.h"
-#include "Core/NotificationManager.h"
-#include "Core/FileIOManager.h"
+#include "ConsoleOutput.h"
+#include "NotificationManager.h"
+#include "FileIOManager.h"
 
 #include "RenderingAbstraction/RenderingAbstractionModule.h"
 #include "RenderingAbstraction/RenderHardwareInterface/RenderHardwareInterface.h"

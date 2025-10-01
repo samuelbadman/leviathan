@@ -1,4 +1,4 @@
-#include "Core/Platform/UUID.h"
+#include "Platform/UUID.h"
 
 void Core::Uuid::Generate()
 {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "InputKey.h"
-#include "Core/ProgrammingTools/Delegate.h"
+#include "ProgrammingTools/Delegate.h"
 
 namespace Core
 {

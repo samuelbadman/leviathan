@@ -1,7 +1,7 @@
-#include "Core/Platform/Gamepad.h"
-#include "Core/ProgrammingTools/Bits.h"
+#include "Platform/Gamepad.h"
+#include "ProgrammingTools/Bits.h"
 #include "Definitions_Windows.h"
-#include "Core/NotificationManager.h"
+#include "NotificationManager.h"
 
 namespace
 {
