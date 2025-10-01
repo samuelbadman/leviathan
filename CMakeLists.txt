@@ -153,23 +153,25 @@ target_include_directories("LeviathanRenderingAbstraction" PRIVATE
 # Begin texture importer static library module target setup
 # Add static library module target with source files to be compiled for all platforms
 add_library("LeviathanTextureImporter" STATIC 
-"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureImporterModule.h"
-"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureImporterModule.cpp"
-"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureLoader.h"
-"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureLoader.cpp"
+"Source/Engine/LeviathanTextureImporter/Public/TextureImporterModule.h"
+"Source/Engine/LeviathanTextureImporter/Public/TextureLoader.h"
+
+"Source/Engine/LeviathanTextureImporter/Private/TextureImporterModule.cpp"
+"Source/Engine/LeviathanTextureImporter/Private/TextureLoader.cpp"
 )
 
 # Marked PUBLIC to share with executable target that is linking with the static library. PRIVATE only uses the precompiled header internally inside the library
 target_precompile_headers("LeviathanTextureImporter" PUBLIC 
-"Source/Engine/LeviathanTextureImporter/TextureImporter/TextureImporterPrecompiledHeader.h"
+"Source/Engine/LeviathanTextureImporter/Public/TextureImporterPrecompiledHeader.h"
 "Source/Engine/LeviathanCore/Public/CorePrecompiledHeader.h"
 )
 
 # Add static library module include directories
 target_include_directories("LeviathanTextureImporter" PRIVATE 
 "Source/Engine/LeviathanCore/Public/"
-"Source/Engine/LeviathanTextureImporter/"
-"Source/Engine/LeviathanTextureImporter/Vendor/stb_image/"
+"Source/Engine/LeviathanTextureImporter/Public/"
+"Source/Engine/LeviathanTextureImporter/Private/"
+"Source/Engine/LeviathanTextureImporter/Private/Vendor/stb_image/"
 )
 # End assets static library module target setup
 
@@ -201,7 +203,7 @@ target_link_libraries("GameTitle"
 target_include_directories("GameTitle" PRIVATE 
 "Source/Engine/LeviathanCore/Public/"
 "Source/Engine/LeviathanRenderingAbstraction/Public/"
-"Source/Engine/LeviathanTextureImporter/"
+"Source/Engine/LeviathanTextureImporter/Public/"
 )
 # End game title executable target setup
 

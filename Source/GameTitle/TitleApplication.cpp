@@ -8,8 +8,8 @@
 #include "RenderingAbstractionModule.h"
 #include "RenderHardwareInterface.h"
 
-#include "TextureImporter/TextureImporterModule.h"
-#include "TextureImporter/TextureLoader.h"
+#include "TextureImporterModule.h"
+#include "TextureLoader.h"
 
 IMPLEMENT(TitleApplication)
 
