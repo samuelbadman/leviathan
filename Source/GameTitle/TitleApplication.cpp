@@ -5,8 +5,8 @@
 #include "NotificationManager.h"
 #include "FileIOManager.h"
 
-#include "RenderingAbstraction/RenderingAbstractionModule.h"
-#include "RenderingAbstraction/RenderHardwareInterface/RenderHardwareInterface.h"
+#include "RenderingAbstractionModule.h"
+#include "RenderHardwareInterface.h"
 
 #include "TextureImporter/TextureImporterModule.h"
 #include "TextureImporter/TextureLoader.h"

@@ -1,4 +1,4 @@
-#include "RenderingAbstraction/RenderHardwareInterface/RenderHardwareInterface.h"
+#include "RenderHardwareInterface.h"
 #include "glad/glad.h"
 #include "ConsoleOutput.h"
 
