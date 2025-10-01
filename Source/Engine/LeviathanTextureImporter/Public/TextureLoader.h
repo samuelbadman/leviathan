@@ -2,6 +2,15 @@
 
 namespace TextureImporter
 {
+	enum class LoadFormat : uint8_t
+	{
+		GREY = 0,
+		GREY_ALPHA,
+		RGB,
+		RGB_ALPHA,
+		MAX
+	};
+
 	struct TextureLoadData
 	{
 		int32_t Width = 0;
@@ -13,7 +22,7 @@ namespace TextureImporter
 	class TextureLoader
 	{
 	public:
-		TextureLoadData LoadTexture(const std::string& Path);
+		TextureLoadData LoadTexture(const std::string& Path, const TextureImporter::LoadFormat LoadFormat);
 		void FreeTextureLoadData(TextureLoadData& Data);
 	};
 }

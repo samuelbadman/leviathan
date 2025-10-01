@@ -18,6 +18,7 @@ namespace RenderingAbstraction
 		struct Buffer;
 		struct Shader;
 		struct Pipeline;
+		struct Texture;
 	}
 }
 
@@ -48,6 +49,7 @@ private:
 	RenderingAbstraction::RenderHardwareInterface::Shader* PipelinePixelShader = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Pipeline* Pipeline = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Buffer* ShaderConstantsConstantBuffer = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Texture* WallTexture = nullptr;
 	ShaderConstants Constants = {};
 	size_t VertexStrideBytes = 0;
 	size_t IndexCount = 0;

@@ -130,14 +130,14 @@ bool TitleApplication::InitializeRendering()
 	// Initialize rendering scene
 	std::vector<float> Vertices =
 	{
-		// X, Y, Z, R, G, B, A
-		0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // top right
-		0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom right
-		-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, // bottom left
-		-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f // top left 
+		// X, Y, Z, R, G, B, A, U, V
+		0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top right
+		0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, // bottom right
+		-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, // bottom left
+		-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f// top left 
 	};
 
-	VertexStrideBytes = sizeof(float) * 7;
+	VertexStrideBytes = sizeof(float) * 9;
 
 	std::vector<uint32_t> Indices =
 	{
@@ -148,12 +148,12 @@ bool TitleApplication::InitializeRendering()
 	IndexCount = Indices.size();
 
 	VertexBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext,
-		RenderingAbstraction::RenderHardwareInterface::BufferType::Vertex,
+		RenderingAbstraction::RenderHardwareInterface::BufferType::VERTEX,
 		Vertices.data(),
 		Vertices.size() * sizeof(float));
 
 	IndexBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext,
-		RenderingAbstraction::RenderHardwareInterface::BufferType::Index,
+		RenderingAbstraction::RenderHardwareInterface::BufferType::INDEX,
 		Indices.data(),
 		Indices.size() * sizeof(uint32_t));
 
@@ -161,28 +161,41 @@ bool TitleApplication::InitializeRendering()
 	// TODO: Add preprocessor definition defining which rendering api is being compiled to know which source files to read or build custom shader language that 
 	// translates to glsl/hlsl depending on which rendering api is being compiled
 	PipelineVertexShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
-		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Vertex,
+		RenderingAbstraction::RenderHardwareInterface::ShaderStage::VERTEX,
 		GetEngine().GetFileIOManager().ReadFileToString(std::string("GameTitleContent/Shaders/OpenGL/Source/VertexShader.glsl")));
 
 	PipelinePixelShader = RenderingAbstraction::RenderHardwareInterface::NewShader(MainAppWindowRenderContext,
-		RenderingAbstraction::RenderHardwareInterface::ShaderStage::Pixel,
+		RenderingAbstraction::RenderHardwareInterface::ShaderStage::PIXEL,
 		GetEngine().GetFileIOManager().ReadFileToString(std::string("GameTitleContent/Shaders/OpenGL/Source/PixelShader.glsl")));
 
 	RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeLayout PipelineInputVertexAttributeLayout = {};
 	PipelineInputVertexAttributeLayout.AttributeDescriptions =
 	{
+		// Position
 		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
 		{
-			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3,
-			sizeof(float) * 7,
+			0,
+			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::FLOAT3,
+			sizeof(float) * 9,
 			0
 		},
 
+		// Color
 		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
 		{
-			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float4,
-			sizeof(float) * 7,
+			1,
+			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::FLOAT4,
+			sizeof(float) * 9,
 			sizeof(float) * 3
+		},
+
+		// Texture coordinate 0
+		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
+		{
+			2,
+			RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::FLOAT2,
+			sizeof(float) * 9,
+			sizeof(float) * 7
 		}
 	};
 
@@ -190,11 +203,11 @@ bool TitleApplication::InitializeRendering()
 		PipelineVertexShader,
 		PipelinePixelShader,
 		PipelineInputVertexAttributeLayout,
-		RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle);
+		RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::TRIANGLE);
 
 	// Create pipeline constant buffers to store constant buffer
 	ShaderConstantsConstantBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext,
-		RenderingAbstraction::RenderHardwareInterface::BufferType::Constant,
+		RenderingAbstraction::RenderHardwareInterface::BufferType::CONSTANT,
 		nullptr,
 		sizeof(ShaderConstants));
 
@@ -210,8 +223,22 @@ bool TitleApplication::InitializeRendering()
 		sizeof(ShaderConstants));
 
 	// Create texture resources
-	TextureImporter::TextureLoadData WallTextureData = TextureImporterModuleInstance->GetTextureLoader().LoadTexture("GameTitleContent/Textures/Wall.jpg");
+	TextureImporter::TextureLoadData WallTextureData = TextureImporterModuleInstance->GetTextureLoader().LoadTexture("GameTitleContent/Textures/Wall.jpg", 
+		TextureImporter::LoadFormat::RGB);
+
+	WallTexture = RenderingAbstraction::RenderHardwareInterface::NewTexture(MainAppWindowRenderContext,
+		RenderingAbstraction::RenderHardwareInterface::TextureResourceDimension::TEXTURE2D,
+		RenderingAbstraction::RenderHardwareInterface::Format::R8G8B8,
+		WallTextureData.Width,
+		WallTextureData.Height,
+		WallTextureData.PixelData,
+		true
+	);
+
 	TextureImporterModuleInstance->GetTextureLoader().FreeTextureLoadData(WallTextureData);
+
+	// Create texture samplers
+
 
 	return true;
 }
@@ -255,6 +282,12 @@ bool TitleApplication::ShutdownRendering()
 	}
 	ShaderConstantsConstantBuffer = nullptr;
 
+	if (!RenderingAbstraction::RenderHardwareInterface::DeleteTexture(MainAppWindowRenderContext, WallTexture))
+	{
+		return false;
+	}
+	WallTexture = nullptr;
+
 	// Delete main app window rendering context
 	if (!RenderingAbstraction::RenderHardwareInterface::DeleteContext(MainAppWindowRenderContext))
 	{
@@ -279,7 +312,7 @@ void TitleApplication::RenderApp()
 		RenderingAbstraction::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
 		RenderingAbstraction::RenderHardwareInterface::SetPipeline(Pipeline);
 		RenderingAbstraction::RenderHardwareInterface::SetConstantBuffer(0, ShaderConstantsConstantBuffer); // Binding parameter maps to binding set when defining constant buffer in shader
-		RenderingAbstraction::RenderHardwareInterface::SetPrimitiveTopology(RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle);
+		RenderingAbstraction::RenderHardwareInterface::SetPrimitiveTopology(RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::TRIANGLE);
 
 		RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);
 

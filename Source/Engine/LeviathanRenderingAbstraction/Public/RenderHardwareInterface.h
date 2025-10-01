@@ -8,31 +8,34 @@ namespace RenderingAbstraction
 		struct Buffer;
 		struct Shader;
 		struct Pipeline;
+		struct Texture;
 
 		enum class BufferType : uint8_t
 		{
-			Vertex = 0,
-			Index,
-			Constant,
+			VERTEX = 0,
+			INDEX,
+			CONSTANT,
 			MAX
 		};
 
 		enum class ShaderStage : uint8_t
 		{
-			Vertex = 0,
-			Pixel,
+			VERTEX = 0,
+			PIXEL,
 			MAX
 		};
 
 		enum class InputVertexAttributeValueDataType : uint8_t
 		{
-			Float3 = 0,
-			Float4,
+			FLOAT2 = 0,
+			FLOAT3,
+			FLOAT4,
 			MAX
 		};
 
 		struct InputVertexAttributeDesc
 		{
+			uint32_t Index = 0;
 			InputVertexAttributeValueDataType ValueType = InputVertexAttributeValueDataType::MAX;
 			int32_t StrideToSameAttributeInNextVertexBytes = 0;
 			uint32_t OffsetFromVertexStartBytes = 0;
@@ -45,9 +48,24 @@ namespace RenderingAbstraction
 
 		enum class PrimitiveTopologyType : uint8_t
 		{
-			Triangle = 0,
-			//Line,
-			//Point,
+			TRIANGLE = 0,
+			//LINE,
+			//POINT,
+			MAX
+		};
+
+		enum class Format : uint8_t
+		{
+			R8G8B8 = 0, // 3 color channel Red, Green, Blue 24-bit image, 8 bits per color channel
+			R8G8B8A8, // 4 color channel Red, Green, Blue, Alpha 32-bit image, 8 bits per color channel
+			R8, // 1 color channel Red 8-bit image, 8 bits per color channel
+			R8G8, // 2 color channel Red, Alpha 16-bit image, 8 bits per color channel
+			MAX
+		};
+
+		enum class TextureResourceDimension : uint8_t
+		{
+			TEXTURE2D = 0,
 			MAX
 		};
 
@@ -102,6 +120,21 @@ namespace RenderingAbstraction
 		bool DeletePipeline(
 			RenderingAbstraction::RenderHardwareInterface::Context* const Context,
 			RenderingAbstraction::RenderHardwareInterface::Pipeline* const Pipeline
+		);
+
+		RenderingAbstraction::RenderHardwareInterface::Texture* NewTexture(
+			RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+			const RenderingAbstraction::RenderHardwareInterface::TextureResourceDimension Dimension,
+			const RenderingAbstraction::RenderHardwareInterface::Format Format,
+			const size_t Width,
+			const size_t Height,
+			//const RenderingAbstraction::RenderHardwareInterface::Format PixelDataMemoryLayout,
+			const void* const PixelData, // Pixel data is expected as unsigned bytes (unsigned char, uint8_t)
+			const bool GenerateMipmaps
+		);
+		bool DeleteTexture(
+			RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+			RenderingAbstraction::RenderHardwareInterface::Texture* const Texture
 		);
 
 		// Frame management

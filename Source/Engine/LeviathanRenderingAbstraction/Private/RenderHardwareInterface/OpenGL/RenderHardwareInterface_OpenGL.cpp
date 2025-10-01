@@ -24,6 +24,7 @@ namespace
 
 		struct GL_InputVertexAttributeDesc
 		{
+			GLuint VertexAttributeIndex = 0;
 			GLint Size = 0;
 			GLenum Type = GL_NONE;
 			GLboolean Normalized = GL_FALSE;
@@ -33,9 +34,14 @@ namespace
 
 		struct GL_Pipeline
 		{
-			uint32_t ShaderProgram = 0;
+			GLuint ShaderProgram = 0;
 			std::vector<GL_RHI::GL_InputVertexAttributeDesc> InputVertexAttributeLayout = {};
 			GLenum PrimitiveType = GL_NONE;
+		};
+
+		struct GL_Texture
+		{
+			GLuint Texture = 0;
 		};
 
 		// Single vertex array object bound throughout gl rhi initialized duration
@@ -120,8 +126,9 @@ namespace
 		{
 			switch (DataType)
 			{
-			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3: return GL_FLOAT;
-			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float4: return GL_FLOAT;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::FLOAT2: return GL_FLOAT;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::FLOAT3: return GL_FLOAT;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::FLOAT4: return GL_FLOAT;
 			default: return GL_NONE;
 			}
 		}
@@ -130,9 +137,9 @@ namespace
 		{
 			switch (Type)
 			{
-			case RenderingAbstraction::RenderHardwareInterface::BufferType::Vertex: return GL_ARRAY_BUFFER;
-			case RenderingAbstraction::RenderHardwareInterface::BufferType::Index: return GL_ELEMENT_ARRAY_BUFFER;
-			case RenderingAbstraction::RenderHardwareInterface::BufferType::Constant: return GL_UNIFORM_BUFFER;
+			case RenderingAbstraction::RenderHardwareInterface::BufferType::VERTEX: return GL_ARRAY_BUFFER;
+			case RenderingAbstraction::RenderHardwareInterface::BufferType::INDEX: return GL_ELEMENT_ARRAY_BUFFER;
+			case RenderingAbstraction::RenderHardwareInterface::BufferType::CONSTANT: return GL_UNIFORM_BUFFER;
 			default: return GL_NONE;
 			}
 		}
@@ -141,8 +148,8 @@ namespace
 		{
 			switch (Stage)
 			{
-			case RenderingAbstraction::RenderHardwareInterface::ShaderStage::Vertex: return GL_VERTEX_SHADER;
-			case RenderingAbstraction::RenderHardwareInterface::ShaderStage::Pixel: return GL_FRAGMENT_SHADER;
+			case RenderingAbstraction::RenderHardwareInterface::ShaderStage::VERTEX: return GL_VERTEX_SHADER;
+			case RenderingAbstraction::RenderHardwareInterface::ShaderStage::PIXEL: return GL_FRAGMENT_SHADER;
 			default: return GL_NONE;
 			}
 		}
@@ -151,7 +158,7 @@ namespace
 		{
 			switch (Type)
 			{
-			case RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::Triangle: return GL_TRIANGLES;
+			case RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::TRIANGLE: return GL_TRIANGLES;
 			default: return GL_NONE;
 			}
 		}
@@ -160,8 +167,30 @@ namespace
 		{
 			switch (DataType)
 			{
-			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float3: return 3;
-			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::Float4: return 4;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::FLOAT2: return 2;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::FLOAT3: return 3;
+			case RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeValueDataType::FLOAT4: return 4;
+			default: return GL_NONE;
+			}
+		}
+
+		GLenum GetFormatGLType(const RenderingAbstraction::RenderHardwareInterface::Format Format)
+		{
+			switch (Format)
+			{
+			case RenderingAbstraction::RenderHardwareInterface::Format::R8: return GL_R8;
+			case RenderingAbstraction::RenderHardwareInterface::Format::R8G8: return GL_RG8;
+			case RenderingAbstraction::RenderHardwareInterface::Format::R8G8B8: return GL_RGB8;
+			case RenderingAbstraction::RenderHardwareInterface::Format::R8G8B8A8: return GL_RGBA8;
+			default: return GL_NONE;
+			}
+		}
+
+		GLenum GetTextureResourceDimensionGLType(const RenderingAbstraction::RenderHardwareInterface::TextureResourceDimension Dimension)
+		{
+			switch (Dimension)
+			{
+			case RenderingAbstraction::RenderHardwareInterface::TextureResourceDimension::TEXTURE2D: return GL_TEXTURE_2D;
 			default: return GL_NONE;
 			}
 		}
@@ -450,6 +479,7 @@ RenderingAbstraction::RenderHardwareInterface::Pipeline* RenderingAbstraction::R
 	{
 		GLPipeline->InputVertexAttributeLayout.emplace_back(GL_RHI::GL_InputVertexAttributeDesc
 			{
+				InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].Index,
 				GL_RHI::GetInputVertexAttributeDataTypeSize(InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueType),
 				GL_RHI::GetInputVertexAttributeDataTypeGLType(InputVertexAttributeLayout.AttributeDescriptions[AttributeDescIndex].ValueType),
 				GL_FALSE,
@@ -483,6 +513,64 @@ bool RenderingAbstraction::RenderHardwareInterface::DeletePipeline(
 
 	// Delete pipeline struct on the heap
 	delete GLPipeline;
+
+	return true;
+}
+
+RenderingAbstraction::RenderHardwareInterface::Texture* RenderingAbstraction::RenderHardwareInterface::NewTexture(
+	RenderingAbstraction::RenderHardwareInterface::Context* const Context,
+	const RenderingAbstraction::RenderHardwareInterface::TextureResourceDimension Dimension,
+	const RenderingAbstraction::RenderHardwareInterface::Format Format,
+	const size_t Width,
+	const size_t Height,
+	//const RenderingAbstraction::RenderHardwareInterface::Format PixelDataMemoryLayout,
+	const void* const PixelData,
+	const bool GenerateMipmaps
+)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	GL_RHI::GL_Texture* const GLTexture = new GL_RHI::GL_Texture();
+
+	const GLenum GLFormat = GL_RHI::GetFormatGLType(Format);
+	const GLenum GLDimension = GL_RHI::GetTextureResourceDimensionGLType(Dimension);
+	//const GLenum GLMemoryLayout = GL_RHI::GetFormatGLType(PixelDataMemoryLayout);
+
+	glGenTextures(1, &GLTexture->Texture);
+	glBindTexture(GLDimension, GLTexture->Texture);
+	// Pixel data memory layout parameter is ignored as it is expected for the pixel data memory layout to be the same as the texture format requested to be created
+	glTexImage2D(GLDimension, 0, GLFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, PixelData);
+
+	if (GenerateMipmaps)
+	{
+		glGenerateMipmap(GLDimension);
+	}
+
+	glBindTexture(GLDimension, 0);
+
+	return reinterpret_cast<RenderingAbstraction::RenderHardwareInterface::Texture*>(GLTexture);
+}
+
+bool RenderingAbstraction::RenderHardwareInterface::DeleteTexture(
+	RenderingAbstraction::RenderHardwareInterface::Context* const Context, 
+	RenderingAbstraction::RenderHardwareInterface::Texture* const Texture
+)
+{
+	// Set context
+	if (!GL_RHI::MakeContextCurrent(Context))
+	{
+		return false;
+	}
+
+	GL_RHI::GL_Texture* const GLTexture = reinterpret_cast<GL_RHI::GL_Texture* const>(Texture);
+
+	glDeleteTextures(1, &GLTexture->Texture);
+
+	delete GLTexture;
 
 	return true;
 }
@@ -528,11 +616,11 @@ void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstrac
 	for (size_t i = 0; i < AttributeCount; ++i)
 	{
 		// Enable attribute
-		glEnableVertexAttribArray(i);
+		glEnableVertexAttribArray(GLPipeline->InputVertexAttributeLayout[i].VertexAttributeIndex);
 
 		// Set up attribute format
 		glVertexAttribFormat(
-			i,
+			GLPipeline->InputVertexAttributeLayout[i].VertexAttributeIndex,
 			GLPipeline->InputVertexAttributeLayout[i].Size,
 			GLPipeline->InputVertexAttributeLayout[i].Type,
 			GLPipeline->InputVertexAttributeLayout[i].Normalized,
@@ -540,7 +628,7 @@ void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstrac
 		);
 
 		// Make attribute use binding 0
-		glVertexAttribBinding(i, 0);
+		glVertexAttribBinding(GLPipeline->InputVertexAttributeLayout[i].VertexAttributeIndex, 0);
 	}
 }
 
