@@ -205,22 +205,27 @@ bool TitleApplication::InitializeRendering()
 		PipelineInputVertexAttributeLayout,
 		RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::TRIANGLE);
 
-	// Create pipeline constant buffers to store constant buffer
-	ShaderConstantsConstantBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext,
+	// Create pipeline constant buffers
+	PipelineVertexShaderConstantsConstantBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext,
 		RenderingAbstraction::RenderHardwareInterface::BufferType::CONSTANT,
 		nullptr,
-		sizeof(ShaderConstants));
+		sizeof(PipelineVertexShaderConstants));
+
+	PipelinePixelShaderConstantsConstantBuffer = RenderingAbstraction::RenderHardwareInterface::NewBuffer(MainAppWindowRenderContext,
+		RenderingAbstraction::RenderHardwareInterface::BufferType::CONSTANT,
+		&PipelinePixelShaderConstants,
+		sizeof(PipelineVertexShaderConstants));
 
 	// Update shader constants constant buffer data
-	Constants.VertexPositionOffset[0] = 0.0f;
-	Constants.VertexPositionOffset[1] = 0.0f;
-	Constants.VertexPositionOffset[2] = 0.0f;
+	PipelineVertexShaderConstants.VertexPositionOffset[0] = 0.0f;
+	PipelineVertexShaderConstants.VertexPositionOffset[1] = 0.0f;
+	PipelineVertexShaderConstants.VertexPositionOffset[2] = 0.0f;
 
 	RenderingAbstraction::RenderHardwareInterface::UpdateConstantBufferData(MainAppWindowRenderContext,
-		ShaderConstantsConstantBuffer,
+		PipelineVertexShaderConstantsConstantBuffer,
 		0,
-		&Constants,
-		sizeof(ShaderConstants));
+		&PipelineVertexShaderConstants,
+		sizeof(PipelineVertexShaderConstants));
 
 	// Create texture resources
 	TextureImporter::TextureLoadData WallTextureData = TextureImporterModuleInstance->GetTextureLoader().LoadTexture("GameTitleContent/Textures/Wall.jpg", 
@@ -276,11 +281,17 @@ bool TitleApplication::ShutdownRendering()
 	}
 	Pipeline = nullptr;
 
-	if (!RenderingAbstraction::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, ShaderConstantsConstantBuffer))
+	if (!RenderingAbstraction::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, PipelineVertexShaderConstantsConstantBuffer))
 	{
 		return false;
 	}
-	ShaderConstantsConstantBuffer = nullptr;
+	PipelineVertexShaderConstantsConstantBuffer = nullptr;
+
+	if (!RenderingAbstraction::RenderHardwareInterface::DeleteBuffer(MainAppWindowRenderContext, PipelinePixelShaderConstantsConstantBuffer))
+	{
+		return false;
+	}
+	PipelinePixelShaderConstantsConstantBuffer = nullptr;
 
 	if (!RenderingAbstraction::RenderHardwareInterface::DeleteTexture(MainAppWindowRenderContext, WallTexture))
 	{
@@ -312,7 +323,8 @@ void TitleApplication::RenderApp()
 		RenderingAbstraction::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
 		RenderingAbstraction::RenderHardwareInterface::SetPipeline(Pipeline);
 
-		RenderingAbstraction::RenderHardwareInterface::SetConstantBuffer(0, ShaderConstantsConstantBuffer); // Binding parameter maps to binding set when defining constant buffer in shader
+		RenderingAbstraction::RenderHardwareInterface::SetConstantBuffer(0, PipelineVertexShaderConstantsConstantBuffer); // Binding parameter maps to binding set when defining constant buffer in shader
+		RenderingAbstraction::RenderHardwareInterface::SetConstantBuffer(1, PipelinePixelShaderConstantsConstantBuffer); // Binding parameter maps to binding set when defining constant buffer in shader
 
 		RenderingAbstraction::RenderHardwareInterface::SetPrimitiveTopology(RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::TRIANGLE);
 

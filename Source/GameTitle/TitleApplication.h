@@ -27,9 +27,14 @@ namespace TextureImporter
 	class TextureImporterModule;
 }
 
-struct ShaderConstants
+struct PipelineVertexShaderConstants
 {
 	float VertexPositionOffset[3] = {0.0f, 0.0f, 0.0f};
+};
+
+struct PipelinePixelShaderConstants
+{
+	float PixelPositionOffset[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 };
 
 class TitleApplicationWindow;
@@ -48,9 +53,11 @@ private:
 	RenderingAbstraction::RenderHardwareInterface::Shader* PipelineVertexShader = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Shader* PipelinePixelShader = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Pipeline* Pipeline = nullptr;
-	RenderingAbstraction::RenderHardwareInterface::Buffer* ShaderConstantsConstantBuffer = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Buffer* PipelineVertexShaderConstantsConstantBuffer = nullptr;
+	RenderingAbstraction::RenderHardwareInterface::Buffer* PipelinePixelShaderConstantsConstantBuffer = nullptr;
 	RenderingAbstraction::RenderHardwareInterface::Texture* WallTexture = nullptr;
-	ShaderConstants Constants = {};
+	PipelineVertexShaderConstants PipelineVertexShaderConstants = {};
+	PipelinePixelShaderConstants PipelinePixelShaderConstants = {};
 	size_t VertexStrideBytes = 0;
 	size_t IndexCount = 0;
 
