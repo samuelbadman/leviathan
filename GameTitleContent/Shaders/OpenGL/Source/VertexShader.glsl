@@ -1,7 +1,7 @@
 #version 460 core
 
 layout (location = 0) in vec3 Attrib_Position;
-layout (location = 1) in vec4 Attrib_Color;
+layout (location = 1) in vec4 Attrib_Color0;
 layout (location = 2) in vec2 Attrib_TexCoord0;
 
 layout (std140, binding = 0) uniform ShaderConstants
@@ -11,13 +11,13 @@ layout (std140, binding = 0) uniform ShaderConstants
 
 out VS_OUT
 {
-	vec4 VertexColor;
+	vec4 VertexColor0;
 	vec2 TexCoord0;
 } VS_Out;
 
 void main()
 {
-	VS_Out.VertexColor = Attrib_Color;
+	VS_Out.VertexColor0 = Attrib_Color0;
 	VS_Out.TexCoord0 = Attrib_TexCoord0;
 
 	gl_Position = vec4(

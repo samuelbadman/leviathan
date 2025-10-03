@@ -180,7 +180,7 @@ bool TitleApplication::InitializeRendering()
 			0
 		},
 
-		// Color
+		// Color 0
 		RenderingAbstraction::RenderHardwareInterface::InputVertexAttributeDesc
 		{
 			1,
@@ -311,7 +311,9 @@ void TitleApplication::RenderApp()
 		const Core::Rectangle WindowClientRect = MainAppWindow->GetClientRegion();
 		RenderingAbstraction::RenderHardwareInterface::SetViewport(0, 0, WindowClientRect.CalcWidth(), WindowClientRect.CalcHeight());
 		RenderingAbstraction::RenderHardwareInterface::SetPipeline(Pipeline);
+
 		RenderingAbstraction::RenderHardwareInterface::SetConstantBuffer(0, ShaderConstantsConstantBuffer); // Binding parameter maps to binding set when defining constant buffer in shader
+
 		RenderingAbstraction::RenderHardwareInterface::SetPrimitiveTopology(RenderingAbstraction::RenderHardwareInterface::PrimitiveTopologyType::TRIANGLE);
 
 		RenderingAbstraction::RenderHardwareInterface::ClearColorBuffer(0.2f, 0.3f, 0.4f, 1.0f);

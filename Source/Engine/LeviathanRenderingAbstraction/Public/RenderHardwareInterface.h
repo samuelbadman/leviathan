@@ -59,7 +59,7 @@ namespace RenderingAbstraction
 			R8G8B8 = 0, // 3 color channel Red, Green, Blue 24-bit image, 8 bits per color channel
 			R8G8B8A8, // 4 color channel Red, Green, Blue, Alpha 32-bit image, 8 bits per color channel
 			R8, // 1 color channel Red 8-bit image, 8 bits per color channel
-			R8G8, // 2 color channel Red, Alpha 16-bit image, 8 bits per color channel
+			R8G8, // 2 color channel Red, Green 16-bit image, 8 bits per color channel
 			MAX
 		};
 

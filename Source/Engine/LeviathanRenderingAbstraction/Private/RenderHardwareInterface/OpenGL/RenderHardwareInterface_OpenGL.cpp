@@ -24,7 +24,7 @@ namespace
 
 		struct GL_InputVertexAttributeDesc
 		{
-			GLuint VertexAttributeIndex = 0;
+			GLuint VertexAttributeLocation = 0;
 			GLint Size = 0;
 			GLenum Type = GL_NONE;
 			GLboolean Normalized = GL_FALSE;
@@ -616,11 +616,11 @@ void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstrac
 	for (size_t i = 0; i < AttributeCount; ++i)
 	{
 		// Enable attribute
-		glEnableVertexAttribArray(GLPipeline->InputVertexAttributeLayout[i].VertexAttributeIndex);
+		glEnableVertexAttribArray(GLPipeline->InputVertexAttributeLayout[i].VertexAttributeLocation);
 
 		// Set up attribute format
 		glVertexAttribFormat(
-			GLPipeline->InputVertexAttributeLayout[i].VertexAttributeIndex,
+			GLPipeline->InputVertexAttributeLayout[i].VertexAttributeLocation,
 			GLPipeline->InputVertexAttributeLayout[i].Size,
 			GLPipeline->InputVertexAttributeLayout[i].Type,
 			GLPipeline->InputVertexAttributeLayout[i].Normalized,
@@ -628,7 +628,7 @@ void RenderingAbstraction::RenderHardwareInterface::SetPipeline(RenderingAbstrac
 		);
 
 		// Make attribute use binding 0
-		glVertexAttribBinding(GLPipeline->InputVertexAttributeLayout[i].VertexAttributeIndex, 0);
+		glVertexAttribBinding(GLPipeline->InputVertexAttributeLayout[i].VertexAttributeLocation, 0);
 	}
 }
 
